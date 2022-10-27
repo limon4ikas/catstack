@@ -24,7 +24,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "catwatch-web:build",
-        "dev": true
+        "dev": true,
+        "proxyConfig": "apps/catwatch-web/proxy.conf.json"
       },
       "configurations": {
         "development": {
