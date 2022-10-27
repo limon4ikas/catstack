@@ -1,28 +1,29 @@
 import { Controller, Get, Post, Param, Delete } from '@nestjs/common';
 
+import { Routes } from '../constants';
 import { RoomsService } from './rooms.service';
 
-@Controller('rooms')
+@Controller(Routes.Rooms)
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
   @Post()
   create() {
-    return this.roomsService.create();
+    return this.roomsService.createRoom();
   }
 
   @Get()
   findAll() {
-    return this.roomsService.findAll();
+    return this.roomsService.getAllRooms();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.roomsService.findOne(id);
+    return this.roomsService.getRoom(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.roomsService.remove(id);
+    return this.roomsService.deleteRoom(id);
   }
 }

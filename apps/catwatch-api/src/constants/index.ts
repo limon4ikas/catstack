@@ -1,4 +1,8 @@
 export const enum Services {
-  RoomService = 'RoomService',
+  RoomsService = 'RoomsService',
   SignalingGateway = 'SignalingGateway',
+}
+
+export const enum Routes {
+  Rooms = 'rooms',
 }
