@@ -17,49 +17,35 @@ export function Index() {
   useEffect(() => {
     socket.connect();
 
-    socket.on(Events.CreateRoom, (roomId) => {
-      console.log('Created room', roomId);
-    });
-    socket.on(Events.DeleteRoom, () => {
-      console.log('DELETED ROOM');
-    });
-
-    socket.on(Events.JoinRoom, (roomId) => {
+    const onRoomCreate = (roomId: string) => {
       console.log('Joined room', roomId);
-    });
-    socket.on(Events.LeaveRoom, (roomId) => {
-      console.log('Left room', roomId);
-    });
+    };
+    const onRoomJoin = (roomId: string) => {
+      setRoomId(roomId);
+    };
 
+    const onRoomLeave = (roomId: string) => {
+      console.log('Left room', roomId);
+    };
+
+    socket.on(Events.CreateRoom, onRoomCreate);
+    socket.on(Events.JoinRoom, onRoomJoin);
+    socket.on(Events.LeaveRoom, onRoomLeave);
     return () => {
-      socket.off(Events.CreateRoom);
-      socket.off(Events.DeleteRoom);
-      socket.off(Events.JoinRoom);
-      socket.off(Events.LeaveRoom);
+      socket.off(Events.CreateRoom, onRoomCreate);
+      socket.off(Events.JoinRoom, onRoomJoin);
+      socket.off(Events.LeaveRoom, onRoomLeave);
     };
   }, []);
 
-  const handleCreateRoomClick = () => {
-    socket.emit(Events.CreateRoom);
-  };
-
-  const handleDeleteRoomClick = () => {
-    socket.emit(Events.DeleteRoom, roomId);
-  };
-
-  const handleJoinRoomClick = () => {
-    socket.emit(Events.JoinRoom, roomId);
-  };
-
-  const handleLeaveRoomClick = () => {
-    socket.emit(Events.LeaveRoom, roomId);
-  };
+  const handleCreateRoomClick = () => socket.emit(Events.CreateRoom);
+  const handleJoinRoomClick = () => socket.emit(Events.JoinRoom, roomId);
+  const handleLeaveRoomClick = () => socket.emit(Events.LeaveRoom, roomId);
 
   return (
     <div>
       <h1>{roomId}</h1>
       <button onClick={handleCreateRoomClick}>Create room</button>
-      <button onClick={handleDeleteRoomClick}>Delete room</button>
       <button onClick={handleJoinRoomClick}>Join room</button>
       <button onClick={handleLeaveRoomClick}>Leave room</button>
       <input

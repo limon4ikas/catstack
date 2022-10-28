@@ -48,8 +48,6 @@ export class RoomsService {
 
     room.addSocket(socketId);
 
-    console.log(room);
-
     this.updateRoom(roomId, room);
   }
 
@@ -60,7 +58,7 @@ export class RoomsService {
 
     const room = this.rooms.get(roomId);
     room.removeSocket(socketId);
-    console.log(room);
+
     this.updateRoom(roomId, room);
   }
 }

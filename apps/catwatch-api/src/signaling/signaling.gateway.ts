@@ -2,11 +2,12 @@ import { Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 
 import {
   ClientToServerEvents,
@@ -18,10 +19,12 @@ import {
 
 import { Services } from '../constants';
 import { RoomsService } from '../rooms/rooms.service';
+import { SocketWithAuth } from '../auth/auth.types';
+import { GatewaySessionManager } from './signaling.sessions';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class SignalingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   private logger = new Logger(Services.SignalingGateway);
   @WebSocketServer()
@@ -32,18 +35,27 @@ export class SignalingGateway
     SocketData
   >;
 
-  constructor(private readonly roomsService: RoomsService) {}
+  constructor(
+    private readonly roomsService: RoomsService,
+    private readonly sessions: GatewaySessionManager
+  ) {}
 
-  handleConnection(client: Socket) {
+  afterInit() {
+    this.logger.log('⚡️ Websocket gateway initialized');
+  }
+
+  handleConnection(client: SocketWithAuth) {
+    this.sessions.setUserSocket(client.user.userId, client);
     this.logger.log(`⚡️ Client connected: ${client.id}`);
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: SocketWithAuth) {
+    this.sessions.removeUserSocket(client.user.userId);
     this.logger.log(`⚡️ Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage(Events.CreateRoom)
-  handleCreateRoom(client: Socket) {
+  handleCreateRoom(client: SocketWithAuth) {
     const room = this.roomsService.createRoom();
 
     client.join(room.id);
@@ -53,7 +65,7 @@ export class SignalingGateway
   }
 
   @SubscribeMessage(Events.DeleteRoom)
-  handleDeleteRoom(client: Socket, roomId: string) {
+  handleDeleteRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.deleteRoom(roomId);
 
     this.server.to(roomId).emit(Events.DeleteRoom);
@@ -62,7 +74,7 @@ export class SignalingGateway
   }
 
   @SubscribeMessage(Events.JoinRoom)
-  handleJoinRoom(client: Socket, roomId: string) {
+  handleJoinRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.joinRoom(roomId, client.id);
 
     client.join(roomId);
@@ -71,7 +83,7 @@ export class SignalingGateway
   }
 
   @SubscribeMessage(Events.LeaveRoom)
-  handleLeaveRoom(client: Socket, roomId: string) {
+  handleLeaveRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.leaveRoom(roomId, client.id);
 
     client.leave(roomId);
