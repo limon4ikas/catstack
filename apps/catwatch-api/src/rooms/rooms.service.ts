@@ -45,8 +45,11 @@ export class RoomsService {
     }
 
     const room = this.rooms.get(roomId);
+
     room.addSocket(socketId);
+
     console.log(room);
+
     this.updateRoom(roomId, room);
   }
 

@@ -8,6 +8,14 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+import {
+  ClientToServerEvents,
+  Events,
+  InterServerEvents,
+  ServerToClientEvents,
+  SocketData,
+} from '@catstack/catwatch/types';
+
 import { Services } from '../constants';
 import { RoomsService } from '../rooms/rooms.service';
 
@@ -17,40 +25,57 @@ export class SignalingGateway
 {
   private logger = new Logger(Services.SignalingGateway);
   @WebSocketServer()
-  server: Server;
+  server: Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >;
 
   constructor(private readonly roomsService: RoomsService) {}
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+    this.logger.log(`⚡️ Client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-
-    this.roomsService.getAllRooms().forEach((room) => {
-      if (room.sockets.has(client.id)) {
-        this.logger.log(`Removed ${client.id} from room ${room.id}`);
-        room.removeSocket(client.id);
-      }
-    });
+    this.logger.log(`⚡️ Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('room.join')
-  handleCreateRoom(client: Socket, roomId: string) {
+  @SubscribeMessage(Events.CreateRoom)
+  handleCreateRoom(client: Socket) {
+    const room = this.roomsService.createRoom();
+
+    client.join(room.id);
+
+    this.server.to(room.id).emit(Events.CreateRoom, room.id);
+    this.server.to(client.id).emit(Events.JoinRoom, room.id);
+  }
+
+  @SubscribeMessage(Events.DeleteRoom)
+  handleDeleteRoom(client: Socket, roomId: string) {
+    this.roomsService.deleteRoom(roomId);
+
+    this.server.to(roomId).emit(Events.DeleteRoom);
+
+    this.server.in(roomId).socketsLeave(roomId);
+  }
+
+  @SubscribeMessage(Events.JoinRoom)
+  handleJoinRoom(client: Socket, roomId: string) {
     this.roomsService.joinRoom(roomId, client.id);
 
     client.join(roomId);
 
-    this.server.to(roomId).emit('user-joined-room', client.id);
+    this.server.to(roomId).emit(Events.JoinRoom, client.id);
   }
 
-  @SubscribeMessage('room.leave')
+  @SubscribeMessage(Events.LeaveRoom)
   handleLeaveRoom(client: Socket, roomId: string) {
     this.roomsService.leaveRoom(roomId, client.id);
 
     client.leave(roomId);
 
-    this.server.to(roomId).emit('user-left-room', client.id);
+    this.server.to(roomId).emit(Events.LeaveRoom, client.id);
   }
 }

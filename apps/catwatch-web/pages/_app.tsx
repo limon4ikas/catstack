@@ -8,9 +8,8 @@ function CustomApp({ Component, pageProps }: AppProps) {
       <Head>
         <title>Welcome to catwatch-web!</title>
       </Head>
-      <main className="app">
-        <Component {...pageProps} />
-      </main>
+
+      <Component {...pageProps} />
     </>
   );
 }

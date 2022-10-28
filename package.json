@@ -31,6 +31,7 @@
     "regenerator-runtime": "0.13.7",
     "rxjs": "^7.0.0",
     "socket.io": "^4.5.3",
+    "socket.io-client": "^4.5.3",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -46,9 +47,10 @@
     "@nrwl/react": "15.0.3",
     "@nrwl/web": "15.0.3",
     "@nrwl/workspace": "15.0.3",
+    "@swc/core": "^1.2.173",
     "@testing-library/react": "13.4.0",
     "@types/jest": "28.1.1",
-    "@types/node": "18.7.1",
+    "@types/node": "18.7.18",
     "@types/passport-jwt": "^3.0.7",
     "@types/passport-local": "^1.0.34",
     "@types/react": "18.0.20",
