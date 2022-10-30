@@ -1,3 +1,3 @@
 export const catwatchConfig = {
-  baseUrl: 'https://pokeapi.co/api/v2/',
+  baseUrl: '/api',
 } as const;

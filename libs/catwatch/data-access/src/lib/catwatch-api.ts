@@ -1,6 +1,7 @@
-import { catwatchConfig } from '@catstack/catwatch/config';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { HYDRATE } from 'next-redux-wrapper';
+
+import { catwatchConfig } from '@catstack/catwatch/config';
 
 import { AppState } from './store';
 
@@ -21,5 +22,19 @@ export const catWatchApi = createApi({
       return action['payload'][reducerPath];
     }
   },
-  endpoints: (builder) => ({}),
+  endpoints: (builder) => ({
+    login: builder.mutation<
+      { access_token: string },
+      { username: string; password: string }
+    >({
+      query: (loginDto) => ({
+        method: 'POST',
+        url: 'auth/login',
+        credentials: 'include',
+        body: loginDto,
+      }),
+    }),
+  }),
 });
+
+export const { useLoginMutation } = catWatchApi;

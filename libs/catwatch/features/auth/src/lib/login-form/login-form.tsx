@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 
 export interface LoginFormValues {
-  email: string;
+  username: string;
   password: string;
   shouldRemember: boolean;
 }
@@ -33,17 +33,17 @@ export const LoginForm = (props: LoginFormProps) => {
           <input type="hidden" name="remember" defaultChecked={false} />
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <label htmlFor="username" className="sr-only">
                 Email address
               </label>
               <input
-                id="email-address"
-                type="email"
-                autoComplete="email"
+                id="username"
+                type="text"
+                autoComplete="username"
                 required
                 className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                {...register('email')}
+                placeholder="Username"
+                {...register('username')}
               />
             </div>
             <div>
