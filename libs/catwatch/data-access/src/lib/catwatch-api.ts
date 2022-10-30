@@ -16,6 +16,7 @@ export const catWatchApi = createApi({
 
       return headers;
     },
+    credentials: 'include',
   }),
   extractRehydrationInfo(action, { reducerPath }) {
     if (action.type === HYDRATE) {
@@ -30,7 +31,6 @@ export const catWatchApi = createApi({
       query: (loginDto) => ({
         method: 'POST',
         url: 'auth/login',
-        credentials: 'include',
         body: loginDto,
       }),
     }),

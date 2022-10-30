@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app/app.module';
 import { SocketIOAdapter } from './signaling/signaling.adapter';
@@ -14,6 +15,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix(GLOBAL_PREFIX);
   app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
+  app.use(cookieParser());
 
   await app.listen(PORT);
 

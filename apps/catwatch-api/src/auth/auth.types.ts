@@ -1,4 +1,5 @@
-import { type Socket } from 'socket.io';
+import type { Socket } from 'socket.io';
+import type { Request } from 'express';
 
 import { User } from '../users/entities/user.entity';
 
