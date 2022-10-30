@@ -1,25 +1,34 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-export const enum Events {
+export const enum ClientEvents {
+  onRoomCreate = 'onRoomCreate',
+  onRoomLeave = 'onRoomLeave',
+  onRoomJoin = 'onRoomJoin',
+  onRoomDelete = 'onRoomDelete',
+}
+
+export const enum ServerEvents {
   CreateRoom = 'room.create',
   LeaveRoom = 'room.leave',
   JoinRoom = 'room.join',
   DeleteRoom = 'room.delete',
 }
 
+export const enum ServerEvents {}
+
 export interface ServerToClientEvents {
-  [Events.CreateRoom]: (roomId: string) => void;
-  [Events.DeleteRoom]: () => void;
-  [Events.JoinRoom]: (roomId: string) => void;
-  [Events.LeaveRoom]: (roomId: string) => void;
+  [ServerEvents.CreateRoom]: (roomId: string) => void;
+  [ServerEvents.DeleteRoom]: () => void;
+  [ServerEvents.JoinRoom]: (roomId: string) => void;
+  [ServerEvents.LeaveRoom]: (roomId: string) => void;
 }
 
 export interface ClientToServerEvents {
-  [Events.CreateRoom]: () => void;
-  [Events.DeleteRoom]: (roomId: string) => void;
-  [Events.JoinRoom]: (roomId: string) => void;
-  [Events.LeaveRoom]: (roomId: string) => void;
+  [ClientEvents.onRoomCreate]: () => void;
+  [ClientEvents.onRoomDelete]: (roomId: string) => void;
+  [ClientEvents.onRoomJoin]: (roomId: string) => void;
+  [ClientEvents.onRoomLeave]: (roomId: string) => void;
 }
 
 export interface InterServerEvents {}

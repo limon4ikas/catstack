@@ -1,11 +1,13 @@
+import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 import {
   ServerToClientEvents,
   ClientToServerEvents,
-  Events,
+  ServerEvents,
+  ClientEvents,
 } from '@catstack/catwatch/types';
-import { useEffect, useState } from 'react';
+import { Layout } from '@catstack/shared/vanilla';
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
   'http://localhost:3333'
@@ -15,8 +17,6 @@ export function Index() {
   const [roomId, setRoomId] = useState('');
 
   useEffect(() => {
-    socket.connect();
-
     const onRoomCreate = (roomId: string) => {
       console.log('Joined room', roomId);
     };
@@ -28,32 +28,36 @@ export function Index() {
       console.log('Left room', roomId);
     };
 
-    socket.on(Events.CreateRoom, onRoomCreate);
-    socket.on(Events.JoinRoom, onRoomJoin);
-    socket.on(Events.LeaveRoom, onRoomLeave);
+    socket.on(ServerEvents.CreateRoom, onRoomCreate);
+    socket.on(ServerEvents.JoinRoom, onRoomJoin);
+    socket.on(ServerEvents.LeaveRoom, onRoomLeave);
     return () => {
-      socket.off(Events.CreateRoom, onRoomCreate);
-      socket.off(Events.JoinRoom, onRoomJoin);
-      socket.off(Events.LeaveRoom, onRoomLeave);
+      socket.off(ServerEvents.CreateRoom, onRoomCreate);
+      socket.off(ServerEvents.JoinRoom, onRoomJoin);
+      socket.off(ServerEvents.LeaveRoom, onRoomLeave);
     };
   }, []);
 
-  const handleCreateRoomClick = () => socket.emit(Events.CreateRoom);
-  const handleJoinRoomClick = () => socket.emit(Events.JoinRoom, roomId);
-  const handleLeaveRoomClick = () => socket.emit(Events.LeaveRoom, roomId);
+  const handleCreateRoomClick = () => socket.emit(ClientEvents.onRoomCreate);
+  const handleJoinRoomClick = () =>
+    socket.emit(ClientEvents.onRoomJoin, roomId);
+  const handleLeaveRoomClick = () =>
+    socket.emit(ClientEvents.onRoomLeave, roomId);
 
   return (
-    <div>
-      <h1>{roomId}</h1>
-      <button onClick={handleCreateRoomClick}>Create room</button>
-      <button onClick={handleJoinRoomClick}>Join room</button>
-      <button onClick={handleLeaveRoomClick}>Leave room</button>
-      <input
-        type="text"
-        placeholder="Room ID"
-        onChange={(e) => setRoomId(e.target.value)}
-      />
-    </div>
+    <Layout>
+      <div>
+        <h1>{roomId}</h1>
+        <button onClick={handleCreateRoomClick}>Create room</button>
+        <button onClick={handleJoinRoomClick}>Join room</button>
+        <button onClick={handleLeaveRoomClick}>Leave room</button>
+        <input
+          type="text"
+          placeholder="Room ID"
+          onChange={(e) => setRoomId(e.target.value)}
+        />
+      </div>
+    </Layout>
   );
 }
 

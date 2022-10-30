@@ -11,10 +11,11 @@ import { Server } from 'socket.io';
 
 import {
   ClientToServerEvents,
-  Events,
+  ClientEvents,
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
+  ServerEvents,
 } from '@catstack/catwatch/types';
 
 import { Services } from '../constants';
@@ -54,40 +55,40 @@ export class SignalingGateway
     this.logger.log(`⚡️ Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage(Events.CreateRoom)
+  @SubscribeMessage(ClientEvents.onRoomCreate)
   handleCreateRoom(client: SocketWithAuth) {
     const room = this.roomsService.createRoom();
 
     client.join(room.id);
 
-    this.server.to(room.id).emit(Events.CreateRoom, room.id);
-    this.server.to(client.id).emit(Events.JoinRoom, room.id);
+    this.server.to(room.id).emit(ServerEvents.CreateRoom, room.id);
+    this.server.to(client.id).emit(ServerEvents.JoinRoom, room.id);
   }
 
-  @SubscribeMessage(Events.DeleteRoom)
+  @SubscribeMessage(ClientEvents.onRoomDelete)
   handleDeleteRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.deleteRoom(roomId);
 
-    this.server.to(roomId).emit(Events.DeleteRoom);
+    this.server.to(roomId).emit(ServerEvents.DeleteRoom);
 
     this.server.in(roomId).socketsLeave(roomId);
   }
 
-  @SubscribeMessage(Events.JoinRoom)
+  @SubscribeMessage(ClientEvents.onRoomJoin)
   handleJoinRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.joinRoom(roomId, client.id);
 
     client.join(roomId);
 
-    this.server.to(roomId).emit(Events.JoinRoom, client.id);
+    this.server.to(roomId).emit(ServerEvents.JoinRoom, client.id);
   }
 
-  @SubscribeMessage(Events.LeaveRoom)
+  @SubscribeMessage(ClientEvents.onRoomLeave)
   handleLeaveRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.leaveRoom(roomId, client.id);
 
     client.leave(roomId);
 
-    this.server.to(roomId).emit(Events.LeaveRoom, client.id);
+    this.server.to(roomId).emit(ServerEvents.LeaveRoom, client.id);
   }
 }

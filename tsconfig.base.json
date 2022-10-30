@@ -15,7 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@catstack/catwatch/types": ["libs/catwatch/types/src/index.ts"]
+      "@catstack/catwatch/types": ["libs/catwatch/types/src/index.ts"],
+      "@catstack/shared/hooks": ["libs/shared/hooks/src/index.ts"],
+      "@catstack/shared/utils": ["libs/shared/utils/src/index.ts"],
+      "@catstack/shared/vanilla": ["libs/shared/vanilla/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
