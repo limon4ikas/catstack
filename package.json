@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start:catwatch": "nx serve catwatch-api & nx serve catwatch-web",
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "catwatch:start": "nx serve catwatch-api & nx serve catwatch-web",
+    "catwatch:migrate": "nx run catwatch-models:migrate",
+    "catwatch:gen-client": "nx run catwatch-models:gen-client",
+    "catwatch:studio": "nx run catwatch-models:studio"
   },
   "private": true,
   "dependencies": {

@@ -1,0 +1,40 @@
+{
+  "name": "catwatch-models",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/catwatch/models/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/catwatch/models/**/*.ts"]
+      }
+    },
+    "migrate": {
+      "executor": "@nrwl/workspace:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "npx prisma migrate dev --schema ./src/prisma/schema.prisma",
+        "cwd": "libs/catwatch/models"
+      }
+    },
+    "gen-client": {
+      "executor": "@nrwl/workspace:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "npx prisma generate --schema ./src/prisma/schema.prisma",
+        "cwd": "libs/catwatch/models"
+      }
+    },
+    "studio": {
+      "executor": "@nrwl/workspace:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "npx prisma studio --schema ./src/prisma/schema.prisma",
+        "cwd": "libs/catwatch/models"
+      }
+    }
+  },
+  "tags": []
+}

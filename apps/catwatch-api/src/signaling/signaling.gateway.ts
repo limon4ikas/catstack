@@ -16,11 +16,12 @@ import {
   ServerToClientEvents,
   SocketData,
   ServerEvents,
+  SocketWithAuth,
 } from '@catstack/catwatch/types';
 
 import { Services } from '../constants';
 import { RoomsService } from '../rooms/rooms.service';
-import { SocketWithAuth } from '../auth/auth.types';
+
 import { GatewaySessionManager } from './signaling.sessions';
 
 @WebSocketGateway({ cors: { origin: '*' } })
@@ -46,12 +47,12 @@ export class SignalingGateway
   }
 
   handleConnection(client: SocketWithAuth) {
-    this.sessions.setUserSocket(client.user.userId, client);
+    this.sessions.setUserSocket(client.user.id, client);
     this.logger.log(`⚡️ Client connected: ${client.id}`);
   }
 
   handleDisconnect(client: SocketWithAuth) {
-    this.sessions.removeUserSocket(client.user.userId);
+    this.sessions.removeUserSocket(client.user.id);
     this.logger.log(`⚡️ Client disconnected: ${client.id}`);
   }
 

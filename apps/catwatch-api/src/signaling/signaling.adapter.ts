@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, ServerOptions } from 'socket.io';
 
-import { JwtPayload, SocketWithAuth } from '../auth/auth.types';
+import { SocketWithAuth } from '@catstack/catwatch/types';
 
 export class SocketIOAdapter extends IoAdapter {
   private readonly logger = new Logger(SocketIOAdapter.name);
@@ -36,12 +36,9 @@ const createTokenMiddleware =
     logger.debug(`Validating auth token before connection: ${token}`);
 
     try {
-      const payload: JwtPayload = jwtService.verify(token);
+      const payload = jwtService.verify(token);
 
-      socket.user = {
-        userId: payload.sub,
-        username: payload.username,
-      };
+      socket.user = payload;
 
       next();
     } catch {

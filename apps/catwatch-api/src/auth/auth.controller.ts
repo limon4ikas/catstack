@@ -1,9 +1,10 @@
-import { Controller, Request, Post, UseGuards, Get, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Request, Post, UseGuards, Get } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+
+import { RequestWithAuth } from '@catstack/catwatch/types';
 
 @Controller('auth')
 export class AuthController {
@@ -17,7 +18,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
+  getProfile(@Request() req: RequestWithAuth) {
     return req.user;
   }
 }

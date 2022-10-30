@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { SocketWithAuth } from '../auth/auth.types';
+import { SocketWithAuth } from '@catstack/catwatch/types';
 
 export interface IGatewaySessionManager {
   getUserSocket(id: number): SocketWithAuth;

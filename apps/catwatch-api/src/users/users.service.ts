@@ -1,33 +1,35 @@
 import { Injectable } from '@nestjs/common';
 
-import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Prisma, User } from '@catstack/catwatch/models';
+
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    { userId: 1, username: 'john', password: 'changeme' },
-    { userId: 2, username: 'maria', password: 'guess' },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  createUser(data: Prisma.UserCreateInput) {
+    this.prisma.user.create({ data });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
+    return this.prisma.user.delete({ where });
   }
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
+  async updateUser(params: {
+    where: Prisma.UserWhereUniqueInput;
+    data: Prisma.UserUpdateInput;
+  }): Promise<User> {
+    const { where, data } = params;
+
+    return this.prisma.user.update({ data, where });
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findById(userId: number): Promise<User | undefined> {
+    return this.prisma.user.findUnique({ where: { id: userId } });
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async findByUsername(username: string): Promise<User | undefined> {
+    return this.prisma.user.findUnique({ where: { username } });
   }
 }
