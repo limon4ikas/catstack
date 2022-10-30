@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { NextPage } from 'next';
 
 import {
   ServerToClientEvents,
@@ -8,12 +9,14 @@ import {
   ClientEvents,
 } from '@catstack/catwatch/types';
 import { Layout } from '@catstack/shared/vanilla';
+import { withAuth } from '@catstack/catwatch/features/auth';
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-  'http://localhost:3333'
+  'http://localhost:3333',
+  { withCredentials: true, requestTimeout: 100 }
 );
 
-export function Index() {
+const Index: NextPage = () => {
   const [roomId, setRoomId] = useState('');
 
   useEffect(() => {
@@ -59,6 +62,6 @@ export function Index() {
       </div>
     </Layout>
   );
-}
+};
 
-export default Index;
+export default withAuth(Index)();

@@ -2,20 +2,12 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { HYDRATE } from 'next-redux-wrapper';
 
 import { catwatchConfig } from '@catstack/catwatch/config';
-
-import { AppState } from './store';
+import { AuthPayload } from '@catstack/catwatch/types';
 
 export const catWatchApi = createApi({
   reducerPath: 'catWatchApi',
   baseQuery: fetchBaseQuery({
     baseUrl: catwatchConfig.baseUrl,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as AppState).auth.token;
-
-      if (token) headers.set('Authentication', `Bearer ${token}`);
-
-      return headers;
-    },
     credentials: 'include',
   }),
   extractRehydrationInfo(action, { reducerPath }) {
@@ -24,17 +16,17 @@ export const catWatchApi = createApi({
     }
   },
   endpoints: (builder) => ({
-    login: builder.mutation<
-      { access_token: string },
-      { username: string; password: string }
-    >({
-      query: (loginDto) => ({
+    login: builder.mutation<void, { username: string; password: string }>({
+      query: (credentials) => ({
         method: 'POST',
         url: 'auth/login',
-        body: loginDto,
+        body: credentials,
       }),
+    }),
+    userInfo: builder.query<AuthPayload, void>({
+      query: () => 'auth/profile',
     }),
   }),
 });
 
-export const { useLoginMutation } = catWatchApi;
+export const { useLoginMutation, useUserInfoQuery } = catWatchApi;

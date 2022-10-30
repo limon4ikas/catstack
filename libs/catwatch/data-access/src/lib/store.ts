@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { authSlice, AUTH_SLICE } from '@catstack/catwatch/features/auth';
 
 import { catWatchApi } from './catwatch-api';
@@ -29,6 +30,6 @@ export type AppThunk<ReturnType = void> = ThunkAction<
 >;
 
 export const useAppDispatch: () => AppDispatch = useDispatch;
-export const useAppSelector: TypedUseSelectorHook<AppStore> = useSelector;
+export const useAppSelector: TypedUseSelectorHook<AppState> = useSelector;
 
 export const wrapper = createWrapper<AppStore>(makeStore, { debug: true });

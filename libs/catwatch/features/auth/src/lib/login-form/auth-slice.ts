@@ -1,29 +1,31 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import { AppState, catWatchApi } from '@catstack/catwatch/data-access';
+import { AuthPayload } from '@catstack/catwatch/types';
 
 export const AUTH_SLICE = 'auth';
 
 export interface AuthSliceState {
-  user: null | unknown;
-  token: null | string;
+  user: AuthPayload | null;
 }
 
 const initialState: AuthSliceState = {
-  token: null,
   user: null,
 };
 
 export const authSlice = createSlice({
   name: AUTH_SLICE,
   initialState,
-  reducers: {
-    setCredentials: (
-      state,
-      { payload: { user, token } }: PayloadAction<{ user: any; token: string }>
-    ) => {
-      state.token = token;
-      state.user = user;
-    },
+  reducers: {},
+  extraReducers(builder) {
+    builder.addMatcher(
+      catWatchApi.endpoints.userInfo.matchFulfilled,
+      (state, action) => {
+        state.user = action.payload;
+      }
+    );
   },
 });
 
-export const { setCredentials } = authSlice.actions;
+export const selectUser = (state: AppState) => state.auth.user;

@@ -1,0 +1,6 @@
+import { Strategies } from '@catstack/catwatch/types';
+import { Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+
+@Injectable()
+export class RefreshTokenGuard extends AuthGuard(Strategies.Refresh) {}

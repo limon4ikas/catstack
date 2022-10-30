@@ -5,6 +5,7 @@ import { User } from '@catstack/catwatch/models';
 export const enum Strategies {
   Local = 'local',
   Jwt = 'jwt',
+  Refresh = 'jwt-refresh',
 }
 
 export type AuthPayload = Pick<User, 'id' | 'username'>;

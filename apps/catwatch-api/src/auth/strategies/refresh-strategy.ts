@@ -1,27 +1,27 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
-
-import { JwtPayload } from '@catstack/catwatch/types';
+import { Injectable } from '@nestjs/common';
 
 import { jwtConstants } from '../constants';
+import { JwtPayload } from '@catstack/catwatch/types';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class RefreshTokenStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const accessToken = req.cookies['accessToken'];
+          const token = req.cookies['refreshToken'];
 
-          if (!accessToken) return null;
+          if (!token) return null;
 
-          return accessToken;
+          return token;
         },
       ]),
+      secretOrKey: jwtConstants.refreshSecret,
+      passReqToCallback: true,
       ignoreExpiration: false,
-      secretOrKey: jwtConstants.accessSecret,
     });
   }
 

@@ -24,7 +24,9 @@ import { RoomsService } from '../rooms/rooms.service';
 
 import { GatewaySessionManager } from './signaling.sessions';
 
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({
+  cors: { origin: 'http://localhost:4200', credentials: true },
+})
 export class SignalingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {

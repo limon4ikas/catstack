@@ -3,8 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, ServerOptions } from 'socket.io';
+import { ExtendedError } from 'socket.io/dist/namespace';
 
-import { SocketWithAuth } from '@catstack/catwatch/types';
+import { JwtPayload, SocketWithAuth } from '@catstack/catwatch/types';
 
 export class SocketIOAdapter extends IoAdapter {
   private readonly logger = new Logger(SocketIOAdapter.name);
@@ -28,17 +29,26 @@ export class SocketIOAdapter extends IoAdapter {
 
 const createTokenMiddleware =
   (jwtService: JwtService, logger: Logger) =>
-  (socket: SocketWithAuth, next) => {
+  (socket: SocketWithAuth, next: (err?: ExtendedError) => void) => {
+    const cookies: { accessToken?: string; refreshToken?: string } =
+      socket.handshake.headers.cookie.split(';').reduce(
+        (cookies, cookieStr) => ({
+          ...cookies,
+          [cookieStr.split('=')[0].trim()]: cookieStr.split('=')[1].trim(),
+        }),
+        {}
+      );
+
     // for Postman testing support, fallback to token header
     const token =
-      socket.handshake.auth.token || socket.handshake.headers['token'];
+      cookies.accessToken || (socket.handshake.headers['token'] as string);
 
     logger.debug(`Validating auth token before connection: ${token}`);
 
     try {
-      const payload = jwtService.verify(token);
+      const { iat, exp, ...user }: JwtPayload = jwtService.verify(token);
 
-      socket.user = payload;
+      socket.user = user;
 
       next();
     } catch {
