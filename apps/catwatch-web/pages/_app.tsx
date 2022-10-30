@@ -1,15 +1,22 @@
 import { AppProps } from 'next/app';
 import Head from 'next/head';
+import { Provider } from 'react-redux';
+
+import { wrapper } from '@catstack/catwatch/data-access';
+
 import './styles.css';
 
-function CustomApp({ Component, pageProps }: AppProps) {
+function CustomApp({ Component, ...rest }: AppProps) {
+  const { store, props } = wrapper.useWrappedStore(rest);
+
   return (
     <>
       <Head>
-        <title>Welcome to catwatch-web!</title>
+        <title>Catwatch</title>
       </Head>
-
-      <Component {...pageProps} />
+      <Provider store={store}>
+        <Component {...props.pageProps} />
+      </Provider>
     </>
   );
 }

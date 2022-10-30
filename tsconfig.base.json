@@ -15,6 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@catstack/catwatch/config": ["libs/catwatch/config/src/index.ts"],
+      "@catstack/catwatch/data-access": [
+        "libs/catwatch/data-access/src/index.ts"
+      ],
       "@catstack/catwatch/features/auth": [
         "libs/catwatch/features/auth/src/index.ts"
       ],
