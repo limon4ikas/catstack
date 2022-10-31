@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
+import { UserProfile } from './auth';
+
 export const enum ClientEvents {
   onRoomCreate = 'onRoomCreate',
   onRoomLeave = 'onRoomLeave',
@@ -15,20 +17,31 @@ export const enum ServerEvents {
   DeleteRoom = 'room.delete',
 }
 
-export const enum ServerEvents {}
+export const enum Events {
+  getRoomUsers = 'getRoomUsers',
+}
 
 export interface ServerToClientEvents {
-  [ServerEvents.CreateRoom]: (roomId: string) => void;
-  [ServerEvents.DeleteRoom]: () => void;
-  [ServerEvents.JoinRoom]: (roomId: string) => void;
-  [ServerEvents.LeaveRoom]: (roomId: string) => void;
+  [ServerEvents.CreateRoom]: (createdRoomId: string) => void;
+  [ServerEvents.DeleteRoom]: (deletedRoomId: string) => void;
+
+  [ServerEvents.JoinRoom]: (joinedUser: UserProfile) => void;
+  [ServerEvents.LeaveRoom]: (leftUser: UserProfile) => void;
+
+  [Events.getRoomUsers]: (users: UserProfile[]) => void;
+  rtc: (data: any) => void;
 }
 
 export interface ClientToServerEvents {
   [ClientEvents.onRoomCreate]: () => void;
   [ClientEvents.onRoomDelete]: (roomId: string) => void;
+
   [ClientEvents.onRoomJoin]: (roomId: string) => void;
   [ClientEvents.onRoomLeave]: (roomId: string) => void;
+
+  [Events.getRoomUsers]: (roomId: string) => void;
+
+  rtc: (data: any) => void;
 }
 
 export interface InterServerEvents {}

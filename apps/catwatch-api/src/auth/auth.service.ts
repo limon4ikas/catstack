@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { AuthPayload } from '@catstack/catwatch/types';
+import { UserProfile } from '@catstack/catwatch/types';
 
 import { UsersService } from '../users/users.service';
 import { jwtConstants } from './constants';
@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateUser(username: string, password: string): Promise<AuthPayload> {
+  async validateUser(username: string, password: string): Promise<UserProfile> {
     const user = await this.usersService.findByUsername(username);
 
     if (user && user.password === password) {
@@ -25,11 +25,11 @@ export class AuthService {
     return null;
   }
 
-  async login(user: AuthPayload) {
+  async login(user: UserProfile) {
     return this.getTokens(user);
   }
 
-  async getTokens(user: AuthPayload) {
+  async getTokens(user: UserProfile) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(user, {
         secret: jwtConstants.accessSecret,

@@ -1,2 +1,2 @@
-export * from './sockets';
+export * from './events';
 export * from './auth';

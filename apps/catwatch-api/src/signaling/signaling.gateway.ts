@@ -61,37 +61,46 @@ export class SignalingGateway
   @SubscribeMessage(ClientEvents.onRoomCreate)
   handleCreateRoom(client: SocketWithAuth) {
     const room = this.roomsService.createRoom();
-
+    this.logger.debug(`⚡️ ${client.user.username} created room ${room.id}`);
     client.join(room.id);
-
     this.server.to(room.id).emit(ServerEvents.CreateRoom, room.id);
-    this.server.to(client.id).emit(ServerEvents.JoinRoom, room.id);
+    this.server.to(client.id).emit(ServerEvents.JoinRoom, client.user);
   }
 
   @SubscribeMessage(ClientEvents.onRoomDelete)
   handleDeleteRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.deleteRoom(roomId);
-
-    this.server.to(roomId).emit(ServerEvents.DeleteRoom);
-
+    this.logger.debug(`⚡️ ${client.user.username} deleted room ${roomId}`);
+    this.server.to(roomId).emit(ServerEvents.DeleteRoom, roomId);
     this.server.in(roomId).socketsLeave(roomId);
   }
 
   @SubscribeMessage(ClientEvents.onRoomJoin)
   handleJoinRoom(client: SocketWithAuth, roomId: string) {
-    this.roomsService.joinRoom(roomId, client.id);
-
+    this.logger.debug(`⚡️ ${client.user.username} joined room ${roomId}`);
     client.join(roomId);
-
-    this.server.to(roomId).emit(ServerEvents.JoinRoom, client.id);
+    this.roomsService.joinRoom(roomId, client.user);
+    this.server.to(roomId).emit(ServerEvents.JoinRoom, client.user);
   }
 
   @SubscribeMessage(ClientEvents.onRoomLeave)
   handleLeaveRoom(client: SocketWithAuth, roomId: string) {
-    this.roomsService.leaveRoom(roomId, client.id);
-
+    this.logger.debug(`⚡️ ${client.user.username} left room ${roomId}`);
     client.leave(roomId);
+    this.roomsService.leaveRoom(roomId, client.user.id);
+    this.server.to(roomId).emit(ServerEvents.LeaveRoom, client.user);
+  }
 
-    this.server.to(roomId).emit(ServerEvents.LeaveRoom, client.id);
+  @SubscribeMessage('rtc')
+  handleRtcHandshake(
+    client: SocketWithAuth,
+    messageObj: { userId: number; message: unknown }
+  ) {
+    this.logger.debug(
+      `⚡️ ${client.user.username} handshake initiate to ${messageObj.userId}`
+    );
+
+    const userSocket = this.sessions.getUserSocket(messageObj.userId);
+    userSocket.emit('rtc', messageObj.message);
   }
 }

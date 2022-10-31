@@ -2,12 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { AppState, catWatchApi } from '@catstack/catwatch/data-access';
-import { AuthPayload } from '@catstack/catwatch/types';
+import { UserProfile } from '@catstack/catwatch/types';
 
 export const AUTH_SLICE = 'auth';
 
 export interface AuthSliceState {
-  user: AuthPayload | null;
+  user: UserProfile | null;
 }
 
 const initialState: AuthSliceState = {

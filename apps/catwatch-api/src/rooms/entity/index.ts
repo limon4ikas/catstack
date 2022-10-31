@@ -1,13 +1,15 @@
+import { UserProfile } from '@catstack/catwatch/types';
+
 export class Room {
-  sockets: Set<string> = new Set();
+  users: Map<number, UserProfile> = new Map();
 
   constructor(public readonly id: string) {}
 
-  addSocket(socketId: string) {
-    this.sockets.add(socketId);
+  addUser(user: UserProfile) {
+    this.users.set(user.id, user);
   }
 
-  removeSocket(socketId: string) {
-    this.sockets.delete(socketId);
+  removeUser(userId: number) {
+    this.users.delete(userId);
   }
 }

@@ -1,3 +1,4 @@
+import { UserProfile } from '@catstack/catwatch/types';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
@@ -8,20 +9,14 @@ export class RoomsService {
   private rooms = new Map<Room['id'], Room>();
 
   createRoom() {
-    const createdRoom = new Room(nanoid());
-
+    const createdRoom = new Room(nanoid(4));
     this.rooms.set(createdRoom.id, createdRoom);
-
     return createdRoom;
-  }
-
-  getAllRooms() {
-    return [...this.rooms.values()];
   }
 
   getRoom(id: string) {
     if (!this.rooms.has(id)) {
-      throw new HttpException('Not found!', HttpStatus.NOT_FOUND);
+      throw new HttpException('Room not found!', HttpStatus.NOT_FOUND);
     }
 
     return this.rooms.get(id);
@@ -29,36 +24,32 @@ export class RoomsService {
 
   deleteRoom(id: string) {
     if (!this.rooms.has(id)) {
-      throw new HttpException('Not found!', HttpStatus.NOT_FOUND);
+      throw new HttpException('Room not found!', HttpStatus.NOT_FOUND);
     }
 
     return this.rooms.delete(id);
   }
 
-  updateRoom(roomId: string, room: Room) {
-    this.rooms.set(roomId, room);
-  }
-
-  joinRoom(roomId: string, socketId: string) {
+  joinRoom(roomId: string, user: UserProfile) {
     if (!this.rooms.has(roomId)) {
       throw new HttpException('Room not found!', HttpStatus.NOT_FOUND);
     }
 
-    const room = this.rooms.get(roomId);
-
-    room.addSocket(socketId);
-
-    this.updateRoom(roomId, room);
+    this.getRoom(roomId).addUser(user);
   }
 
-  leaveRoom(roomId: string, socketId: string) {
+  leaveRoom(roomId: string, userId: number) {
     if (!this.rooms.has(roomId)) {
       throw new HttpException('Room not found!', HttpStatus.NOT_FOUND);
     }
 
-    const room = this.rooms.get(roomId);
-    room.removeSocket(socketId);
+    this.getRoom(roomId).removeUser(userId);
+  }
 
-    this.updateRoom(roomId, room);
+  getRoomUsers(roomId: string) {
+    const room = this.getRoom(roomId);
+    const users = [...room.users.values()];
+
+    return users;
   }
 }

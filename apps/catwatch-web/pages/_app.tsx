@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { Provider } from 'react-redux';
 
 import { wrapper } from '@catstack/catwatch/data-access';
+import { Toaster } from '@catstack/shared/vanilla';
 
 import './styles.css';
 
@@ -16,6 +17,7 @@ function CustomApp({ Component, ...rest }: AppProps) {
       </Head>
       <Provider store={store}>
         <Component {...props.pageProps} />
+        <Toaster position="top-right" />
       </Provider>
     </>
   );

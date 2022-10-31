@@ -14,7 +14,7 @@ export class RoomsController {
 
   @Get()
   findAll() {
-    return this.roomsService.getAllRooms();
+    // return this.roomsService.getAllRooms();
   }
 
   @Get(':id')
@@ -25,5 +25,10 @@ export class RoomsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.roomsService.deleteRoom(id);
+  }
+
+  @Get(':roomId/users')
+  getRoomUsers(@Param('roomId') roomId: string) {
+    return this.roomsService.getRoomUsers(roomId);
   }
 }
