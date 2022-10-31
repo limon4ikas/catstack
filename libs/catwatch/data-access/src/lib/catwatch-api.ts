@@ -47,30 +47,24 @@ export const catWatchApi = createApi({
         return userAdapter.addMany(userAdapter.getInitialState(), response);
       },
       async onCacheEntryAdded(
-        roomId,
+        _roomId,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved, getState }
       ) {
         const socket = getSocket();
         const currenUserId = (getState() as AppState).auth.user?.id;
 
         const onRoomJoinListener = async (user: UserProfile) => {
-          if (currenUserId !== user.id) {
-            toast(`${user.username} joined room`);
-          }
+          if (currenUserId !== user.id) toast(`${user.username} joined room`);
+          updateCachedData((draft) => userAdapter.addOne(draft, user));
 
-          updateCachedData((draft) => {
-            userAdapter.addOne(draft, user);
-          });
+          // TODO: Establish WebRTC connection
         };
 
         const onRoomLeaveListener = (user: UserProfile) => {
-          if (currenUserId !== user.id) {
-            toast(`${user.username} left room`);
-          }
+          if (currenUserId !== user.id) toast(`${user.username} left room`);
+          updateCachedData((draft) => userAdapter.removeOne(draft, user.id));
 
-          updateCachedData((draft) => {
-            userAdapter.removeOne(draft, user.id);
-          });
+          // TODO: Remove WebRTC connection
         };
 
         try {

@@ -1,10 +1,9 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import { useDispatch, useSelector } from 'react-redux';
-import type { TypedUseSelectorHook } from 'react-redux';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { authSlice, AUTH_SLICE } from '@catstack/catwatch/features/auth';
+import { authSlice } from '@catstack/catwatch/features/auth';
 
 import { catWatchApi } from './catwatch-api';
 
@@ -12,7 +11,7 @@ const makeStore = () =>
   configureStore({
     reducer: {
       [catWatchApi.reducerPath]: catWatchApi.reducer,
-      [AUTH_SLICE]: authSlice.reducer,
+      [authSlice.name]: authSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(catWatchApi.middleware),
@@ -21,7 +20,6 @@ const makeStore = () =>
 export type AppStore = ReturnType<typeof makeStore>;
 export type AppDispatch = AppStore['dispatch'];
 export type AppState = ReturnType<AppStore['getState']>;
-
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
   AppState,
