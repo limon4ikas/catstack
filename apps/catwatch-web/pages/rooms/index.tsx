@@ -12,7 +12,7 @@ export interface JoinRoomFormProps {
 }
 
 const JoinRoomForm = (props: JoinRoomFormProps) => {
-  const [roomId, setRoomId] = useState('');
+  const [roomId, setRoomId] = useState('1');
 
   const handleSubmit = () => props.onJoinRoomSubmit(roomId);
 
@@ -22,6 +22,7 @@ const JoinRoomForm = (props: JoinRoomFormProps) => {
         type="text"
         placeholder="Room ID"
         onChange={(e) => setRoomId(e.target.value)}
+        value={roomId}
       />
       <Button onClick={handleSubmit}>Join room</Button>
     </div>

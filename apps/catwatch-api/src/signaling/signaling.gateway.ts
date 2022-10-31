@@ -93,14 +93,10 @@ export class SignalingGateway
 
   @SubscribeMessage('rtc')
   handleRtcHandshake(
-    client: SocketWithAuth,
-    messageObj: { userId: number; message: unknown }
+    senderSocket: SocketWithAuth,
+    messageObj: { from: number; to: number; message: unknown }
   ) {
-    this.logger.debug(
-      `⚡️ ${client.user.username} handshake initiate to ${messageObj.userId}`
-    );
-
-    const userSocket = this.sessions.getUserSocket(messageObj.userId);
-    userSocket.emit('rtc', messageObj.message);
+    const recipientSocket = this.sessions.getUserSocket(messageObj.to);
+    this.server.to(recipientSocket.id).emit('rtc', messageObj);
   }
 }

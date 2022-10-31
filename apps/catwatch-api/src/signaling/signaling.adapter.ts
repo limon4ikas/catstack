@@ -43,7 +43,7 @@ const createTokenMiddleware =
     const token =
       cookies.accessToken || (socket.handshake.headers['token'] as string);
 
-    logger.debug(`Validating auth token before connection: ${token}`);
+    // logger.debug(`Validating auth token before connection: ${token}`);
 
     try {
       const { iat, exp, ...user }: JwtPayload = jwtService.verify(token);

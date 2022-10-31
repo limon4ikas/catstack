@@ -6,7 +6,7 @@ import { Room } from './entity';
 
 @Injectable()
 export class RoomsService {
-  private rooms = new Map<Room['id'], Room>();
+  private rooms = new Map<Room['id'], Room>([['1', new Room('1')]]);
 
   createRoom() {
     const createdRoom = new Room(nanoid(4));
