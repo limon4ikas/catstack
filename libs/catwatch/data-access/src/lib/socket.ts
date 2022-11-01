@@ -22,7 +22,7 @@ export const createRoomQueryFn = async () => {
 
   socket.emit(ClientEvents.onRoomCreate);
   const roomId = await new Promise<string>((resolve) =>
-    socket.once(ServerEvents.CreateRoom, resolve)
+    socket.once(ServerEvents.RoomCreated, resolve)
   );
 
   return { data: roomId };
@@ -33,7 +33,7 @@ export const joinRoomQueryFn = async (roomId: string) => {
 
   socket.emit(ClientEvents.onRoomJoin, roomId);
   const userId = await new Promise<UserProfile>((resolve) =>
-    socket.once(ServerEvents.JoinRoom, resolve)
+    socket.once(ServerEvents.RoomJoined, resolve)
   );
 
   return { data: userId };

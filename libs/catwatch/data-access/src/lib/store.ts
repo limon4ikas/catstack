@@ -6,6 +6,7 @@ import { createWrapper } from 'next-redux-wrapper';
 import { authSlice } from '@catstack/catwatch/features/auth';
 
 import { catWatchApi } from './catwatch-api';
+import { listenerMiddleware } from './middleware';
 
 const makeStore = () =>
   configureStore({
@@ -14,7 +15,9 @@ const makeStore = () =>
       [authSlice.name]: authSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(catWatchApi.middleware),
+      getDefaultMiddleware()
+        .prepend(listenerMiddleware.middleware)
+        .concat(catWatchApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

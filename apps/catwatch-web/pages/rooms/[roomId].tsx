@@ -1,14 +1,16 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-import { Layout } from '@catstack/shared/vanilla';
+import { Button, Layout } from '@catstack/shared/vanilla';
 import {
+  CatPeer,
+  useAppSelector,
   useGetRoomUsersQuery,
   useJoinRoomMutation,
   useLeaveRoomMutation,
 } from '@catstack/catwatch/data-access';
-import { withAuth } from '@catstack/catwatch/features/auth';
+import { selectUser, withAuth } from '@catstack/catwatch/features/auth';
 
 export interface UseRoomConfig {
   roomId: string;
@@ -18,18 +20,16 @@ const useRoom = ({ roomId }: UseRoomConfig) => {
   const { data, isLoading, isError } = useGetRoomUsersQuery(roomId);
   const [leaveRoom] = useLeaveRoomMutation();
   const [joinRoom] = useJoinRoomMutation();
+  const { id } = useAppSelector(selectUser);
 
-  useEffect(() => {
-    (async () => {
-      await joinRoom(roomId);
-    })();
-
-    return () => {
-      leaveRoom(roomId);
-    };
-  }, [roomId, joinRoom, leaveRoom]);
-
-  return { users: data, joinRoom, leaveRoom, isError, isLoading } as const;
+  return {
+    id,
+    users: data,
+    joinRoom,
+    leaveRoom,
+    isError,
+    isLoading,
+  } as const;
 };
 
 export interface UsersListContainerProps {
@@ -37,7 +37,30 @@ export interface UsersListContainerProps {
 }
 
 const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
-  const { users, isLoading, isError } = useRoom({ roomId });
+  const { id, users, isLoading, isError, joinRoom, leaveRoom } = useRoom({
+    roomId,
+  });
+
+  useEffect(() => {
+    (async () => joinRoom(roomId))();
+
+    return () => {
+      leaveRoom(roomId);
+    };
+  }, [joinRoom, leaveRoom, roomId]);
+
+  const peerRef = useRef<any>();
+  const createPeer = () => {
+    const pc = new CatPeer(id, id === 1 ? 2 : 1);
+    peerRef.current = pc;
+  };
+  useEffect(createPeer, []);
+
+  const call = async () => {
+    const pc = peerRef.current;
+    await pc.start();
+    peerRef.current = pc;
+  };
 
   if (isError) return <h1>Something went wrong</h1>;
 
@@ -46,10 +69,13 @@ const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   if (!users) return <h1>No users</h1>;
 
   return (
-    <div className="flex flex-col gap-4">
-      {Object.values(users.entities).map((user) => (
-        <div key={user.id}>{user.username}</div>
-      ))}
+    <div>
+      <Button onClick={call}>Call</Button>
+      <ul className="flex flex-col gap-4">
+        {Object.values(users.entities).map((user) => (
+          <li key={user.id}>{user.username}</li>
+        ))}
+      </ul>
     </div>
   );
 };

@@ -3,6 +3,16 @@
 
 import { UserProfile } from './auth';
 
+export interface InterServerEvents {}
+
+export interface SocketData {}
+
+/**
+|--------------------------------------------------
+| Socket events
+|--------------------------------------------------
+*/
+
 export const enum ClientEvents {
   onRoomCreate = 'onRoomCreate',
   onRoomLeave = 'onRoomLeave',
@@ -11,39 +21,54 @@ export const enum ClientEvents {
 }
 
 export const enum ServerEvents {
-  CreateRoom = 'room.create',
-  LeaveRoom = 'room.leave',
-  JoinRoom = 'room.join',
-  DeleteRoom = 'room.delete',
+  RoomCreated = 'room.create',
+  RoomDeleted = 'room.delete',
+  RoomLeft = 'room.leave',
+  RoomJoined = 'room.join',
 }
 
 export const enum Events {
   getRoomUsers = 'getRoomUsers',
+  WebRtc = 'WebRTC',
+  WebRtcOffer = 'webrtc-offer',
+  WebRtcAnswer = 'webrtc-answer',
+  WebRtcCandidate = 'webrtc-candidate',
 }
 
 export interface ServerToClientEvents {
-  [ServerEvents.CreateRoom]: (createdRoomId: string) => void;
-  [ServerEvents.DeleteRoom]: (deletedRoomId: string) => void;
-
-  [ServerEvents.JoinRoom]: (joinedUser: UserProfile) => void;
-  [ServerEvents.LeaveRoom]: (leftUser: UserProfile) => void;
-
+  // ROOM EVENTS
+  [ServerEvents.RoomCreated]: (createdRoomId: string) => void;
+  [ServerEvents.RoomDeleted]: (deletedRoomId: string) => void;
+  [ServerEvents.RoomJoined]: (joinedUser: UserProfile) => void;
+  [ServerEvents.RoomLeft]: (leftUser: UserProfile) => void;
+  // SHARED EVENTS
   [Events.getRoomUsers]: (users: UserProfile[]) => void;
-  rtc: (data: any) => void;
+  [Events.WebRtc]: (data: RTCSignalMessage) => void;
 }
 
 export interface ClientToServerEvents {
+  // ROOM EVENTS
   [ClientEvents.onRoomCreate]: () => void;
-  [ClientEvents.onRoomDelete]: (roomId: string) => void;
-
-  [ClientEvents.onRoomJoin]: (roomId: string) => void;
-  [ClientEvents.onRoomLeave]: (roomId: string) => void;
-
+  [ClientEvents.onRoomDelete]: (deletedRoomId: string) => void;
+  [ClientEvents.onRoomJoin]: (roomToJoinId: string) => void;
+  [ClientEvents.onRoomLeave]: (roomToLeaveId: string) => void;
+  // SHARED EVENTS
   [Events.getRoomUsers]: (roomId: string) => void;
-
-  rtc: (data: any) => void;
+  [Events.WebRtc]: (data: RTCSignalMessage) => void;
 }
 
-export interface InterServerEvents {}
+/**
+|--------------------------------------------------
+| WebRTC Events
+|--------------------------------------------------
+*/
 
-export interface SocketData {}
+export type RTCSignalingEvents = 'offer' | 'answer' | 'candidate';
+export type RTCSignalPayload = unknown;
+
+export type RTCSignalMessage = {
+  type: RTCSignalingEvents;
+  fromUserId: number;
+  toUserId: number;
+  payload: unknown;
+};

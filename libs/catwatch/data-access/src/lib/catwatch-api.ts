@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { HYDRATE } from 'next-redux-wrapper';
-import { createEntityAdapter, EntityState } from '@reduxjs/toolkit';
+import { EntityState } from '@reduxjs/toolkit';
 
 import { catwatchConfig } from '@catstack/catwatch/config';
 import { UserProfile, ServerEvents } from '@catstack/catwatch/types';
@@ -13,8 +13,7 @@ import {
   leaveRoomQueryFn,
 } from './socket';
 import { AppState } from './store';
-
-const userAdapter = createEntityAdapter<UserProfile>();
+import { userAdapter, userJoined, userLeft } from './actions';
 
 export const catWatchApi = createApi({
   reducerPath: 'catWatchApi',
@@ -48,35 +47,41 @@ export const catWatchApi = createApi({
       },
       async onCacheEntryAdded(
         _roomId,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved, getState }
+        {
+          updateCachedData,
+          cacheDataLoaded,
+          cacheEntryRemoved,
+          getState,
+          dispatch,
+        }
       ) {
         const socket = getSocket();
         const currenUserId = (getState() as AppState).auth.user?.id;
 
+        if (!currenUserId) return;
+
         const onRoomJoinListener = async (user: UserProfile) => {
           if (currenUserId !== user.id) toast(`${user.username} joined room`);
           updateCachedData((draft) => userAdapter.addOne(draft, user));
-
-          // TODO: Establish WebRTC connection
+          dispatch(userJoined(user));
         };
 
         const onRoomLeaveListener = (user: UserProfile) => {
           if (currenUserId !== user.id) toast(`${user.username} left room`);
           updateCachedData((draft) => userAdapter.removeOne(draft, user.id));
-
-          // TODO: Remove WebRTC connection
+          dispatch(userLeft(user));
         };
 
         try {
           await cacheDataLoaded;
-          socket.on(ServerEvents.JoinRoom, onRoomJoinListener);
-          socket.on(ServerEvents.LeaveRoom, onRoomLeaveListener);
+          socket.on(ServerEvents.RoomJoined, onRoomJoinListener);
+          socket.on(ServerEvents.RoomLeft, onRoomLeaveListener);
         } catch {
           //
         }
         await cacheEntryRemoved;
-        socket.off(ServerEvents.JoinRoom, onRoomJoinListener);
-        socket.off(ServerEvents.LeaveRoom, onRoomLeaveListener);
+        socket.off(ServerEvents.RoomJoined, onRoomJoinListener);
+        socket.off(ServerEvents.RoomLeft, onRoomLeaveListener);
       },
     }),
   }),

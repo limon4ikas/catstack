@@ -6,6 +6,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
@@ -17,6 +18,8 @@ import {
   SocketData,
   ServerEvents,
   SocketWithAuth,
+  RTCSignalMessage,
+  Events,
 } from '@catstack/catwatch/types';
 
 import { Services } from '../constants';
@@ -63,15 +66,15 @@ export class SignalingGateway
     const room = this.roomsService.createRoom();
     this.logger.debug(`⚡️ ${client.user.username} created room ${room.id}`);
     client.join(room.id);
-    this.server.to(room.id).emit(ServerEvents.CreateRoom, room.id);
-    this.server.to(client.id).emit(ServerEvents.JoinRoom, client.user);
+    this.server.to(room.id).emit(ServerEvents.RoomCreated, room.id);
+    this.server.to(client.id).emit(ServerEvents.RoomJoined, client.user);
   }
 
   @SubscribeMessage(ClientEvents.onRoomDelete)
   handleDeleteRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.deleteRoom(roomId);
     this.logger.debug(`⚡️ ${client.user.username} deleted room ${roomId}`);
-    this.server.to(roomId).emit(ServerEvents.DeleteRoom, roomId);
+    this.server.to(roomId).emit(ServerEvents.RoomDeleted, roomId);
     this.server.in(roomId).socketsLeave(roomId);
   }
 
@@ -80,7 +83,7 @@ export class SignalingGateway
     this.logger.debug(`⚡️ ${client.user.username} joined room ${roomId}`);
     client.join(roomId);
     this.roomsService.joinRoom(roomId, client.user);
-    this.server.to(roomId).emit(ServerEvents.JoinRoom, client.user);
+    this.server.to(roomId).emit(ServerEvents.RoomJoined, client.user);
   }
 
   @SubscribeMessage(ClientEvents.onRoomLeave)
@@ -88,15 +91,39 @@ export class SignalingGateway
     this.logger.debug(`⚡️ ${client.user.username} left room ${roomId}`);
     client.leave(roomId);
     this.roomsService.leaveRoom(roomId, client.user.id);
-    this.server.to(roomId).emit(ServerEvents.LeaveRoom, client.user);
+    this.server.to(roomId).emit(ServerEvents.RoomLeft, client.user);
   }
 
-  @SubscribeMessage('rtc')
-  handleRtcHandshake(
-    senderSocket: SocketWithAuth,
-    messageObj: { from: number; to: number; message: unknown }
-  ) {
-    const recipientSocket = this.sessions.getUserSocket(messageObj.to);
-    this.server.to(recipientSocket.id).emit('rtc', messageObj);
+  @SubscribeMessage(Events.WebRtc)
+  handleRtcHandshake(_client: SocketWithAuth, message: RTCSignalMessage) {
+    const recepient = this.sessions.getUserSocket(message.toUserId);
+
+    if (!recepient) throw new WsException('User offline');
+
+    switch (message.type) {
+      case 'offer':
+        this.logger.debug(
+          `⚡️ Offer from ${message.fromUserId} to ${message.toUserId}`
+        );
+
+        this.server.to(recepient.id).emit(Events.WebRtc, message);
+        break;
+      case 'answer':
+        this.logger.debug(
+          `⚡️ Answer from ${message.fromUserId} to ${message.toUserId}`
+        );
+
+        this.server.to(recepient.id).emit(Events.WebRtc, message);
+        break;
+      case 'candidate':
+        this.logger.debug(
+          `⚡️ Candidate from ${message.fromUserId} to ${message.toUserId}`
+        );
+
+        this.server.to(recepient.id).emit(Events.WebRtc, message);
+        break;
+      default:
+        return;
+    }
   }
 }
