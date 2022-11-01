@@ -34,8 +34,6 @@ export const useRoom = ({ roomId }: UseRoomConfig) => {
   return {
     user,
     users,
-    joinRoom,
-    leaveRoom,
     isError,
     isLoading,
   } as const;

@@ -2,17 +2,19 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import {
+  catWatchApi,
+  listenerMiddleware,
+} from '@catstack/catwatch/data-access';
 import { authSlice } from '@catstack/catwatch/features/auth';
-
-import { catWatchApi } from './catwatch-api';
-import { listenerMiddleware } from './middleware';
+import { roomSlice } from '@catstack/catwatch/features/room';
 
 const makeStore = () =>
   configureStore({
     reducer: {
       [catWatchApi.reducerPath]: catWatchApi.reducer,
       [authSlice.name]: authSlice.reducer,
+      [roomSlice.name]: roomSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()

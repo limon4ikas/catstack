@@ -1,13 +1,11 @@
 import { NextPage } from 'next';
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {
-  useAppSelector,
-  useUserInfoQuery,
-} from '@catstack/catwatch/data-access';
+import { ReactNode, useEffect } from 'react';
+import { useRouter } from 'next/router';
+
+import { useUserInfoQuery } from '@catstack/catwatch/data-access';
+import { useAppSelector } from '@catstack/catwatch/store';
 
 import { selectUser } from './auth-slice';
-import { useRouter } from 'next/router';
-import { ReactNode, useEffect } from 'react';
 
 export interface WithAuthConfig {
   redirectTo?: string;

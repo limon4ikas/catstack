@@ -97,9 +97,7 @@ export class CatPeer {
   */
 
   start = async () => {
-    const { localStream, localTracks } = await this.getUserMedia({
-      audio: true,
-    });
+    const { localStream, localTracks } = await this.getUserMedia();
     const channel = this.createDataChannel('MESSAGES');
     this.registerHandlers(channel);
     this.addTracksToPeerConnection(localStream, localTracks);
@@ -128,7 +126,9 @@ export class CatPeer {
     tracks.forEach((track) => this.pc.addTrack(track, stream));
   };
 
-  private getUserMedia = async (constraints?: MediaStreamConstraints) => {
+  private getUserMedia = async (
+    constraints: MediaStreamConstraints = { video: true }
+  ) => {
     this.log(`⚡️ Getting user media`);
     const localStream = await navigator.mediaDevices.getUserMedia(constraints);
     const localTracks = localStream.getTracks();
@@ -253,9 +253,7 @@ export class CatPeer {
         this.log(`⚡️ Got offer`);
         const offerDesc = message.payload as RTCSessionDescriptionInit;
         this.setRemoteDescription(offerDesc);
-        const { localStream, localTracks } = await this.getUserMedia({
-          audio: true,
-        });
+        const { localStream, localTracks } = await this.getUserMedia();
         this.addTracksToPeerConnection(localStream, localTracks);
         this.createAnswer();
         break;

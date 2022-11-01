@@ -1,4 +1,3 @@
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { useLoginMutation } from '@catstack/catwatch/data-access';
 import { useRouter } from 'next/router';
 

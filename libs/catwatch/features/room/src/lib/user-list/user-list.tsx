@@ -1,17 +1,30 @@
 import { getSocket } from '@catstack/catwatch/data-access';
+import { UserProfile } from '@catstack/catwatch/types';
 import { useCatPeer } from '@catstack/shared/rtc';
 import { Button } from '@catstack/shared/vanilla';
 
 import { useRoom } from '../hooks/use-room';
+
+export interface UserListProps {
+  users: UserProfile[];
+}
+
+export const UserList = (props: UserListProps) => {
+  return (
+    <ul className="flex flex-col gap-4">
+      {props.users.map((user) => (
+        <li key={user.id}>{user.username}</li>
+      ))}
+    </ul>
+  );
+};
 
 export interface UsersListContainerProps {
   roomId: string;
 }
 
 export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
-  const { user, users, isLoading, isError, joinRoom, leaveRoom } = useRoom({
-    roomId,
-  });
+  const { user, users, isLoading, isError } = useRoom({ roomId });
 
   const pc = useCatPeer({ id: user.id, remoteId: 2, socket: getSocket() });
   const call = async () => await pc.start();
@@ -25,12 +38,7 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   return (
     <div>
       <Button onClick={call}>Call</Button>
-
-      <ul className="flex flex-col gap-4">
-        {users.map((user) => (
-          <li key={user.id}>{user.username}</li>
-        ))}
-      </ul>
+      <UserList users={users} />
     </div>
   );
 };
