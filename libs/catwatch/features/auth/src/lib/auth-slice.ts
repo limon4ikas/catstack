@@ -4,8 +4,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import { AppState, catWatchApi } from '@catstack/catwatch/data-access';
 import { UserProfile } from '@catstack/catwatch/types';
 
-export const AUTH_SLICE = 'auth';
-
 export interface AuthSliceState {
   user: UserProfile | null;
 }
@@ -15,7 +13,7 @@ const initialState: AuthSliceState = {
 };
 
 export const authSlice = createSlice({
-  name: AUTH_SLICE,
+  name: 'auth',
   initialState,
   reducers: {},
   extraReducers(builder) {

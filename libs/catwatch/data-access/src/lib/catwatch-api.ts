@@ -5,6 +5,7 @@ import { EntityState } from '@reduxjs/toolkit';
 import { catwatchConfig } from '@catstack/catwatch/config';
 import { UserProfile, ServerEvents } from '@catstack/catwatch/types';
 import { toast } from '@catstack/shared/vanilla';
+import { userAdapter, userJoined, userLeft } from '@catstack/catwatch/actions';
 
 import {
   createRoomQueryFn,
@@ -13,7 +14,6 @@ import {
   leaveRoomQueryFn,
 } from './socket';
 import { AppState } from './store';
-import { userAdapter, userJoined, userLeft } from './actions';
 
 export const catWatchApi = createApi({
   reducerPath: 'catWatchApi',

@@ -13,13 +13,15 @@ export interface CatPeerConfig {
 }
 
 export class CatPeer {
-  pc: RTCPeerConnection;
-  socket: Socket<ClientToServerEvents, ServerToClientEvents>;
+  private pc: RTCPeerConnection;
+  private socket: Socket<ClientToServerEvents, ServerToClientEvents>;
   remoteId: number;
   currentId: number;
-  makingOffer = false;
-  ignoreOffer = false;
+  private makingOffer = false;
+  private ignoreOffer = false;
   polite: boolean;
+  debug = true;
+  private channel?: RTCDataChannel;
 
   constructor(config: CatPeerConfig) {
     // Setup
@@ -28,7 +30,7 @@ export class CatPeer {
     this.polite = this.currentId > this.remoteId;
     this.socket = config.socket;
 
-    console.log(`⚡️ Created peer connection`);
+    this.log(`⚡️ Created peer connection`);
     this.pc = new RTCPeerConnection();
     // Events
     this.socket.on(Events.WebRtc, this.handleMessage);
@@ -48,27 +50,34 @@ export class CatPeer {
   |--------------------------------------------------
   */
 
+  private log(message?: unknown, ...optionalParams: unknown[]) {
+    if (!this.debug) return;
+
+    console.log(message, ...optionalParams);
+  }
+
   private handleDataChannel = (e: RTCDataChannelEvent) => {
-    const channel = e.channel;
-    console.log(`⚡️ Recieved data channel ${e.channel.label}`);
-    this.registerHandlers(channel);
+    this.channel = e.channel;
+    this.log(`⚡️ Recieved data channel ${e.channel.label}`);
+    this.registerHandlers(this.channel);
   };
 
   private handleDataChannelOpen = (channel: RTCDataChannel) => (e: Event) => {
-    console.log(`⚡️ Data channel open ${channel.label}`);
+    this.log(`⚡️ Data channel open ${channel.label}`);
   };
 
   private handleDataChannelClose = (channel: RTCDataChannel) => (e: Event) => {
-    console.log(`⚡️ Data channel closed ${channel.label}`);
+    this.log(`⚡️ Data channel closed ${channel.label}`);
   };
 
   private handleDataChannelMessage =
     (channel: RTCDataChannel) => (ev: MessageEvent) => {
-      console.log(`⚡️ Got message on channel ${channel.label}: ${ev.data}`);
+      this.log(`⚡️ Got message on channel ${channel.label}: ${ev.data}`);
     };
 
   private createDataChannel = (label: string) => {
-    return this.pc.createDataChannel(label);
+    this.channel = this.pc.createDataChannel(label);
+    return this.channel;
   };
 
   private registerHandlers = (channel: RTCDataChannel) => {
@@ -76,6 +85,16 @@ export class CatPeer {
     channel.addEventListener('open', this.handleDataChannelOpen(channel));
     channel.addEventListener('close', this.handleDataChannelClose(channel));
   };
+
+  sendMessage = (data: any) => {
+    this.channel?.send(data);
+  };
+
+  /**
+  |--------------------------------------------------
+  | MAIN API
+  |--------------------------------------------------
+  */
 
   start = async () => {
     const { localStream, localTracks } = await this.getUserMedia({
@@ -98,19 +117,19 @@ export class CatPeer {
   */
 
   private handleTrack = (ev: RTCTrackEvent) => {
-    console.log(`⚡ Got remote track`, ev.track.kind);
+    this.log(`⚡ Got remote track`, ev.track.kind);
   };
 
   private addTracksToPeerConnection = (
     stream: MediaStream,
     tracks: MediaStreamTrack[]
   ) => {
-    console.log(`⚡️ Attached local tracks`);
+    this.log(`⚡️ Attached local tracks`);
     tracks.forEach((track) => this.pc.addTrack(track, stream));
   };
 
   private getUserMedia = async (constraints?: MediaStreamConstraints) => {
-    console.log(`⚡️ Getting user media`);
+    this.log(`⚡️ Getting user media`);
     const localStream = await navigator.mediaDevices.getUserMedia(constraints);
     const localTracks = localStream.getTracks();
 
@@ -124,7 +143,7 @@ export class CatPeer {
   */
 
   private handleIceConnectionStateChange = () => {
-    console.log(
+    this.log(
       `⚡️ Ice connection state change to ${this.pc.iceConnectionState}`
     );
     if (this.pc.iceConnectionState === 'failed') this.pc.restartIce();
@@ -133,7 +152,7 @@ export class CatPeer {
   private handleNegotiation = async (ev: Event) => {
     if (this.makingOffer) return;
 
-    console.log(`⚡️ Negotiation start`);
+    this.log(`⚡️ Negotiation start`);
     try {
       this.makingOffer = true;
       await this.pc.setLocalDescription();
@@ -144,7 +163,7 @@ export class CatPeer {
         payload: this.pc.localDescription,
       });
     } catch (err) {
-      console.log('⚡️ Failed negotiation');
+      this.log('⚡️ Failed negotiation');
       console.error(err);
     } finally {
       this.makingOffer = false;
@@ -153,14 +172,14 @@ export class CatPeer {
 
   private createOffer = async () => {
     this.makingOffer = true;
-    console.log(`⚡️ Created offer and set as local description`);
+    this.log(`⚡️ Created offer and set as local description`);
     const offer = await this.pc.createOffer();
     await this.getDescription(offer);
     this.makingOffer = false;
   };
 
   private createAnswer = () => {
-    console.log(`⚡️ Created answer and set as local description`);
+    this.log(`⚡️ Created answer and set as local description`);
     this.pc.createAnswer().then(this.getDescription).catch(console.error);
   };
 
@@ -170,7 +189,7 @@ export class CatPeer {
     const description = { type: desc.type, sdp: desc.sdp };
 
     if (desc.type === 'offer') {
-      console.log(`⚡️ Sending offer`);
+      this.log(`⚡️ Sending offer`);
       this.socket.emit(Events.WebRtc, {
         type: 'offer',
         fromUserId: this.currentId,
@@ -180,7 +199,7 @@ export class CatPeer {
     }
 
     if (desc.type === 'answer') {
-      console.log(`⚡️ Sending answer`);
+      this.log(`⚡️ Sending answer`);
       this.socket.emit(Events.WebRtc, {
         type: 'answer',
         fromUserId: this.currentId,
@@ -191,7 +210,7 @@ export class CatPeer {
   };
 
   private setRemoteDescription = (desc: RTCSessionDescriptionInit) => {
-    console.log(`⚡️ Setted remote description`);
+    this.log(`⚡️ Setted remote description`);
     this.pc.setRemoteDescription(new RTCSessionDescription(desc));
   };
 
@@ -203,7 +222,7 @@ export class CatPeer {
 
   private handleIceCandidate = (ev: RTCPeerConnectionIceEvent) => {
     if (!ev.candidate) return;
-    console.log(`⚡️ Sending ice candidate to remote peer`);
+    this.log(`⚡️ Sending ice candidate to remote peer`);
 
     this.socket.emit(Events.WebRtc, {
       type: 'candidate',
@@ -218,20 +237,20 @@ export class CatPeer {
       message.type === 'offer' &&
       (this.makingOffer || this.pc.signalingState !== 'stable');
 
-    console.log(`⚡️ Offer collision`, offerCollision);
+    this.log(`⚡️ Offer collision`, offerCollision);
     this.ignoreOffer = !this.polite && offerCollision;
 
     if (this.ignoreOffer) return;
 
     switch (message.type) {
       case 'answer': {
-        console.log(`⚡️ Got answer`);
+        this.log(`⚡️ Got answer`);
         const answerDesc = message.payload as RTCSessionDescriptionInit;
         this.setRemoteDescription(answerDesc);
         break;
       }
       case 'offer': {
-        console.log(`⚡️ Got offer`);
+        this.log(`⚡️ Got offer`);
         const offerDesc = message.payload as RTCSessionDescriptionInit;
         this.setRemoteDescription(offerDesc);
         const { localStream, localTracks } = await this.getUserMedia({
@@ -242,7 +261,7 @@ export class CatPeer {
         break;
       }
       case 'candidate': {
-        console.log(`⚡️ Got remote candidate message`);
+        this.log(`⚡️ Got remote candidate message`);
         try {
           const candidate = message.payload as RTCIceCandidateInit;
           this.addIceCandidate(candidate);

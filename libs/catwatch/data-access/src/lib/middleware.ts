@@ -1,5 +1,6 @@
 import { createListenerMiddleware } from '@reduxjs/toolkit';
-import { userJoined } from './actions';
+
+import { userJoined } from '@catstack/catwatch/actions';
 
 export const listenerMiddleware = createListenerMiddleware();
 
