@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { Button, Layout } from '@catstack/shared/vanilla';
 import {
   CatPeer,
+  getSocket,
   useAppSelector,
   useGetRoomUsersQuery,
   useJoinRoomMutation,
@@ -51,7 +52,12 @@ const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
 
   const peerRef = useRef<any>();
   const createPeer = () => {
-    const pc = new CatPeer(id, id === 1 ? 2 : 1);
+    const pc = new CatPeer({
+      socket: getSocket(),
+      userId: id,
+      remoteUserId: id === 1 ? 2 : 1,
+      isPolite: id === 1 ? false : true,
+    });
     peerRef.current = pc;
   };
   useEffect(createPeer, []);
