@@ -32,6 +32,7 @@ export const catWatchApi = createApi({
         method: 'POST',
         url: 'auth/login',
         body: credentials,
+        responseHandler: (response) => response.text(),
       }),
     }),
     userInfo: builder.query<UserProfile, void>({ query: () => 'auth/profile' }),

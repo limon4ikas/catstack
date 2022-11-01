@@ -50,14 +50,14 @@ const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
     };
   }, [joinRoom, leaveRoom, roomId]);
 
-  const peerRef = useRef<any>();
+  const peerRef = useRef<CatPeer>();
   const createPeer = () => {
     const pc = new CatPeer({
-      socket: getSocket(),
       userId: id,
       remoteUserId: id === 1 ? 2 : 1,
-      isPolite: id === 1 ? false : true,
+      socket: getSocket(),
     });
+
     peerRef.current = pc;
   };
   useEffect(createPeer, []);
@@ -65,7 +65,6 @@ const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   const call = async () => {
     const pc = peerRef.current;
     await pc.start();
-    peerRef.current = pc;
   };
 
   if (isError) return <h1>Something went wrong</h1>;
