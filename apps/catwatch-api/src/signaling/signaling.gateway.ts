@@ -6,7 +6,6 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
@@ -18,8 +17,8 @@ import {
   SocketData,
   ServerEvents,
   SocketWithAuth,
-  RTCSignalMessage,
   Events,
+  SignalMessage,
 } from '@catstack/catwatch/types';
 
 import { Services } from '../constants';
@@ -59,18 +58,22 @@ export class SignalingGateway
   handleDisconnect(client: SocketWithAuth) {
     this.sessions.removeUserSocket(client.user.id);
     this.logger.log(`⚡️ Client disconnected: ${client.id}`);
+    const rooms = this.roomsService.getAllRooms();
+    rooms.forEach((room) => {
+      if (!room.users.has(client.user.id)) return;
+      room.removeUser(client.user.id);
+    });
   }
 
-  @SubscribeMessage(ClientEvents.onRoomCreate)
+  @SubscribeMessage(ClientEvents.CreateRoom)
   handleCreateRoom(client: SocketWithAuth) {
     const room = this.roomsService.createRoom();
     this.logger.debug(`⚡️ ${client.user.username} created room ${room.id}`);
     client.join(room.id);
     this.server.to(room.id).emit(ServerEvents.RoomCreated, room.id);
-    this.server.to(client.id).emit(ServerEvents.RoomJoined, client.user);
   }
 
-  @SubscribeMessage(ClientEvents.onRoomDelete)
+  @SubscribeMessage(ClientEvents.DeleteRoom)
   handleDeleteRoom(client: SocketWithAuth, roomId: string) {
     this.roomsService.deleteRoom(roomId);
     this.logger.debug(`⚡️ ${client.user.username} deleted room ${roomId}`);
@@ -78,15 +81,19 @@ export class SignalingGateway
     this.server.in(roomId).socketsLeave(roomId);
   }
 
-  @SubscribeMessage(ClientEvents.onRoomJoin)
+  @SubscribeMessage(ClientEvents.JoinRoom)
   handleJoinRoom(client: SocketWithAuth, roomId: string) {
     this.logger.debug(`⚡️ ${client.user.username} joined room ${roomId}`);
     client.join(roomId);
     this.roomsService.joinRoom(roomId, client.user);
-    this.server.to(roomId).emit(ServerEvents.RoomJoined, client.user);
+    const usersInRoom = this.roomsService
+      .getRoomUsers(roomId)
+      .filter((user) => user.id !== client.user.id);
+
+    this.server.to(roomId).emit(Events.AllUsers, usersInRoom);
   }
 
-  @SubscribeMessage(ClientEvents.onRoomLeave)
+  @SubscribeMessage(ClientEvents.LeaveRoom)
   handleLeaveRoom(client: SocketWithAuth, roomId: string) {
     this.logger.debug(`⚡️ ${client.user.username} left room ${roomId}`);
     client.leave(roomId);
@@ -94,36 +101,22 @@ export class SignalingGateway
     this.server.to(roomId).emit(ServerEvents.RoomLeft, client.user);
   }
 
-  @SubscribeMessage(Events.WebRtc)
-  handleRtcHandshake(_client: SocketWithAuth, message: RTCSignalMessage) {
+  @SubscribeMessage(Events.SendingSignal)
+  handleSendingSignal(client: SocketWithAuth, message: SignalMessage) {
+    this.logger.debug(
+      `⚡️ ${client.user.username} sending signal to ${message.toUserId}`
+    );
     const recepient = this.sessions.getUserSocket(message.toUserId);
+    this.server.to(recepient.id).emit(ServerEvents.RoomJoined, message);
+  }
 
-    if (!recepient) throw new WsException('User offline');
+  @SubscribeMessage(Events.ReturningSignal)
+  handleReturningSignal(client: SocketWithAuth, message: SignalMessage) {
+    this.logger.debug(
+      `⚡️ ${client.user.username} returning signal ${message.toUserId}`
+    );
 
-    switch (message.type) {
-      case 'offer':
-        this.logger.debug(
-          `⚡️ Offer from ${message.fromUserId} to ${message.toUserId}`
-        );
-
-        this.server.to(recepient.id).emit(Events.WebRtc, message);
-        break;
-      case 'answer':
-        this.logger.debug(
-          `⚡️ Answer from ${message.fromUserId} to ${message.toUserId}`
-        );
-
-        this.server.to(recepient.id).emit(Events.WebRtc, message);
-        break;
-      case 'candidate':
-        this.logger.debug(
-          `⚡️ Candidate from ${message.fromUserId} to ${message.toUserId}`
-        );
-
-        this.server.to(recepient.id).emit(Events.WebRtc, message);
-        break;
-      default:
-        return;
-    }
+    const recepient = this.sessions.getUserSocket(message.toUserId);
+    this.server.to(recepient.id).emit(Events.RecievingReturnedSignal, message);
   }
 }

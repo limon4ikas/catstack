@@ -20,13 +20,13 @@ export const useRoom = ({ roomId }: UseRoomConfig) => {
   const [joinRoom] = useJoinRoomMutation();
   const user = useAppSelector(selectUser) as UserProfile;
 
-  useEffect(() => {
-    (async () => joinRoom(roomId))();
+  // useEffect(() => {
+  //   (async () => joinRoom(roomId))();
 
-    return () => {
-      leaveRoom(roomId);
-    };
-  }, [joinRoom, leaveRoom, roomId]);
+  //   return () => {
+  //     leaveRoom(roomId);
+  //   };
+  // }, [joinRoom, leaveRoom, roomId]);
 
   const users = Object.values(data?.entities || {})
     .filter((user): user is UserProfile => !!user)

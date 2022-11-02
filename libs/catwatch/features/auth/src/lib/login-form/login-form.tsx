@@ -11,7 +11,12 @@ export interface LoginFormProps {
 }
 
 export const LoginForm = (props: LoginFormProps) => {
-  const { register, handleSubmit } = useForm<LoginFormValues>();
+  const { register, handleSubmit } = useForm<LoginFormValues>({
+    defaultValues: {
+      password: 'xuwi389fa',
+      username: 'limonikas',
+    },
+  });
 
   return (
     <div className="flex items-center justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">

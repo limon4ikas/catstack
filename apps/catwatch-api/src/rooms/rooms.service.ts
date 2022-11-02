@@ -35,7 +35,7 @@ export class RoomsService {
       throw new HttpException('Room not found!', HttpStatus.NOT_FOUND);
     }
 
-    this.getRoom(roomId).addUser(user);
+    return this.getRoom(roomId).addUser(user);
   }
 
   leaveRoom(roomId: string, userId: number) {
@@ -51,5 +51,9 @@ export class RoomsService {
     const users = [...room.users.values()];
 
     return users;
+  }
+
+  getAllRooms() {
+    return [...this.rooms.values()];
   }
 }

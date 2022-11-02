@@ -26,7 +26,7 @@ export const RoomPage: NextPage = () => {
         </div>
       </div>
       <div className="mt-8">
-        <VideoCallContainer />
+        <VideoCallContainer roomId={roomId} />
       </div>
     </Layout>
   );

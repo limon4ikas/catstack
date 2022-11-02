@@ -20,7 +20,7 @@ export const getSocket = () => {
 export const createRoomQueryFn = async () => {
   const socket = getSocket();
 
-  socket.emit(ClientEvents.onRoomCreate);
+  socket.emit(ClientEvents.CreateRoom);
   const roomId = await new Promise<string>((resolve) =>
     socket.once(ServerEvents.RoomCreated, resolve)
   );
@@ -31,7 +31,7 @@ export const createRoomQueryFn = async () => {
 export const joinRoomQueryFn = async (roomId: string) => {
   const socket = getSocket();
 
-  socket.emit(ClientEvents.onRoomJoin, roomId);
+  socket.emit(ClientEvents.JoinRoom, roomId);
   const userId = await new Promise<UserProfile>((resolve) =>
     socket.once(ServerEvents.RoomJoined, resolve)
   );
@@ -41,7 +41,7 @@ export const joinRoomQueryFn = async (roomId: string) => {
 
 export const leaveRoomQueryFn = async (roomId: string) => {
   const socket = getSocket();
-  socket.emit(ClientEvents.onRoomLeave, roomId);
+  socket.emit(ClientEvents.LeaveRoom, roomId);
 
   return { data: '' };
 };

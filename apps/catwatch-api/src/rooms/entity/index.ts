@@ -7,6 +7,7 @@ export class Room {
 
   addUser(user: UserProfile) {
     this.users.set(user.id, user);
+    return this;
   }
 
   removeUser(userId: number) {

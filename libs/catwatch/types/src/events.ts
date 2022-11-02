@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
+import { SignalData } from 'simple-peer';
+
 import { UserProfile } from './auth';
 
 export interface InterServerEvents {}
@@ -14,10 +16,10 @@ export interface SocketData {}
 */
 
 export const enum ClientEvents {
-  onRoomCreate = 'onRoomCreate',
-  onRoomLeave = 'onRoomLeave',
-  onRoomJoin = 'onRoomJoin',
-  onRoomDelete = 'onRoomDelete',
+  CreateRoom = 'onRoomCreate',
+  LeaveRoom = 'LeaveRoom',
+  JoinRoom = 'JoinRoom',
+  DeleteRoom = 'onRoomDelete',
 }
 
 export const enum ServerEvents {
@@ -28,33 +30,36 @@ export const enum ServerEvents {
 }
 
 export const enum Events {
-  getRoomUsers = 'getRoomUsers',
+  AllUsers = 'getRoomUsers',
   WebRtc = 'WebRTC',
-  WebRtcOffer = 'webrtc-offer',
-  WebRtcAnswer = 'webrtc-answer',
-  WebRtcCandidate = 'webrtc-candidate',
+  SendingSignal = 'sending-signal',
+  ReturningSignal = 'returning-signal',
+  RecievingReturnedSignal = 'recieving-returneds-signal',
+}
+
+export interface SignalMessage {
+  fromUserId: number;
+  toUserId: number;
+  signal: SignalData;
 }
 
 export interface ServerToClientEvents {
-  // ROOM EVENTS
   [ServerEvents.RoomCreated]: (createdRoomId: string) => void;
   [ServerEvents.RoomDeleted]: (deletedRoomId: string) => void;
-  [ServerEvents.RoomJoined]: (joinedUser: UserProfile) => void;
+  [ServerEvents.RoomJoined]: (joinedUser: SignalMessage) => void;
   [ServerEvents.RoomLeft]: (leftUser: UserProfile) => void;
-  // SHARED EVENTS
-  [Events.getRoomUsers]: (users: UserProfile[]) => void;
+  [Events.AllUsers]: (users: UserProfile[]) => void;
   [Events.WebRtc]: (data: RTCSignalMessage) => void;
+  [Events.RecievingReturnedSignal]: (data: SignalMessage) => void;
 }
 
 export interface ClientToServerEvents {
-  // ROOM EVENTS
-  [ClientEvents.onRoomCreate]: () => void;
-  [ClientEvents.onRoomDelete]: (deletedRoomId: string) => void;
-  [ClientEvents.onRoomJoin]: (roomToJoinId: string) => void;
-  [ClientEvents.onRoomLeave]: (roomToLeaveId: string) => void;
-  // SHARED EVENTS
-  [Events.getRoomUsers]: (roomId: string) => void;
-  [Events.WebRtc]: (data: RTCSignalMessage) => void;
+  [ClientEvents.CreateRoom]: () => void;
+  [ClientEvents.DeleteRoom]: (deletedRoomId: string) => void;
+  [ClientEvents.JoinRoom]: (roomToJoinId: string) => void;
+  [ClientEvents.LeaveRoom]: (roomToLeaveId: string) => void;
+  [Events.SendingSignal]: (data: SignalMessage) => void;
+  [Events.ReturningSignal]: (data: SignalMessage) => void;
 }
 
 /**
