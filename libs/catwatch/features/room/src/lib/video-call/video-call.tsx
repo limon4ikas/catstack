@@ -8,6 +8,7 @@ import {
   ClientEvents,
   Events,
   ServerEvents,
+  SignalMessage,
   UserProfile,
 } from '@catstack/catwatch/types';
 
@@ -21,6 +22,14 @@ export const SERVERS: RTCConfiguration = {
     },
   ],
   iceCandidatePoolSize: 10,
+};
+
+const useUserMedia = () => {
+  const getMedia = useCallback(async (constraints?: MediaStreamConstraints) => {
+    return await navigator.mediaDevices.getUserMedia(constraints);
+  }, []);
+
+  return { getMedia };
 };
 
 const handlePeerConnection = (label: string) => () => {
@@ -41,8 +50,11 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   const peersRef = useRef<Record<number, Peer.Instance>>({});
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const { getMedia } = useUserMedia();
+
   const createInitiatorPeer = useCallback(
-    (callerId: number, calleeId: number, stream: MediaStream) => {
+    async (callerId: number, calleeId: number) => {
+      const stream = await getMedia({ video: true });
       const peer = new Peer({
         initiator: true,
         trickle: false,
@@ -66,16 +78,14 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       peer.on('error', handlerError);
       return peer;
     },
-    [socket]
+    [getMedia, socket]
   );
 
   const createListenerPeer = useCallback(
-    (
-      incomingSignal: Peer.SignalData,
-      callerId: number,
-      stream: MediaStream
-    ) => {
+    async (incomingSignal: Peer.SignalData, callerId: number) => {
       console.log(`⚡️ Waiting for peer connection from ${callerId}`);
+      const stream = await getMedia({ video: true });
+
       const peer = new Peer({
         initiator: false,
         trickle: false,
@@ -101,55 +111,85 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
 
       return peer;
     },
-    [socket, userId]
+    [getMedia, socket, userId]
   );
 
-  useEffect(() => {
+  const handleAllUsersEvent = useCallback(
+    (users: UserProfile[]) => {
+      const peers = peersRef.current;
+
+      console.log('⚡️ Got all users from server on join', users);
+
+      if (!users.length) {
+        console.log('⚡️ No one in the room waiting for participants');
+      }
+      users.forEach(async (user) => {
+        if (user.id === userId || peers[user.id]) {
+          console.log('⚡️ Skipping connection');
+          return;
+        }
+        const peer = await createInitiatorPeer(userId, user.id);
+        console.log(
+          `⚡️ Initiate peer connection to from ${userId} to ${user.id}`
+        );
+        peers[user.id] = peer;
+      });
+    },
+    [createInitiatorPeer, userId]
+  );
+
+  const handleRoomJoinedEvent = useCallback(
+    async (message: SignalMessage) => {
+      const peers = peersRef.current;
+      console.log('⚡️ User joined creating listener peer');
+
+      const peer = await createListenerPeer(message.signal, message.fromUserId);
+      peers[message.fromUserId] = peer;
+    },
+    [createListenerPeer]
+  );
+
+  const handleRecievingReturnedSignal = (message: SignalMessage) => {
     const peers = peersRef.current;
 
+    peers[message.fromUserId]?.signal(message.signal);
+  };
+
+  const destroyPeers = useCallback(() => {
+    const peers = peersRef.current;
+
+    Object.entries(peers).forEach(([id, peer]) => {
+      console.log(`⚡️ Destroy connection from ${userId} to ${id}`);
+      peer.destroy();
+    });
+  }, [userId]);
+
+  useEffect(() => {
     (async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       socket.emit(ClientEvents.JoinRoom, roomId);
-
-      socket.on(Events.AllUsers, (users) => {
-        console.log('⚡️ Got all users from server on join', users);
-
-        if (!users.length) {
-          console.log('⚡️ No one in the room waiting for participants');
-        }
-        users.forEach((user) => {
-          if (user.id === userId || peers[user.id]) {
-            console.log('⚡️ Skipping connection');
-            return;
-          }
-          const peer = createInitiatorPeer(userId, user.id, stream);
-          console.log(
-            `⚡️ Initiate peer connection to from ${userId} to ${user.id}`
-          );
-          peers[user.id] = peer;
-        });
-      });
-
-      socket.on(ServerEvents.RoomJoined, (payload) => {
-        console.log('⚡️ User joined creating listener peer');
-
-        const peer = createListenerPeer(
-          payload.signal,
-          payload.fromUserId,
-          stream
-        );
-        peers[payload.fromUserId] = peer;
-      });
-
-      socket.on(Events.RecievingReturnedSignal, (message) => {
-        peers[message.fromUserId]?.signal(message.signal);
-      });
+      socket.on(Events.AllUsers, handleAllUsersEvent);
+      socket.on(ServerEvents.RoomJoined, handleRoomJoinedEvent);
+      socket.on(Events.RecievingReturnedSignal, handleRecievingReturnedSignal);
     })();
 
     return () => {
       socket.emit(ClientEvents.LeaveRoom, roomId);
+      socket.off(Events.AllUsers, handleAllUsersEvent);
+      socket.off(ServerEvents.RoomJoined, handleRoomJoinedEvent);
+      socket.off(Events.RecievingReturnedSignal, handleRecievingReturnedSignal);
+      destroyPeers();
     };
-  }, [createInitiatorPeer, createListenerPeer, roomId, socket, userId]);
+  }, [
+    roomId,
+    userId,
+    socket,
+    createInitiatorPeer,
+    createListenerPeer,
+    getMedia,
+    handleAllUsersEvent,
+    handleRoomJoinedEvent,
+    destroyPeers,
+  ]);
 
   return (
     <div className="p-8 bg-white rounded-lg">
