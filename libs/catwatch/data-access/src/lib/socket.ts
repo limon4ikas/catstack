@@ -5,7 +5,6 @@ import {
   ClientToServerEvents,
   ClientEvents,
   ServerEvents,
-  UserProfile,
 } from '@catstack/catwatch/types';
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
@@ -26,22 +25,4 @@ export const createRoomQueryFn = async () => {
   );
 
   return { data: roomId };
-};
-
-export const joinRoomQueryFn = async (roomId: string) => {
-  const socket = getSocket();
-
-  socket.emit(ClientEvents.JoinRoom, roomId);
-  const userId = await new Promise<UserProfile>((resolve) =>
-    socket.once(ServerEvents.RoomJoined, resolve)
-  );
-
-  return { data: userId };
-};
-
-export const leaveRoomQueryFn = async (roomId: string) => {
-  const socket = getSocket();
-  socket.emit(ClientEvents.LeaveRoom, roomId);
-
-  return { data: '' };
 };

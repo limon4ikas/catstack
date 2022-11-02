@@ -9,12 +9,7 @@ import { userAdapter, userJoined, userLeft } from '@catstack/catwatch/actions';
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { AppState } from '@catstack/catwatch/store';
 
-import {
-  createRoomQueryFn,
-  getSocket,
-  joinRoomQueryFn,
-  leaveRoomQueryFn,
-} from './socket';
+import { createRoomQueryFn, getSocket } from './socket';
 
 export const catWatchApi = createApi({
   reducerPath: 'catWatchApi',
@@ -38,10 +33,6 @@ export const catWatchApi = createApi({
     }),
     userInfo: builder.query<UserProfile, void>({ query: () => 'auth/profile' }),
     createRoom: builder.mutation<string, void>({ queryFn: createRoomQueryFn }),
-    joinRoom: builder.mutation<UserProfile, string>({
-      queryFn: joinRoomQueryFn,
-    }),
-    leaveRoom: builder.mutation<string, string>({ queryFn: leaveRoomQueryFn }),
     getRoomUsers: builder.query<EntityState<UserProfile>, string>({
       query: (roomId) => `rooms/${roomId}/users`,
       transformResponse(response: UserProfile[]) {
@@ -91,8 +82,6 @@ export const {
   useLoginMutation,
   useUserInfoQuery,
   useCreateRoomMutation,
-  useJoinRoomMutation,
   useGetRoomUsersQuery,
   useLazyGetRoomUsersQuery,
-  useLeaveRoomMutation,
 } = catWatchApi;

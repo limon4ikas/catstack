@@ -19,6 +19,7 @@ const JoinRoomForm = (props: JoinRoomFormProps) => {
   return (
     <div className="flex items-center gap-4">
       <Input
+        label="Join room"
         type="text"
         placeholder="Room ID"
         onChange={(e) => setRoomId(e.target.value)}
