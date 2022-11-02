@@ -3,11 +3,7 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
 
-import {
-  catWatchApi,
-  listenerMiddleware,
-} from '@catstack/catwatch/data-access';
-import { RtcMiddleware } from '@catstack/shared/rtc';
+import { catWatchApi } from '@catstack/catwatch/data-access';
 import { authSlice } from '@catstack/catwatch/features/auth';
 import { roomSlice } from '@catstack/catwatch/features/room';
 
@@ -19,10 +15,7 @@ const makeStore = () =>
       [roomSlice.name]: roomSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware()
-        .prepend(listenerMiddleware.middleware)
-        .concat(catWatchApi.middleware)
-        .concat(RtcMiddleware),
+      getDefaultMiddleware().concat(catWatchApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

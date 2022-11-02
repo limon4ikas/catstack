@@ -3,7 +3,11 @@ import { useRouter } from 'next/router';
 
 import { Layout } from '@catstack/shared/vanilla';
 import { withAuth } from '@catstack/catwatch/features/auth';
-import { UsersListContainer } from '@catstack/catwatch/features/room';
+import {
+  TorrentManagerContainer,
+  UsersListContainer,
+  VideoCallContainer,
+} from '@catstack/catwatch/features/room';
 
 export const RoomPage: NextPage = () => {
   const router = useRouter();
@@ -13,7 +17,17 @@ export const RoomPage: NextPage = () => {
 
   return (
     <Layout header={`Room ${roomId}`}>
-      <UsersListContainer roomId={roomId} />
+      <div className="flex gap-8">
+        <div className="flex-1 p-6 bg-white rounded-lg">
+          <UsersListContainer roomId={roomId} />
+        </div>
+        <div className="flex-1 p-6 bg-white rounded-lg">
+          <TorrentManagerContainer />
+        </div>
+      </div>
+      <div className="mt-8">
+        <VideoCallContainer />
+      </div>
     </Layout>
   );
 };

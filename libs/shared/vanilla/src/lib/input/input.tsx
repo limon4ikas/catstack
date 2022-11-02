@@ -1,6 +1,6 @@
 import { ComponentPropsWithRef, forwardRef } from 'react';
 
-export type InputProps = ComponentPropsWithRef<'input'>;
+export type InputProps = ComponentPropsWithRef<'input'> & { label: string };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   return (
@@ -9,7 +9,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
         htmlFor="name"
         className="absolute inline-block px-1 -mt-px text-xs font-medium text-gray-900 bg-white -top-2 left-2"
       >
-        Name
+        {props.label}
       </label>
       <input
         type="text"
