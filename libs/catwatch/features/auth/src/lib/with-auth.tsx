@@ -1,3 +1,4 @@
+/* eslint-disable @nrwl/nx/enforce-module-boundaries */
 import { NextPage } from 'next';
 import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -22,11 +23,11 @@ export const withAuth = (Component: NextPage) => (config?: WithAuthConfig) => {
       if (error) router.push(config?.redirectTo || '/auth/login');
     }, [error, router]);
 
-    if (user) return <Component />;
-
     if (isLoading) return config?.loadingComponent || null;
 
-    if (!data) return <h1>Something went wrong!!!</h1>;
+    if (user) return <Component />;
+
+    if (!data) return null;
 
     return <Component />;
   };
