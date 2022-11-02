@@ -6,7 +6,7 @@ export interface SeedFileFormProps {
   onCreatedTorrent: (magnetUri: string) => void;
 }
 
-export const CreateTorrentForm = (props: SeedFileFormProps) => {
+export const CreateTorrentForm = ({ onCreatedTorrent }: SeedFileFormProps) => {
   const [magnetURI, setMagnet] = useState('');
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -15,11 +15,14 @@ export const CreateTorrentForm = (props: SeedFileFormProps) => {
     const client = new WebTorrent();
 
     const eventFile = e.target.files?.item(0);
+
     if (!eventFile) return;
-    client.seed(eventFile, (torrent) => {
+
+    client.seed(eventFile, function (torrent) {
       toast(`Seeding torrent ${torrent.name}`);
       setMagnet(torrent.magnetURI);
-      props.onCreatedTorrent(torrent.magnetURI);
+      console.log(torrent.magnetURI);
+      onCreatedTorrent(torrent.magnetURI);
     });
   };
 

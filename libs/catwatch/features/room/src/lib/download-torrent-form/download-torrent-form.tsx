@@ -20,7 +20,7 @@ const ProgressBar = ({ progress = 0 }: ProgressBarProps) => {
 
 export interface AddTorrentFileFormProps {
   magnetUri: string;
-  onTorrentDownloadComplete: (url: string) => void;
+  onTorrentDownloadComplete: (name: string, url: string) => void;
   onTorrentProgress: (progress: number) => void;
   onMagnetUriChange: Dispatch<SetStateAction<string>>;
 }
@@ -51,7 +51,7 @@ export const AddTorrentFileForm = ({
       movie.getBlobURL(function (err, url) {
         if (err) throw err;
         if (!url) throw new Error('No Url');
-        onTorrentDownloadComplete(url);
+        onTorrentDownloadComplete(torrent.name, url);
       });
     });
   };
