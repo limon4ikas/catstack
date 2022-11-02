@@ -2,7 +2,7 @@ import { AppProps } from 'next/app';
 import Head from 'next/head';
 import { Provider } from 'react-redux';
 
-import { wrapper } from '@catstack/catwatch/data-access';
+import { wrapper } from '@catstack/catwatch/store';
 import { Toaster } from '@catstack/shared/vanilla';
 
 import './styles.css';

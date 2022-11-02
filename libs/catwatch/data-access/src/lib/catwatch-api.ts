@@ -6,6 +6,8 @@ import { catwatchConfig } from '@catstack/catwatch/config';
 import { UserProfile, ServerEvents } from '@catstack/catwatch/types';
 import { toast } from '@catstack/shared/vanilla';
 import { userAdapter, userJoined, userLeft } from '@catstack/catwatch/actions';
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import { AppState } from '@catstack/catwatch/store';
 
 import {
   createRoomQueryFn,
@@ -13,7 +15,6 @@ import {
   joinRoomQueryFn,
   leaveRoomQueryFn,
 } from './socket';
-import { AppState } from './store';
 
 export const catWatchApi = createApi({
   reducerPath: 'catWatchApi',

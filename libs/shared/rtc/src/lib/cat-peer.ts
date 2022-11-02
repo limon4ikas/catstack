@@ -1,3 +1,5 @@
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import { getSocket } from '@catstack/catwatch/data-access';
 import {
   ClientToServerEvents,
   Events,
@@ -8,28 +10,25 @@ import { Socket } from 'socket.io-client';
 
 export interface CatPeerConfig {
   userId: number;
-  remoteUserId: number;
-  socket: Socket<ClientToServerEvents, ServerToClientEvents>;
 }
 
 export class CatPeer {
   private pc: RTCPeerConnection;
   private socket: Socket<ClientToServerEvents, ServerToClientEvents>;
-  remoteId: number;
-  currentId: number;
   private makingOffer = false;
   private ignoreOffer = false;
+  currentId: number;
+  remoteId?: number;
   polite: boolean;
-  debug = true;
-  private channel?: RTCDataChannel;
+  debug = false;
 
   constructor(config: CatPeerConfig) {
     // Setup
     this.currentId = config.userId;
-    this.remoteId = config.remoteUserId;
-    this.polite = this.currentId > this.remoteId;
-    this.socket = config.socket;
-
+    // FIXME: CHANGE POLITENESS
+    this.polite = true;
+    this.socket = getSocket();
+    console.log('CREATED PEER CONNECTION');
     this.log(`⚡️ Created peer connection`);
     this.pc = new RTCPeerConnection();
     // Events
@@ -41,14 +40,7 @@ export class CatPeer {
       'iceconnectionstatechange',
       this.handleIceConnectionStateChange
     );
-    this.pc.addEventListener('datachannel', this.handleDataChannel);
   }
-
-  /**
-  |--------------------------------------------------
-  | DATA CHANNEL
-  |--------------------------------------------------
-  */
 
   private log(message?: unknown, ...optionalParams: unknown[]) {
     if (!this.debug) return;
@@ -56,56 +48,25 @@ export class CatPeer {
     console.log(message, ...optionalParams);
   }
 
-  private handleDataChannel = (e: RTCDataChannelEvent) => {
-    this.channel = e.channel;
-    this.log(`⚡️ Recieved data channel ${e.channel.label}`);
-    this.registerHandlers(this.channel);
-  };
-
-  private handleDataChannelOpen = (channel: RTCDataChannel) => (e: Event) => {
-    this.log(`⚡️ Data channel open ${channel.label}`);
-  };
-
-  private handleDataChannelClose = (channel: RTCDataChannel) => (e: Event) => {
-    this.log(`⚡️ Data channel closed ${channel.label}`);
-  };
-
-  private handleDataChannelMessage =
-    (channel: RTCDataChannel) => (ev: MessageEvent) => {
-      this.log(`⚡️ Got message on channel ${channel.label}: ${ev.data}`);
-    };
-
-  private createDataChannel = (label: string) => {
-    this.channel = this.pc.createDataChannel(label);
-    return this.channel;
-  };
-
-  private registerHandlers = (channel: RTCDataChannel) => {
-    channel.addEventListener('message', this.handleDataChannelMessage(channel));
-    channel.addEventListener('open', this.handleDataChannelOpen(channel));
-    channel.addEventListener('close', this.handleDataChannelClose(channel));
-  };
-
-  sendMessage = (data: any) => {
-    this.channel?.send(data);
-  };
-
   /**
   |--------------------------------------------------
   | MAIN API
   |--------------------------------------------------
   */
 
-  start = async () => {
+  start = async (remoteId: number) => {
+    this.remoteId = remoteId;
     const { localStream, localTracks } = await this.getUserMedia();
-    const channel = this.createDataChannel('MESSAGES');
-    this.registerHandlers(channel);
     this.addTracksToPeerConnection(localStream, localTracks);
     await this.createOffer();
   };
 
-  private stop = () => {
+  stop = () => {
     this.pc.restartIce();
+  };
+
+  destroy = () => {
+    this.pc.close();
   };
 
   /**
@@ -156,10 +117,8 @@ export class CatPeer {
     try {
       this.makingOffer = true;
       await this.pc.setLocalDescription();
-      this.socket.emit(Events.WebRtc, {
+      this.sendSignalMessage({
         type: 'offer',
-        fromUserId: this.currentId,
-        toUserId: this.remoteId,
         payload: this.pc.localDescription,
       });
     } catch (err) {
@@ -190,27 +149,18 @@ export class CatPeer {
 
     if (desc.type === 'offer') {
       this.log(`⚡️ Sending offer`);
-      this.socket.emit(Events.WebRtc, {
-        type: 'offer',
-        fromUserId: this.currentId,
-        toUserId: this.remoteId,
-        payload: description,
-      });
+      this.sendSignalMessage({ type: 'offer', payload: description });
     }
 
     if (desc.type === 'answer') {
       this.log(`⚡️ Sending answer`);
-      this.socket.emit(Events.WebRtc, {
-        type: 'answer',
-        fromUserId: this.currentId,
-        toUserId: this.remoteId,
-        payload: description,
-      });
+      this.sendSignalMessage({ type: 'answer', payload: description });
     }
   };
 
   private setRemoteDescription = (desc: RTCSessionDescriptionInit) => {
     this.log(`⚡️ Setted remote description`);
+    if (this.pc.currentRemoteDescription) return;
     this.pc.setRemoteDescription(new RTCSessionDescription(desc));
   };
 
@@ -220,14 +170,28 @@ export class CatPeer {
     this.pc.addIceCandidate(new RTCIceCandidate(candidate));
   };
 
+  private sendSignalMessage = (
+    message: Pick<RTCSignalMessage, 'payload' | 'type'>
+  ) => {
+    if (!this.remoteId) {
+      this.log('⚡️ No remote id found 😔');
+      return;
+    }
+
+    this.socket.emit(Events.WebRtc, {
+      toUserId: this.remoteId,
+      fromUserId: this.currentId,
+      type: message.type,
+      payload: message.payload,
+    });
+  };
+
   private handleIceCandidate = (ev: RTCPeerConnectionIceEvent) => {
     if (!ev.candidate) return;
     this.log(`⚡️ Sending ice candidate to remote peer`);
 
-    this.socket.emit(Events.WebRtc, {
+    this.sendSignalMessage({
       type: 'candidate',
-      fromUserId: this.currentId,
-      toUserId: this.remoteId,
       payload: ev.candidate.toJSON(),
     });
   };
@@ -250,7 +214,8 @@ export class CatPeer {
         break;
       }
       case 'offer': {
-        this.log(`⚡️ Got offer`);
+        this.log(`⚡️ Got offer from ${message.fromUserId}`);
+        this.remoteId = message.fromUserId;
         const offerDesc = message.payload as RTCSessionDescriptionInit;
         this.setRemoteDescription(offerDesc);
         const { localStream, localTracks } = await this.getUserMedia();

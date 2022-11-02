@@ -1,7 +1,4 @@
-import { getSocket } from '@catstack/catwatch/data-access';
 import { UserProfile } from '@catstack/catwatch/types';
-import { useCatPeer } from '@catstack/shared/rtc';
-import { Button } from '@catstack/shared/vanilla';
 
 import { useRoom } from '../hooks/use-room';
 
@@ -26,9 +23,6 @@ export interface UsersListContainerProps {
 export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   const { user, users, isLoading, isError } = useRoom({ roomId });
 
-  const pc = useCatPeer({ id: user.id, remoteId: 2, socket: getSocket() });
-  const call = async () => await pc.start();
-
   if (isError) return <h1>Something went wrong</h1>;
 
   if (isLoading) return <h1>Loading</h1>;
@@ -37,7 +31,7 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
 
   return (
     <div>
-      <Button onClick={call}>Call</Button>
+      <h1 style={{ fontWeight: 600 }}>Logged in as {user.username}</h1>
       <UserList users={users} />
     </div>
   );

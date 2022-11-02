@@ -9,15 +9,8 @@ generator client {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  username  String    @unique
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  username  String   @unique
   password  String
-  Message   Message[]
-}
-
-model Message {
-  id     Int  @id @default(dbgenerated("message"))
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
 }

@@ -1,11 +1,12 @@
+/* eslint-disable @nrwl/nx/enforce-module-boundaries */
 import { useEffect } from 'react';
 
 import {
   useGetRoomUsersQuery,
   useLeaveRoomMutation,
   useJoinRoomMutation,
-  useAppSelector,
 } from '@catstack/catwatch/data-access';
+import { useAppSelector } from '@catstack/catwatch/store';
 import { selectUser } from '@catstack/catwatch/features/auth';
 import { UserProfile } from '@catstack/catwatch/types';
 

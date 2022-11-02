@@ -25,6 +25,7 @@ specifiers:
   '@nrwl/react': 15.0.3
   '@nrwl/web': 15.0.3
   '@nrwl/workspace': 15.0.3
+  '@prisma/client': ^4.5.0
   '@reduxjs/toolkit': ^1.8.6
   '@swc/core': ^1.2.173
   '@swc/jest': 0.2.20
@@ -99,6 +100,7 @@ dependencies:
   '@nestjs/platform-socket.io': 9.1.6_vzp54junx56nuwta7cdfyezrwy
   '@nestjs/websockets': 9.1.6_q7oeefvfo2joyojxllcrmxhtve
   '@nrwl/next': 15.0.3_ncgud2zksmcycsxnvpen6te2aq
+  '@prisma/client': 4.5.0_prisma@4.5.0
   '@reduxjs/toolkit': 1.8.6_kuo2ie247izvzll3jejufdtq3q
   '@types/express': 4.17.14
   class-variance-authority: 0.2.4_typescript@4.8.4
@@ -2908,10 +2910,27 @@ packages:
       source-map: 0.7.4
       webpack: 5.74.0_@swc+core@1.3.11
 
+  /@prisma/client/4.5.0_prisma@4.5.0:
+    resolution: {integrity: sha512-B2cV0OPI1smhdYUxsJoLYQLoMlLH06MUxgFUWQnHodGMX98VRVXKmQE/9OcrTNkqtke5RC+YU24Szxd04tZA2g==}
+    engines: {node: '>=14.17'}
+    requiresBuild: true
+    peerDependencies:
+      prisma: '*'
+    peerDependenciesMeta:
+      prisma:
+        optional: true
+    dependencies:
+      '@prisma/engines-version': 4.5.0-43.0362da9eebca54d94c8ef5edd3b2e90af99ba452
+      prisma: 4.5.0
+    dev: false
+
+  /@prisma/engines-version/4.5.0-43.0362da9eebca54d94c8ef5edd3b2e90af99ba452:
+    resolution: {integrity: sha512-o7LyVx8PPJBLrEzLl6lpxxk2D5VnlM4Fwmrbq0NoT6pr5aa1OuHD9ZG+WJY6TlR/iD9bhmo2LNcxddCMr5Rv2A==}
+    dev: false
+
   /@prisma/engines/4.5.0:
     resolution: {integrity: sha512-4t9ir2SbQQr/wMCNU4YpHWp5hU14J2m3wHUZnGJPpmBF8YtkisxyVyQsKd1e6FyLTaGq8LOLhm6VLYHKqKNm+g==}
     requiresBuild: true
-    dev: true
 
   /@reduxjs/toolkit/1.8.6_kuo2ie247izvzll3jejufdtq3q:
     resolution: {integrity: sha512-4Ia/Loc6WLmdSOzi7k5ff7dLK8CgG2b8aqpLsCAJhazAzGdp//YBUSaj0ceW6a3kDBDNRrq5CRwyCS0wBiL1ig==}
@@ -9373,7 +9392,6 @@ packages:
     requiresBuild: true
     dependencies:
       '@prisma/engines': 4.5.0
-    dev: true
 
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
