@@ -1,5 +1,5 @@
 /* eslint-disable @nrwl/nx/enforce-module-boundaries */
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Peer, { SignalData } from 'simple-peer';
 
 import { useUserMedia } from '@catstack/shared/hooks';
@@ -11,9 +11,10 @@ import {
   SignalMessage,
   UserProfile,
 } from '@catstack/catwatch/types';
+import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
 import { useAppSelector } from '@catstack/catwatch/store';
 import { selectUser } from '@catstack/catwatch/features/auth';
-import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
+import { Button, Input } from '@catstack/shared/vanilla';
 
 export const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -48,13 +49,13 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
         config: SERVERS,
         stream,
       });
-      pc.on('signal', (signal) => {
+      pc.on('signal', (signal) =>
         socket.emit(Events.SendingSignal, {
           toUserId: calleeId,
           fromUserId: callerId,
           signal,
-        });
-      });
+        })
+      );
 
       pc.on('stream', (stream) => {
         console.log('Got remote stream', stream);
@@ -63,6 +64,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       });
       pc.on('connect', handlePeerConnection('Initiator'));
       pc.on('error', handlerError);
+      pc.on('data', handleDataChannelMessage);
       return pc;
     },
     [getMedia, socket]
@@ -94,6 +96,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       });
       pc.on('error', handlerError);
       pc.on('connect', handlePeerConnection('Listener'));
+      pc.on('data', handleDataChannelMessage);
       pc.signal(incomingSignal);
 
       return pc;
@@ -205,9 +208,75 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     destroyConnection,
   ]);
 
+  const handleDataChannelMessage = (channelMessage: Uint8Array) => {
+    const decoded = new TextDecoder('utf-8').decode(channelMessage);
+    console.log('⚡️ Got message from channel', decoded);
+  };
+
+  const handleSendMessage = (message: string) => {
+    const peers = peersRef.current;
+
+    Object.values(peers).forEach((peer) => peer.send(message));
+  };
+
   return (
     <div className="p-8 bg-white rounded-lg">
-      <video ref={videoRef} autoPlay controls />
+      <div className="flex flex-col gap-8">
+        <ChatWindowContainer onMessageSend={handleSendMessage} />
+        <video ref={videoRef} autoPlay controls />
+      </div>
     </div>
+  );
+};
+
+export interface ChatWindowContainerProps {
+  onMessageSend: (message: string) => void;
+}
+
+const ChatWindowContainer = (props: ChatWindowContainerProps) => {
+  const [messages, setMessages] = useState<string[]>([]);
+
+  const handleSendMessage = (message: string) => {
+    setMessages((prev) => [...prev, message]);
+    props.onMessageSend(message);
+  };
+
+  return (
+    <>
+      <ChatWindow messages={messages} />
+      <SendMessageForm onSendMessage={handleSendMessage} />
+    </>
+  );
+};
+
+export interface SendMessageFormProps {
+  onSendMessage: (message: string) => void;
+}
+
+const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
+  const [message, setMessage] = useState('');
+
+  return (
+    <div className="flex w-full gap-4">
+      <Input
+        label="Send message"
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <Button onClick={() => onSendMessage(message)}>Send</Button>
+    </div>
+  );
+};
+
+export interface ChatWindowProps {
+  messages: string[];
+}
+
+const ChatWindow = ({ messages }: ChatWindowProps) => {
+  return (
+    <ul className="flex flex-col gap-4">
+      {messages.map((message) => (
+        <li>{message}</li>
+      ))}
+    </ul>
   );
 };

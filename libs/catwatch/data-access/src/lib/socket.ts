@@ -20,9 +20,9 @@ export const createRoomQueryFn = async () => {
   const socket = getSocket();
 
   socket.emit(ClientEvents.CreateRoom);
-  const roomId = await new Promise<string>((resolve) =>
+  const createdRoomId = await new Promise<string>((resolve) =>
     socket.once(ServerEvents.RoomCreated, resolve)
   );
 
-  return { data: roomId };
+  return { data: createdRoomId };
 };
