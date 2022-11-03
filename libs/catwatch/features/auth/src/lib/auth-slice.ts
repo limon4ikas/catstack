@@ -1,8 +1,9 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 
 import { UserProfile } from '@catstack/catwatch/types';
-import { AppState } from '@catstack/catwatch/store';
 import { catWatchApi } from '@catstack/catwatch/data-access';
+
+export const AUTH_SLICE_NAME = 'auth';
 
 export interface AuthSliceState {
   user: UserProfile | null;
@@ -13,7 +14,7 @@ const initialState: AuthSliceState = {
 };
 
 export const authSlice = createSlice({
-  name: 'auth',
+  name: AUTH_SLICE_NAME,
   initialState,
   reducers: {},
   extraReducers(builder) {
@@ -26,4 +27,18 @@ export const authSlice = createSlice({
   },
 });
 
-export const selectUser = (state: AppState) => state.auth.user;
+export const getAuthState = (state: {
+  [AUTH_SLICE_NAME]: AuthSliceState;
+}): AuthSliceState => {
+  return state[AUTH_SLICE_NAME];
+};
+
+export const authActions = authSlice.actions;
+
+export const selectUser = createSelector(getAuthState, (state) => state.user);
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+export const selectUserId = createSelector(selectUser, (state) => state!.id);
+export const selectUsername = createSelector(
+  selectUser,
+  (state) => state?.username
+);

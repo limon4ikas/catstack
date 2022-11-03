@@ -1,30 +1,26 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { AppState } from '@catstack/catwatch/store';
-import { userJoined, userLeft } from '@catstack/catwatch/actions';
 import { UserProfile } from '@catstack/catwatch/types';
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { catWatchApi } from '@catstack/catwatch/data-access';
+import { userJoined, userLeft } from '@catstack/catwatch/actions';
+
+export const ROOM_SLICE_NAME = 'room';
 
 export interface RoomSliceState {
-  lastJoinedUser: UserProfile | null;
   participants: Record<number, UserProfile>;
 }
 
 const initialState: RoomSliceState = {
-  lastJoinedUser: null,
   participants: {},
 };
 
 export const roomSlice = createSlice({
-  name: 'room',
+  name: ROOM_SLICE_NAME,
   initialState,
   reducers: {},
   extraReducers(builder) {
     builder.addMatcher(userJoined.match, (state, action) => {
       const user = action.payload;
-      state.lastJoinedUser = user;
       state.participants[action.payload.id] = user;
     });
     builder.addMatcher(userLeft.match, (state, action) => {
@@ -42,6 +38,19 @@ export const roomSlice = createSlice({
   },
 });
 
-export const selectLastJoinedUser = (state: AppState) => {
-  return state.room.lastJoinedUser;
-};
+export const roomActions = roomSlice.actions;
+export const roomReducer = roomSlice.reducer;
+
+export const getRoomState = (state: { [ROOM_SLICE_NAME]: RoomSliceState }) =>
+  state[ROOM_SLICE_NAME];
+
+export const getRoomParticipants = createSelector(
+  getRoomState,
+  (state) => state.participants
+);
+
+export const getParticipant = createSelector(
+  getRoomParticipants,
+  (id: number) => id,
+  (state, id) => state[id]
+);

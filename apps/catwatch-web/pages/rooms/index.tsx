@@ -5,49 +5,50 @@ import { useRouter } from 'next/router';
 import { useCopyToClipboard } from '@catstack/shared/hooks';
 import { useCreateRoomMutation } from '@catstack/catwatch/data-access';
 import { withAuth } from '@catstack/catwatch/features/auth';
-import { Button, Input, Layout, toast } from '@catstack/shared/vanilla';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  Input,
+  Layout,
+  toast,
+} from '@catstack/shared/vanilla';
 
-export interface JoinRoomFormProps {
-  onJoinRoomSubmit: (roomId: string) => void;
-}
-
-const JoinRoomForm = (props: JoinRoomFormProps) => {
+const JoinRoomForm = () => {
+  const router = useRouter();
   const [roomId, setRoomId] = useState('1');
 
-  const handleSubmit = () => props.onJoinRoomSubmit(roomId);
-
-  return (
-    <div className="flex items-center gap-4">
-      <Input
-        label="Join room"
-        type="text"
-        placeholder="Room ID"
-        onChange={(e) => setRoomId(e.target.value)}
-        value={roomId}
-      />
-      <Button onClick={handleSubmit}>Join room</Button>
-    </div>
-  );
-};
-
-const JoinRoomContainer = () => {
-  const router = useRouter();
-  const handleJoinRoomClick = async (roomId: string) => {
+  const handleJoinRoomClick = async () => {
     router.push(`rooms/${roomId}`);
   };
 
-  return <JoinRoomForm onJoinRoomSubmit={handleJoinRoomClick} />;
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Join room</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <div className="flex items-center gap-4">
+          <Input
+            label="Join room"
+            type="text"
+            placeholder="Room ID"
+            onChange={(e) => setRoomId(e.target.value)}
+            value={roomId}
+          />
+          <Button onClick={handleJoinRoomClick}>Join</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export interface CreateRoomFormProps {
   handleCreateRoomClick: () => void;
 }
 
-const CreateRoomForm = (props: CreateRoomFormProps) => {
-  return <Button onClick={props.handleCreateRoomClick}>Create room</Button>;
-};
-
-const CreateRoomContainer = () => {
+const CreateRoom = () => {
   const router = useRouter();
   const [createRoom] = useCreateRoomMutation();
   const { copy } = useCopyToClipboard();
@@ -65,15 +66,15 @@ const CreateRoomContainer = () => {
     router.push(`rooms/${roomId}`);
   };
 
-  return <CreateRoomForm handleCreateRoomClick={handleCreateRoomClick} />;
+  return <Button onClick={handleCreateRoomClick}>Create room</Button>;
 };
 
 const Rooms: NextPage = () => {
   return (
     <Layout header="Rooms">
-      <div className="flex flex-col gap-4 p-6 bg-white rounded-lg">
-        <JoinRoomContainer />
-        <CreateRoomContainer />
+      <div className="flex gap-4 p-6 bg-white rounded-lg">
+        <JoinRoomForm />
+        <CreateRoom />
       </div>
     </Layout>
   );

@@ -1,5 +1,5 @@
-/* eslint-disable @nrwl/nx/enforce-module-boundaries */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import Peer, { SignalData } from 'simple-peer';
 
 import { useUserMedia } from '@catstack/shared/hooks';
@@ -12,8 +12,7 @@ import {
   UserProfile,
 } from '@catstack/catwatch/types';
 import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
-import { useAppSelector } from '@catstack/catwatch/store';
-import { selectUser } from '@catstack/catwatch/features/auth';
+import { selectUserId } from '@catstack/catwatch/features/auth';
 import { Button, Input } from '@catstack/shared/vanilla';
 
 export const SERVERS: RTCConfiguration = {
@@ -31,7 +30,7 @@ export interface VideoCallContainerProps {
 
 export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   const socket = useSocket();
-  const { id: userId } = useAppSelector(selectUser) as UserProfile;
+  const userId = useSelector(selectUserId);
   const peersRef = useRef<Record<string, Peer.Instance>>({});
   const videoRef = useRef<HTMLVideoElement>(null);
 

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { useLoginMutation } from '@catstack/catwatch/data-access';
 
 import { LoginForm, LoginFormValues } from './login-form';

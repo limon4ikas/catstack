@@ -6,8 +6,6 @@ import { catwatchConfig } from '@catstack/catwatch/config';
 import { UserProfile, ServerEvents } from '@catstack/catwatch/types';
 import { toast } from '@catstack/shared/vanilla';
 import { userAdapter, userJoined, userLeft } from '@catstack/catwatch/actions';
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { AppState } from '@catstack/catwatch/store';
 
 import { createRoomQueryFn, getSocket } from './socket';
 
@@ -49,7 +47,8 @@ export const catWatchApi = createApi({
         }
       ) {
         const socket = getSocket();
-        const currenUserId = (getState() as AppState).auth.user?.id;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const currenUserId = (getState() as any).auth.user?.id;
 
         if (!currenUserId) return;
 

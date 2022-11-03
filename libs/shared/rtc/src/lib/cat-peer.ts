@@ -1,4 +1,3 @@
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { getSocket } from '@catstack/catwatch/data-access';
 import {
   ClientToServerEvents,

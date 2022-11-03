@@ -1,10 +1,9 @@
-/* eslint-disable @nrwl/nx/enforce-module-boundaries */
-import { NextPage } from 'next';
 import { ReactNode, useEffect } from 'react';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
 
 import { useUserInfoQuery } from '@catstack/catwatch/data-access';
-import { useAppSelector } from '@catstack/catwatch/store';
 
 import { selectUser } from './auth-slice';
 
@@ -15,8 +14,8 @@ export interface WithAuthConfig {
 
 export const withAuth = (Component: NextPage) => (config?: WithAuthConfig) => {
   const AuthenticatedComponent = () => {
-    const user = useAppSelector(selectUser);
     const { data, error, isLoading } = useUserInfoQuery();
+    const user = useSelector(selectUser);
     const router = useRouter();
 
     useEffect(() => {
