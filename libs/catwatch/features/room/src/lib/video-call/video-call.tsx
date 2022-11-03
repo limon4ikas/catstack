@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { nanoid } from '@reduxjs/toolkit';
 import Peer, { SignalData } from 'simple-peer';
 
 import { useUserMedia } from '@catstack/shared/hooks';
@@ -7,6 +8,7 @@ import { useSocket } from '@catstack/catwatch/data-access';
 import {
   ClientEvents,
   Events,
+  RoomMessage,
   ServerEvents,
   SignalMessage,
   UserProfile,
@@ -14,6 +16,9 @@ import {
 import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
 import { selectUserId } from '@catstack/catwatch/features/auth';
 import { Button, Input } from '@catstack/shared/vanilla';
+
+import { getAllRoomMessages, getUserById } from '../room-slice';
+import { messageAdded } from '@catstack/catwatch/actions';
 
 export const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -30,11 +35,32 @@ export interface VideoCallContainerProps {
 
 export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   const socket = useSocket();
+  const dispatch = useDispatch();
   const userId = useSelector(selectUserId);
   const peersRef = useRef<Record<string, Peer.Instance>>({});
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { getMedia } = useUserMedia();
+
+  const handleDataChannelMessage = useCallback(
+    (channelMessage: Uint8Array) => {
+      const decoded = new TextDecoder('utf-8').decode(channelMessage);
+      console.log('⚡️ Got message from channel', decoded);
+      try {
+        const message: RoomMessage = JSON.parse(decoded);
+        dispatch(messageAdded(message));
+      } catch {
+        //
+      }
+    },
+    [dispatch]
+  );
+
+  const handleSendMessage = (message: RoomMessage) => {
+    const peers = peersRef.current;
+
+    Object.values(peers).forEach((peer) => peer.send(JSON.stringify(message)));
+  };
 
   const createInitiatorPeer = useCallback(
     async (callerId: number, calleeId: number) => {
@@ -57,7 +83,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       );
 
       pc.on('stream', (stream) => {
-        console.log('Got remote stream', stream);
+        console.log('⚡️ Got remote stream', stream);
         if (!videoRef.current) return;
         videoRef.current.srcObject = stream;
       });
@@ -66,7 +92,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       pc.on('data', handleDataChannelMessage);
       return pc;
     },
-    [getMedia, socket]
+    [getMedia, handleDataChannelMessage, socket]
   );
 
   const createListenerPeer = useCallback(
@@ -89,7 +115,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
         });
       });
       pc.on('stream', (stream) => {
-        console.log('Got remote stream', stream);
+        console.log('⚡️ Got remote stream', stream);
         if (!videoRef.current) return;
         videoRef.current.srcObject = stream;
       });
@@ -100,7 +126,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
 
       return pc;
     },
-    [getMedia, socket, userId]
+    [getMedia, handleDataChannelMessage, socket, userId]
   );
 
   const handleAllUsersEvent = useCallback(
@@ -207,27 +233,10 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     destroyConnection,
   ]);
 
-  const [messages, setMessages] = useState<string[]>([]);
-
-  const handleDataChannelMessage = (channelMessage: Uint8Array) => {
-    const decoded = new TextDecoder('utf-8').decode(channelMessage);
-    console.log('⚡️ Got message from channel', decoded);
-    setMessages((prev) => [...prev, decoded]);
-  };
-
-  const handleSendMessage = (message: string) => {
-    const peers = peersRef.current;
-
-    Object.values(peers).forEach((peer) => peer.send(message));
-    setMessages((prev) => [...prev, message]);
-  };
-
   return (
     <div className="p-8 bg-white rounded-lg">
       <div className="flex flex-col gap-8">
-        <ChatWindow messages={messages} />
-        <SendMessageForm onSendMessage={handleSendMessage} />
-        <video ref={videoRef} autoPlay controls />
+        <ChatWindowContainer onSendMessage={handleSendMessage} />
       </div>
     </div>
   );
@@ -252,15 +261,48 @@ const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
 };
 
 export interface ChatWindowProps {
-  messages: string[];
+  messages: RoomMessage[];
 }
 
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
     <ul className="flex flex-col gap-4">
       {messages.map((message, idx) => (
-        <li key={idx}>{message}</li>
+        <li key={idx}>
+          {message.username}: {message.text}
+        </li>
       ))}
     </ul>
+  );
+};
+
+export interface ChatWindowContainerProps {
+  onSendMessage: (message: RoomMessage) => void;
+}
+
+export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
+  const dispatch = useDispatch();
+  const userId = useSelector(selectUserId);
+  const currentUser = useSelector(getUserById(userId));
+  const messages = useSelector(getAllRoomMessages);
+
+  const handleSendMessage = (text: string) => {
+    if (!currentUser) return;
+
+    const message: RoomMessage = {
+      id: nanoid(),
+      text,
+      timestamp: new Date().toISOString(),
+      username: currentUser.username,
+    };
+    props.onSendMessage(message);
+    dispatch(messageAdded(message));
+  };
+
+  return (
+    <div>
+      <ChatWindow messages={messages} />
+      <SendMessageForm onSendMessage={handleSendMessage} />
+    </div>
   );
 };

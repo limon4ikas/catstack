@@ -34,10 +34,12 @@ export const getAuthState = (state: {
 };
 
 export const authActions = authSlice.actions;
+export const authReducer = authSlice.reducer;
 
 export const selectUser = createSelector(getAuthState, (state) => state.user);
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 export const selectUserId = createSelector(selectUser, (state) => state!.id);
+
 export const selectUsername = createSelector(
   selectUser,
   (state) => state?.username

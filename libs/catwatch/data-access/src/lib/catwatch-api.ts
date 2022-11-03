@@ -9,8 +9,10 @@ import { userAdapter, userJoined, userLeft } from '@catstack/catwatch/actions';
 
 import { createRoomQueryFn, getSocket } from './socket';
 
+export const CATWATCH_API_NAME = 'catWatchApi';
+
 export const catWatchApi = createApi({
-  reducerPath: 'catWatchApi',
+  reducerPath: CATWATCH_API_NAME,
   baseQuery: fetchBaseQuery({
     baseUrl: catwatchConfig.baseUrl,
     credentials: 'include',
@@ -86,3 +88,6 @@ export const {
   useGetRoomUsersQuery,
   useLazyGetRoomUsersQuery,
 } = catWatchApi;
+
+export const catWatchApiReducer = catWatchApi.reducer;
+export const catWatchApiMiddleware = catWatchApi.middleware;

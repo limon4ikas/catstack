@@ -1,56 +1,125 @@
-import { createSelector, createSlice } from '@reduxjs/toolkit';
+import {
+  createSelector,
+  createSlice,
+  EntityId,
+  EntityState,
+} from '@reduxjs/toolkit';
 
-import { UserProfile } from '@catstack/catwatch/types';
+import { RoomMessage, UserProfile } from '@catstack/catwatch/types';
 import { catWatchApi } from '@catstack/catwatch/data-access';
-import { userJoined, userLeft } from '@catstack/catwatch/actions';
+import {
+  messageAdded,
+  messageDeleted,
+  messagesAdapter,
+  userAdapter,
+  userJoined,
+  userLeft,
+} from '@catstack/catwatch/actions';
 
-export const ROOM_SLICE_NAME = 'room';
+/**
+|--------------------------------------------------
+| TYPES
+|--------------------------------------------------
+*/
+
+export const ROOM_SLICE_NAME = 'room' as const;
+
+export interface AppStateWithRoom {
+  [ROOM_SLICE_NAME]: RoomSliceState;
+}
 
 export interface RoomSliceState {
-  participants: Record<number, UserProfile>;
+  participants: EntityState<UserProfile>;
+  messages: EntityState<RoomMessage>;
 }
 
 const initialState: RoomSliceState = {
-  participants: {},
+  participants: userAdapter.getInitialState(),
+  messages: messagesAdapter.getInitialState(),
 };
+
+/**
+|--------------------------------------------------
+| SLICE
+|--------------------------------------------------
+*/
 
 export const roomSlice = createSlice({
   name: ROOM_SLICE_NAME,
   initialState,
   reducers: {},
   extraReducers(builder) {
-    builder.addMatcher(userJoined.match, (state, action) => {
-      const user = action.payload;
-      state.participants[action.payload.id] = user;
+    builder.addCase(messageAdded, (state, action) => {
+      messagesAdapter.addOne(state.messages, action.payload);
     });
-    builder.addMatcher(userLeft.match, (state, action) => {
-      const userId = action.payload.id;
-      delete state.participants[userId];
+    builder.addCase(messageDeleted, (state, action) => {
+      messagesAdapter.removeOne(state.messages, action.payload);
     });
     builder.addMatcher(
       catWatchApi.endpoints.getRoomUsers.matchFulfilled,
       (state, action) => {
-        Object.values(action.payload.entities)
-          .filter((user): user is UserProfile => !!user)
-          .forEach((user) => (state.participants[user.id] = user));
+        state.participants = action.payload;
       }
     );
+    builder.addMatcher(userJoined.match, (state, action) => {
+      userAdapter.addOne(state.participants, action.payload);
+    });
+    builder.addMatcher(userLeft.match, (state, action) => {
+      userAdapter.removeOne(state.participants, action.payload.id);
+    });
   },
 });
 
 export const roomActions = roomSlice.actions;
 export const roomReducer = roomSlice.reducer;
 
-export const getRoomState = (state: { [ROOM_SLICE_NAME]: RoomSliceState }) =>
-  state[ROOM_SLICE_NAME];
+/**
+|--------------------------------------------------
+| SELECTORS
+|--------------------------------------------------
+*/
+
+// General
+export const getRoomState = (state: AppStateWithRoom) => {
+  return state[ROOM_SLICE_NAME];
+};
 
 export const getRoomParticipants = createSelector(
   getRoomState,
   (state) => state.participants
 );
 
-export const getParticipant = createSelector(
-  getRoomParticipants,
-  (id: number) => id,
-  (state, id) => state[id]
+export const getRoomMessages = createSelector(
+  getRoomState,
+  (state) => state.messages
 );
+
+const roomUsersSelectors = userAdapter.getSelectors(getRoomParticipants);
+const roomMessagesSelectors = messagesAdapter.getSelectors(getRoomMessages);
+
+// Room
+export const getAllUsers = roomUsersSelectors.selectAll;
+export const getRoomUsers = roomUsersSelectors.selectEntities;
+export const getRoomUserIds = roomUsersSelectors.selectIds;
+export const getTotalUsers = roomUsersSelectors.selectTotal;
+
+export const getUserById = (id: EntityId) => {
+  return createSelector(
+    (state: AppStateWithRoom) => state,
+    (state) => roomUsersSelectors.selectById(state, id)
+  );
+};
+
+// Messages
+export const getAllRoomMessages = roomMessagesSelectors.selectAll;
+export const getRoomMessageById = roomMessagesSelectors.selectById;
+export const getMessages = roomMessagesSelectors.selectEntities;
+export const getMessagesIds = roomMessagesSelectors.selectIds;
+export const getTotalMessages = roomMessagesSelectors.selectTotal;
+
+export const getMessageById = (id: EntityId) => {
+  return createSelector(
+    (state: AppStateWithRoom) => state,
+    (state) => getRoomMessageById(state, id)
+  );
+};
