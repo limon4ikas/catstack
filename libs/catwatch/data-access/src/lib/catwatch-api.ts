@@ -67,12 +67,14 @@ export const catWatchApi = createApi({
 
         try {
           await cacheDataLoaded;
-          socket.on(ServerEvents.RoomLeft, onRoomLeaveListener);
+          socket.on(ServerEvents.onRoomJoined, onRoomJoinListener);
+          socket.on(ServerEvents.onRoomLeft, onRoomLeaveListener);
         } catch {
           //
         }
         await cacheEntryRemoved;
-        socket.off(ServerEvents.RoomLeft, onRoomLeaveListener);
+        socket.off(ServerEvents.onRoomJoined, onRoomJoinListener);
+        socket.off(ServerEvents.onRoomLeft, onRoomLeaveListener);
       },
     }),
   }),

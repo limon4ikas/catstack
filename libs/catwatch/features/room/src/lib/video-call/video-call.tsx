@@ -1,6 +1,6 @@
 /* eslint-disable @nrwl/nx/enforce-module-boundaries */
 import { useCallback, useEffect, useRef } from 'react';
-import Peer from 'simple-peer';
+import Peer, { SignalData } from 'simple-peer';
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { useSocket } from '@catstack/catwatch/data-access';
@@ -47,7 +47,7 @@ export interface VideoCallContainerProps {
 export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   const socket = useSocket();
   const { id: userId } = useAppSelector(selectUser) as UserProfile;
-  const peersRef = useRef<Record<number, Peer.Instance>>({});
+  const peersRef = useRef<Record<string, Peer.Instance>>({});
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { getMedia } = useUserMedia();
@@ -82,7 +82,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   );
 
   const createListenerPeer = useCallback(
-    async (incomingSignal: Peer.SignalData, callerId: number) => {
+    async (incomingSignal: SignalData, callerId: number) => {
       console.log(`⚡️ Waiting for peer connection from ${callerId}`);
       const stream = await getMedia({ video: true });
 
@@ -158,10 +158,17 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   const destroyPeers = useCallback(() => {
     const peers = peersRef.current;
 
-    Object.entries(peers).forEach(([id, peer]) => {
-      console.log(`⚡️ Destroy connection from ${userId} to ${id}`);
-      peer.destroy();
-    });
+    const destroyConnection = (leftUserId: string) => {
+      const peers = peersRef.current;
+      console.log(`⚡️ Destroy connection from ${userId} to ${leftUserId}`);
+      if (!peers[leftUserId]) {
+        console.warn('⚡️ No connection for this user, please check');
+      }
+
+      peers[leftUserId].destroy();
+    };
+
+    Object.keys(peers).forEach(destroyConnection);
   }, [userId]);
 
   useEffect(() => {

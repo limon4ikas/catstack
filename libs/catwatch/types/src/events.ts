@@ -25,8 +25,11 @@ export const enum ClientEvents {
 export const enum ServerEvents {
   RoomCreated = 'room.create',
   RoomDeleted = 'room.delete',
-  RoomLeft = 'room.leave',
   RoomJoined = 'room.join',
+  RoomLeft = 'room.left',
+  // Events on client side
+  onRoomLeft = 'roomLeft',
+  onRoomJoined = 'roomJoined',
 }
 
 export const enum Events {
@@ -46,10 +49,12 @@ export interface SignalMessage {
 export interface ServerToClientEvents {
   [ServerEvents.RoomCreated]: (createdRoomId: string) => void;
   [ServerEvents.RoomDeleted]: (deletedRoomId: string) => void;
-  [ServerEvents.RoomJoined]: (joinedUser: SignalMessage) => void;
-  [ServerEvents.RoomLeft]: (leftUser: UserProfile) => void;
+  [ServerEvents.onRoomLeft]: (leftUser: UserProfile) => void;
+  [ServerEvents.onRoomJoined]: (joinedUser: UserProfile) => void;
+
+  // Signaling
   [Events.AllUsers]: (users: UserProfile[]) => void;
-  [Events.WebRtc]: (data: RTCSignalMessage) => void;
+  [ServerEvents.RoomJoined]: (joinedUser: SignalMessage) => void;
   [Events.RecievingReturnedSignal]: (data: SignalMessage) => void;
 }
 
@@ -58,6 +63,7 @@ export interface ClientToServerEvents {
   [ClientEvents.DeleteRoom]: (deletedRoomId: string) => void;
   [ClientEvents.JoinRoom]: (roomToJoinId: string) => void;
   [ClientEvents.LeaveRoom]: (roomToLeaveId: string) => void;
+  // Signaling
   [Events.SendingSignal]: (data: SignalMessage) => void;
   [Events.ReturningSignal]: (data: SignalMessage) => void;
 }

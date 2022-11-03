@@ -91,6 +91,7 @@ export class SignalingGateway
       .filter((user) => user.id !== client.user.id);
 
     this.server.to(roomId).emit(Events.AllUsers, usersInRoom);
+    this.server.to(roomId).emit(ServerEvents.onRoomJoined, client.user);
   }
 
   @SubscribeMessage(ClientEvents.LeaveRoom)
@@ -98,7 +99,7 @@ export class SignalingGateway
     this.logger.debug(`⚡️ ${client.user.username} left room ${roomId}`);
     client.leave(roomId);
     this.roomsService.leaveRoom(roomId, client.user.id);
-    this.server.to(roomId).emit(ServerEvents.RoomLeft, client.user);
+    this.server.to(roomId).emit(ServerEvents.onRoomLeft, client.user);
   }
 
   @SubscribeMessage(Events.SendingSignal)
