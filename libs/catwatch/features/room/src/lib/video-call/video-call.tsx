@@ -208,44 +208,29 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     destroyConnection,
   ]);
 
+  const [messages, setMessages] = useState<string[]>([]);
+
   const handleDataChannelMessage = (channelMessage: Uint8Array) => {
     const decoded = new TextDecoder('utf-8').decode(channelMessage);
     console.log('⚡️ Got message from channel', decoded);
+    setMessages((prev) => [...prev, decoded]);
   };
 
   const handleSendMessage = (message: string) => {
     const peers = peersRef.current;
 
     Object.values(peers).forEach((peer) => peer.send(message));
+    setMessages((prev) => [...prev, message]);
   };
 
   return (
     <div className="p-8 bg-white rounded-lg">
       <div className="flex flex-col gap-8">
-        <ChatWindowContainer onMessageSend={handleSendMessage} />
+        <ChatWindow messages={messages} />
+        <SendMessageForm onSendMessage={handleSendMessage} />
         <video ref={videoRef} autoPlay controls />
       </div>
     </div>
-  );
-};
-
-export interface ChatWindowContainerProps {
-  onMessageSend: (message: string) => void;
-}
-
-const ChatWindowContainer = (props: ChatWindowContainerProps) => {
-  const [messages, setMessages] = useState<string[]>([]);
-
-  const handleSendMessage = (message: string) => {
-    setMessages((prev) => [...prev, message]);
-    props.onMessageSend(message);
-  };
-
-  return (
-    <>
-      <ChatWindow messages={messages} />
-      <SendMessageForm onSendMessage={handleSendMessage} />
-    </>
   );
 };
 
@@ -274,8 +259,8 @@ export interface ChatWindowProps {
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
     <ul className="flex flex-col gap-4">
-      {messages.map((message) => (
-        <li>{message}</li>
+      {messages.map((message, idx) => (
+        <li key={idx}>{message}</li>
       ))}
     </ul>
   );
