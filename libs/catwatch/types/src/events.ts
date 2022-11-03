@@ -3,7 +3,7 @@
 
 import { SignalData } from 'simple-peer';
 
-import { UserProfile } from './auth';
+import { UserProfile } from './user';
 
 export interface InterServerEvents {}
 
