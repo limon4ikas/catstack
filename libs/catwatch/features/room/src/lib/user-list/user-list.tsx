@@ -1,7 +1,4 @@
-import { ChangeEvent, useState } from 'react';
-
 import { UserProfile } from '@catstack/catwatch/types';
-import { Input, toast } from '@catstack/shared/vanilla';
 
 import { useRoom } from '../hooks/use-room';
 
@@ -34,7 +31,7 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 style={{ fontWeight: 600 }}>Logged in as {user.username}</h1>
+      <h1 style={{ fontWeight: 600 }}>Logged in as {user?.username}</h1>
       <UserList users={users} />
     </div>
   );

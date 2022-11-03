@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { nanoid } from '@reduxjs/toolkit';
+import { nanoid, PayloadAction } from '@reduxjs/toolkit';
 import Peer, { SignalData } from 'simple-peer';
 
 import { useUserMedia } from '@catstack/shared/hooks';
@@ -43,12 +43,12 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
   const { getMedia } = useUserMedia();
 
   const handleDataChannelMessage = useCallback(
-    (channelMessage: Uint8Array) => {
-      const decoded = new TextDecoder('utf-8').decode(channelMessage);
+    (action: Uint8Array) => {
+      const decoded = new TextDecoder('utf-8').decode(action);
       console.log('⚡️ Got message from channel', decoded);
       try {
-        const message: RoomMessage = JSON.parse(decoded);
-        dispatch(messageAdded(message));
+        const action: PayloadAction<unknown> = JSON.parse(decoded);
+        dispatch(action);
       } catch {
         //
       }
@@ -56,10 +56,12 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     [dispatch]
   );
 
-  const handleSendMessage = (message: RoomMessage) => {
+  const handleSendMessage = (messageAction: PayloadAction<RoomMessage>) => {
     const peers = peersRef.current;
 
-    Object.values(peers).forEach((peer) => peer.send(JSON.stringify(message)));
+    Object.values(peers).forEach((peer) =>
+      peer.send(JSON.stringify(messageAction))
+    );
   };
 
   const createInitiatorPeer = useCallback(
@@ -277,7 +279,7 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
 };
 
 export interface ChatWindowContainerProps {
-  onSendMessage: (message: RoomMessage) => void;
+  onSendMessage: (message: PayloadAction<RoomMessage>) => void;
 }
 
 export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
@@ -295,12 +297,12 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
       timestamp: new Date().toISOString(),
       username: currentUser.username,
     };
-    props.onSendMessage(message);
+    props.onSendMessage(messageAdded(message));
     dispatch(messageAdded(message));
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-8">
       <ChatWindow messages={messages} />
       <SendMessageForm onSendMessage={handleSendMessage} />
     </div>
