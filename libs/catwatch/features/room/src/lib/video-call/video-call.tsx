@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import Peer, { SignalData } from 'simple-peer';
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import { useUserMedia } from '@catstack/shared/hooks';
 import { useSocket } from '@catstack/catwatch/data-access';
 import {
   ClientEvents,
@@ -11,9 +11,9 @@ import {
   SignalMessage,
   UserProfile,
 } from '@catstack/catwatch/types';
-
 import { useAppSelector } from '@catstack/catwatch/store';
 import { selectUser } from '@catstack/catwatch/features/auth';
+import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
 
 export const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -22,22 +22,6 @@ export const SERVERS: RTCConfiguration = {
     },
   ],
   iceCandidatePoolSize: 10,
-};
-
-const useUserMedia = () => {
-  const getMedia = useCallback(async (constraints?: MediaStreamConstraints) => {
-    return await navigator.mediaDevices.getUserMedia(constraints);
-  }, []);
-
-  return { getMedia };
-};
-
-const handlePeerConnection = (label: string) => () => {
-  console.log(`⚡️ ${label} from connection established`);
-};
-
-const handlerError = (error: Error) => {
-  console.warn(error.name, error.message);
 };
 
 export interface VideoCallContainerProps {
@@ -54,14 +38,17 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
 
   const createInitiatorPeer = useCallback(
     async (callerId: number, calleeId: number) => {
+      console.log(
+        `⚡️ Initiate peer connection to from ${calleeId} to ${calleeId}`
+      );
       const stream = await getMedia({ video: true });
-      const peer = new Peer({
+      const pc = new Peer({
         initiator: true,
         trickle: false,
         config: SERVERS,
         stream,
       });
-      peer.on('signal', (signal) => {
+      pc.on('signal', (signal) => {
         socket.emit(Events.SendingSignal, {
           toUserId: calleeId,
           fromUserId: callerId,
@@ -69,14 +56,14 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
         });
       });
 
-      peer.on('stream', (stream) => {
+      pc.on('stream', (stream) => {
         console.log('Got remote stream', stream);
         if (!videoRef.current) return;
         videoRef.current.srcObject = stream;
       });
-      peer.on('connect', handlePeerConnection('Initiator'));
-      peer.on('error', handlerError);
-      return peer;
+      pc.on('connect', handlePeerConnection('Initiator'));
+      pc.on('error', handlerError);
+      return pc;
     },
     [getMedia, socket]
   );
@@ -86,30 +73,30 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       console.log(`⚡️ Waiting for peer connection from ${callerId}`);
       const stream = await getMedia({ video: true });
 
-      const peer = new Peer({
+      const pc = new Peer({
         initiator: false,
         trickle: false,
         config: SERVERS,
         stream,
       });
 
-      peer.on('signal', (signal) => {
+      pc.on('signal', (signal) => {
         socket.emit(Events.ReturningSignal, {
           toUserId: callerId,
           fromUserId: userId,
           signal,
         });
       });
-      peer.on('stream', (stream) => {
+      pc.on('stream', (stream) => {
         console.log('Got remote stream', stream);
         if (!videoRef.current) return;
         videoRef.current.srcObject = stream;
       });
-      peer.on('error', handlerError);
-      peer.on('connect', handlePeerConnection('Listener'));
-      peer.signal(incomingSignal);
+      pc.on('error', handlerError);
+      pc.on('connect', handlePeerConnection('Listener'));
+      pc.signal(incomingSignal);
 
-      return peer;
+      return pc;
     },
     [getMedia, socket, userId]
   );
@@ -118,22 +105,21 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     (users: UserProfile[]) => {
       const peers = peersRef.current;
 
-      console.log('⚡️ Got all users from server on join', users);
-
-      if (!users.length) {
-        console.log('⚡️ No one in the room waiting for participants');
-      }
-      users.forEach(async (user) => {
+      const createConnection = async (user: UserProfile) => {
         if (user.id === userId || peers[user.id]) {
           console.log('⚡️ Skipping connection');
           return;
         }
         const peer = await createInitiatorPeer(userId, user.id);
-        console.log(
-          `⚡️ Initiate peer connection to from ${userId} to ${user.id}`
-        );
+
         peers[user.id] = peer;
-      });
+      };
+
+      if (!users.length) {
+        console.log('⚡️ No one in the room waiting for participants');
+      }
+
+      users.forEach(createConnection);
     },
     [createInitiatorPeer, userId]
   );
@@ -155,21 +141,38 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     peers[message.fromUserId]?.signal(message.signal);
   };
 
-  const destroyPeers = useCallback(() => {
-    const peers = peersRef.current;
-
-    const destroyConnection = (leftUserId: string) => {
+  const destroyConnection = useCallback(
+    (leftUserId: string | UserProfile) => {
       const peers = peersRef.current;
+
+      if (typeof leftUserId !== 'string') {
+        console.log(
+          `⚡️ Destroy connection from ${userId} to ${leftUserId.id}`
+        );
+
+        if (!peers[leftUserId.id]) {
+          console.warn('⚡️ No connection for this user, please check');
+        }
+        peers[leftUserId.id].destroy();
+        return;
+      }
+
       console.log(`⚡️ Destroy connection from ${userId} to ${leftUserId}`);
+
       if (!peers[leftUserId]) {
         console.warn('⚡️ No connection for this user, please check');
       }
 
       peers[leftUserId].destroy();
-    };
+    },
+    [userId]
+  );
+
+  const destroyPeers = useCallback(() => {
+    const peers = peersRef.current;
 
     Object.keys(peers).forEach(destroyConnection);
-  }, [userId]);
+  }, [destroyConnection]);
 
   useEffect(() => {
     (async () => {
@@ -177,6 +180,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       socket.on(Events.AllUsers, handleAllUsersEvent);
       socket.on(ServerEvents.RoomJoined, handleRoomJoinedEvent);
       socket.on(Events.RecievingReturnedSignal, handleRecievingReturnedSignal);
+      socket.on(ServerEvents.onRoomLeft, destroyConnection);
     })();
 
     return () => {
@@ -184,6 +188,8 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
       socket.off(Events.AllUsers, handleAllUsersEvent);
       socket.off(ServerEvents.RoomJoined, handleRoomJoinedEvent);
       socket.off(Events.RecievingReturnedSignal, handleRecievingReturnedSignal);
+      socket.off(ServerEvents.onRoomLeft, destroyConnection);
+
       destroyPeers();
     };
   }, [
@@ -196,6 +202,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     handleAllUsersEvent,
     handleRoomJoinedEvent,
     destroyPeers,
+    destroyConnection,
   ]);
 
   return (
