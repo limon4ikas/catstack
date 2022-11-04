@@ -3,6 +3,7 @@ import {
   createSlice,
   EntityId,
   EntityState,
+  PayloadAction,
 } from '@reduxjs/toolkit';
 
 import { RoomMessage, UserProfile } from '@catstack/catwatch/types';
@@ -24,6 +25,8 @@ import {
 
 export const ROOM_SLICE_NAME = 'room' as const;
 
+export type VideoState = 'play' | 'pause';
+
 export interface AppStateWithRoom {
   [ROOM_SLICE_NAME]: RoomSliceState;
 }
@@ -31,11 +34,15 @@ export interface AppStateWithRoom {
 export interface RoomSliceState {
   participants: EntityState<UserProfile>;
   messages: EntityState<RoomMessage>;
+  videoState: VideoState;
+  lastSeek: number | null;
 }
 
 const initialState: RoomSliceState = {
   participants: userAdapter.getInitialState(),
   messages: messagesAdapter.getInitialState(),
+  videoState: 'pause',
+  lastSeek: null,
 };
 
 /**
@@ -47,7 +54,19 @@ const initialState: RoomSliceState = {
 export const roomSlice = createSlice({
   name: ROOM_SLICE_NAME,
   initialState,
-  reducers: {},
+  reducers: {
+    play: (state, action: PayloadAction<number>) => {
+      state.videoState = 'play';
+      state.lastSeek = action.payload;
+    },
+    pause: (state, action: PayloadAction<number>) => {
+      state.videoState = 'pause';
+      state.lastSeek = action.payload;
+    },
+    seek: (state, action: PayloadAction<number>) => {
+      state.lastSeek = action.payload;
+    },
+  },
   extraReducers(builder) {
     builder.addCase(messageAdded, (state, action) => {
       messagesAdapter.addOne(state.messages, action.payload);
@@ -123,3 +142,18 @@ export const getMessageById = (id: EntityId) => {
     (state) => getRoomMessageById(state, id)
   );
 };
+
+export const getLastSeek = createSelector(
+  getRoomState,
+  (state) => state.lastSeek
+);
+export const getVideoState = createSelector(
+  getRoomState,
+  (state) => state.videoState
+);
+
+export const getVideoPlayerState = createSelector(
+  getLastSeek,
+  getVideoState,
+  (seek, videoState) => ({ seek, videoState })
+);

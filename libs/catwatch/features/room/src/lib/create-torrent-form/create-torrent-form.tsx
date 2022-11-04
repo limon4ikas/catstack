@@ -8,10 +8,10 @@ export const CreateTorrentForm = ({ onCreatedTorrent }: SeedFileFormProps) => {
   const handleFileChange = async (file: File) => {
     const WebTorrent = (await import('webtorrent')).default;
     const client = new WebTorrent();
-
-    client.seed(file, function (torrent) {
-      onCreatedTorrent(torrent.name, torrent.magnetURI, file);
-    });
+    onCreatedTorrent('', '', file);
+    // client.seed(file, function (torrent) {
+    //
+    // });
   };
 
   return <FileDropZone onFileDrop={handleFileChange} />;

@@ -1,95 +1,82 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Peer from 'simple-peer';
+import { SyntheticEvent, useEffect, useRef } from 'react';
+import { throttle } from 'lodash';
 
-import { Events, ClientEvents, ServerEvents } from '@catstack/catwatch/types';
-import { usePeersManager } from '@catstack/shared/rtc';
-import { useSocket } from '@catstack/catwatch/data-access';
+import { useRoomContext } from '../context';
+import { getVideoPlayerState, roomActions } from '../room-slice';
+import { useSelector } from 'react-redux';
 import { selectUserId } from '@catstack/catwatch/features/auth';
+
+const useVideoSync = () => {
+  const { send } = useRoomContext();
+  const ref = useRef<HTMLVideoElement>(null);
+  const { seek, videoState } = useSelector(getVideoPlayerState);
+  const userId = useSelector(selectUserId);
+
+  const handlePause = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+    const videoEl = ref.current;
+    if (!videoEl) return;
+
+    if (userId === 1) send(roomActions.pause(videoEl.currentTime));
+  };
+
+  const handlePlay = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+    const videoEl = ref.current;
+    if (!videoEl) return;
+
+    if (userId === 1) send(roomActions.play(videoEl.currentTime));
+  };
+
+  const handleSeeked = throttle(
+    (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+      const videoEl = ref.current;
+      if (!videoEl) return;
+
+      if (userId === 1) send(roomActions.seek(videoEl.currentTime));
+    },
+    500
+  );
+
+  const listeners = {
+    onPlay: handlePlay,
+    onPause: handlePause,
+    onSeeked: handleSeeked,
+  };
+
+  useEffect(() => {
+    const videoEl = ref.current;
+
+    if (!videoEl) return;
+
+    if (seek) videoEl.currentTime = seek;
+    if (videoState === 'play') videoEl.play();
+    if (videoState === 'pause') videoEl.pause();
+  }, [seek, videoState]);
+
+  return { ref, listeners };
+};
 
 export interface VideoCallContainerProps {
   roomId: string;
-  file: File;
+  file: string;
 }
 
 export const VideoCallContainer = ({
   roomId,
   file,
 }: VideoCallContainerProps) => {
-  const socket = useSocket();
-  const dispatch = useDispatch();
-  const userId = useSelector(selectUserId);
-
-  const handleSendOffer = (
-    signal: Peer.SignalData,
-    callerId: number,
-    calleeId: number
-  ) => {
-    socket.emit(Events.SendOffer, {
-      toUserId: calleeId,
-      fromUserId: callerId,
-      signal,
-    });
-  };
-
-  const handleReturnSignal = (signal: Peer.SignalData, callerId: number) => {
-    socket.emit(Events.AnswerOffer, {
-      toUserId: callerId,
-      fromUserId: userId,
-      signal,
-    });
-  };
-
-  const {
-    send,
-    destroyConnection,
-    destroyPeers,
-    createPeersConnections,
-    listenForPeer,
-    handleAnswer,
-  } = usePeersManager({
-    userId,
-    onChannelMessage: dispatch,
-    onSendSignal: handleSendOffer,
-    onReturnSignal: handleReturnSignal,
-  });
-
-  useEffect(() => {
-    (async () => {
-      socket.emit(ClientEvents.JoinRoom, roomId);
-      socket.on(Events.AllUsers, createPeersConnections);
-      socket.on(ServerEvents.RoomJoined, listenForPeer);
-      socket.on(Events.onAnswer, handleAnswer);
-      socket.on(ServerEvents.onRoomLeft, destroyConnection);
-    })();
-
-    return () => {
-      socket.emit(ClientEvents.LeaveRoom, roomId);
-      socket.off(ServerEvents.RoomJoined, listenForPeer);
-      socket.off(Events.AllUsers, createPeersConnections);
-      socket.off(Events.onAnswer, handleAnswer);
-      socket.off(ServerEvents.onRoomLeft, destroyConnection);
-      destroyPeers();
-    };
-  }, [
-    roomId,
-    userId,
-    socket,
-    destroyPeers,
-    destroyConnection,
-    createPeersConnections,
-    listenForPeer,
-    handleAnswer,
-  ]);
+  const { ref, listeners } = useVideoSync();
 
   return (
-    <div>
+    <div className="w-full h-full">
       <video
         controls
         className="h-full rounded-lg"
-        // src={URL.createObjectURL(file)}
+        src={file}
         muted
         autoPlay
+        key={'1'}
+        {...listeners}
+        ref={ref}
       />
     </div>
   );

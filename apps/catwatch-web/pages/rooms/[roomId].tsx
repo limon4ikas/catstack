@@ -13,6 +13,8 @@ import {
 import { withAuth } from '@catstack/catwatch/features/auth';
 import {
   ChatWindowContainer,
+  CreateTorrentForm,
+  RoomContextProvider,
   UsersListContainer,
   VideoCallContainer,
 } from '@catstack/catwatch/features/room';
@@ -57,7 +59,7 @@ export interface MainFrameProps {
 
 const MainFrame = (props: MainFrameProps) => {
   const { copy } = useCopyToClipboard();
-  const [file, setFile] = useState<File>(null);
+  const [file, setFile] = useState<string>(null);
 
   const handleCreatedTorrent = async (
     name: string,
@@ -67,12 +69,12 @@ const MainFrame = (props: MainFrameProps) => {
     await copy(magnetUri);
     toast(`Seeding torrent ${name}`);
     toast('Copied magnet uri to clipboard!');
-    setFile(file);
+    setFile(URL.createObjectURL(file));
   };
 
-  // if (!file) {
-  //   return <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
-  // }
+  if (!file) {
+    return <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
+  }
 
   return <VideoCallContainer roomId={props.roomId} file={file} />;
 };
@@ -85,12 +87,14 @@ export const RoomPage: NextPage = () => {
   return (
     <Layout>
       <div className="flex flex-grow h-full">
-        <div className="flex-grow pt-4 pb-4 pl-4">
-          <MainFrame roomId={roomId} />
-        </div>
-        <div className="p-4 w-96">
-          <ChatFrame roomId={roomId} />
-        </div>
+        <RoomContextProvider roomId={roomId}>
+          <div className="flex-grow pt-4 pb-4 pl-4">
+            <MainFrame roomId={roomId} />
+          </div>
+          <div className="p-4 w-96">
+            <ChatFrame roomId={roomId} />
+          </div>
+        </RoomContextProvider>
       </div>
     </Layout>
   );

@@ -116,11 +116,11 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     onRemoteStream: () => console.log(''),
   });
 
-  const send = (action: PayloadAction<unknown>) => {
+  const send = useCallback((action: PayloadAction<unknown>) => {
     const peers = peersRef.current;
 
     Object.values(peers).forEach((peer) => peer.send(JSON.stringify(action)));
-  };
+  }, []);
 
   const createPeersConnections = useCallback(
     (users: UserProfile[]) => {

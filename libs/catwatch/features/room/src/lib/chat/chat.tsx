@@ -9,6 +9,7 @@ import { messageAdded } from '@catstack/catwatch/actions';
 
 import { getUserById, getAllRoomMessages } from '../room-slice';
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
+import { useRoomContext } from '../context';
 
 const stringToColour = (str: string) => {
   let hash = 0;
@@ -83,6 +84,7 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const currentUser = useSelector(getUserById(userId));
   const messages = useSelector(getAllRoomMessages);
   useGetRoomUsersQuery(props.roomId);
+  const { send } = useRoomContext();
 
   const handleSendMessage = (text: string) => {
     if (!currentUser) return;
@@ -94,7 +96,7 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
       timestamp: new Date().toISOString(),
       username: currentUser.username,
     };
-
+    send(messageAdded(message));
     dispatch(messageAdded(message));
   };
 
