@@ -18,7 +18,7 @@ export const LoginFormContainer = () => {
 
     try {
       await login(rest).unwrap();
-      await router.push('/rooms');
+      await router.push('/');
     } catch (e) {
       console.log(e);
     }

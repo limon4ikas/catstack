@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { Layout } from '@catstack/shared/vanilla';
 import { withAuth } from '@catstack/catwatch/features/auth';
 import {
+  ChatWindowContainer,
   TorrentManagerContainer,
   UsersListContainer,
   VideoCallContainer,
@@ -16,17 +17,14 @@ export const RoomPage: NextPage = () => {
   if (!roomId) return null;
 
   return (
-    <Layout header={`Room ${roomId}`}>
-      <div className="flex gap-8">
-        <div className="flex-1 p-6 bg-white rounded-lg">
-          <UsersListContainer roomId={roomId} />
+    <Layout>
+      <div className="flex flex-grow h-full">
+        <div className="flex-grow pt-4 pb-4 pl-4">
+          <video controls className="h-full rounded-lg" />
         </div>
-        <div className="flex-1 p-6 bg-white rounded-lg">
-          <TorrentManagerContainer />
+        <div className="p-4 w-80">
+          <ChatWindowContainer />
         </div>
-      </div>
-      <div className="mt-8">
-        <VideoCallContainer roomId={roomId} />
       </div>
     </Layout>
   );

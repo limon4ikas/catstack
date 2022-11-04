@@ -15,7 +15,14 @@ import {
 } from '@catstack/catwatch/types';
 import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
 import { selectUserId } from '@catstack/catwatch/features/auth';
-import { Button, Input } from '@catstack/shared/vanilla';
+import {
+  Button,
+  Input,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@catstack/shared/vanilla';
 
 import { getAllRoomMessages, getUserById } from '../room-slice';
 import { messageAdded } from '@catstack/catwatch/actions';
@@ -237,9 +244,7 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
 
   return (
     <div className="p-8 bg-white rounded-lg">
-      <div className="flex flex-col gap-8">
-        <ChatWindowContainer onSendMessage={handleSendMessage} />
-      </div>
+      <div className="flex flex-col gap-8"></div>
     </div>
   );
 };
@@ -268,7 +273,7 @@ export interface ChatWindowProps {
 
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col flex-grow gap-4">
       {messages.map((message, idx) => (
         <li key={idx}>
           {message.username}: {message.text}
@@ -278,11 +283,7 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
   );
 };
 
-export interface ChatWindowContainerProps {
-  onSendMessage: (message: PayloadAction<RoomMessage>) => void;
-}
-
-export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
+export const ChatWindowContainer = () => {
   const dispatch = useDispatch();
   const userId = useSelector(selectUserId);
   const currentUser = useSelector(getUserById(userId));
@@ -297,14 +298,37 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
       timestamp: new Date().toISOString(),
       username: currentUser.username,
     };
-    props.onSendMessage(messageAdded(message));
+
     dispatch(messageAdded(message));
   };
 
+  const [tab, setTab] = useState('chat');
+  const handleTabChange = (value: string) => setTab(value);
+
   return (
-    <div className="flex flex-col gap-8">
-      <ChatWindow messages={messages} />
-      <SendMessageForm onSendMessage={handleSendMessage} />
-    </div>
+    <Tabs
+      defaultValue="chat"
+      onValueChange={handleTabChange}
+      className="flex flex-col h-full p-4 bg-white rounded-xl"
+    >
+      <TabsList className="flex gap-4">
+        <TabsTrigger value="chat">Chat</TabsTrigger>
+        <TabsTrigger value="users">Users</TabsTrigger>
+      </TabsList>
+
+      <TabsContent
+        value="chat"
+        className={`flex flex-col ${tab === 'chat' ? 'flex-grow' : ''}`}
+      >
+        <ChatWindow messages={messages} />
+        <div className="mt-8">
+          <SendMessageForm onSendMessage={handleSendMessage} />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="users">
+        <div className="flex-grow">Users</div>
+      </TabsContent>
+    </Tabs>
   );
 };
