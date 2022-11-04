@@ -33,7 +33,13 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
 
   if (isLoading) return <h1>Loading</h1>;
 
-  if (!users.length) return <h1>No users</h1>;
+  if (!users.length) {
+    return (
+      <div className="flex justify-center pt-3">
+        <h1 className="text-lg font-medium text-gray-900">No users</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

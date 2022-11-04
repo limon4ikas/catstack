@@ -46,10 +46,16 @@ export interface ChatWindowProps {
 
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
-    <ul className="flex flex-col flex-grow gap-4">
+    <ul className="flex flex-col flex-grow gap-1 pt-3">
       {messages.map((message, idx) => (
-        <li key={idx} style={{ color: stringToColour(message.username) }}>
-          {message.username}: {message.text}
+        <li key={idx} className="px-3">
+          <span
+            style={{ color: stringToColour(message.username) }}
+            className="text-sm font-semibold leading-5"
+          >
+            {message.username}:{' '}
+          </span>
+          <span className="text-sm leading-5">{message.text}</span>
         </li>
       ))}
     </ul>
