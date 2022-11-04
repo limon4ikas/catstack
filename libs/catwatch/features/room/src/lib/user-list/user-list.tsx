@@ -1,4 +1,5 @@
 import { UserProfile } from '@catstack/catwatch/types';
+import { Avatar } from '@catstack/shared/vanilla';
 
 import { useRoom } from '../hooks/use-room';
 
@@ -8,9 +9,14 @@ export interface UserListProps {
 
 export const UserList = (props: UserListProps) => {
   return (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-4 pt-3">
       {props.users.map((user) => (
-        <li key={user.id}>{user.username}</li>
+        <li key={user.id} className="flex items-center gap-3 px-2">
+          <Avatar username={user.username} />
+          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+            {user.username}
+          </span>
+        </li>
       ))}
     </ul>
   );
@@ -31,7 +37,6 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 style={{ fontWeight: 600 }}>Logged in as {user?.username}</h1>
       <UserList users={users} />
     </div>
   );

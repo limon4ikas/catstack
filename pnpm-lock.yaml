@@ -27,6 +27,7 @@ specifiers:
   '@nrwl/workspace': 15.0.3
   '@prisma/client': ^4.5.0
   '@radix-ui/react-alert-dialog': ^1.0.2
+  '@radix-ui/react-avatar': ^1.0.1
   '@radix-ui/react-dialog': ^1.0.2
   '@radix-ui/react-tabs': ^1.0.1
   '@reduxjs/toolkit': ^1.8.6
@@ -110,6 +111,7 @@ dependencies:
   '@nrwl/next': 15.0.3_ncgud2zksmcycsxnvpen6te2aq
   '@prisma/client': 4.5.0_prisma@4.5.0
   '@radix-ui/react-alert-dialog': 1.0.2_7ey2zzynotv32rpkwno45fsx4e
+  '@radix-ui/react-avatar': 1.0.1_biqbaboplfbrettd7655fr4n2y
   '@radix-ui/react-dialog': 1.0.2_7ey2zzynotv32rpkwno45fsx4e
   '@radix-ui/react-tabs': 1.0.1_biqbaboplfbrettd7655fr4n2y
   '@reduxjs/toolkit': 1.8.6_kuo2ie247izvzll3jejufdtq3q
@@ -2971,6 +2973,21 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     transitivePeerDependencies:
       - '@types/react'
+    dev: false
+
+  /@radix-ui/react-avatar/1.0.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-GfUgw4i/OWmb76bmM9qLnedYOsXhPvRXL6xaxyZzhiIVEwo2KbmxTaSQv5r1Oh8nNqBs1vfYPGuVmhEfpxpnvw==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.19.4
+      '@radix-ui/react-context': 1.0.0_react@18.2.0
+      '@radix-ui/react-primitive': 1.0.1_biqbaboplfbrettd7655fr4n2y
+      '@radix-ui/react-use-callback-ref': 1.0.0_react@18.2.0
+      '@radix-ui/react-use-layout-effect': 1.0.0_react@18.2.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: false
 
   /@radix-ui/react-collection/1.0.1_biqbaboplfbrettd7655fr4n2y:

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { nanoid, PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction } from '@reduxjs/toolkit';
 import Peer, { SignalData } from 'simple-peer';
 
 import { useUserMedia } from '@catstack/shared/hooks';
@@ -15,17 +15,6 @@ import {
 } from '@catstack/catwatch/types';
 import { handlePeerConnection, handlerError } from '@catstack/shared/rtc';
 import { selectUserId } from '@catstack/catwatch/features/auth';
-import {
-  Button,
-  Input,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@catstack/shared/vanilla';
-
-import { getAllRoomMessages, getUserById } from '../room-slice';
-import { messageAdded } from '@catstack/catwatch/actions';
 
 export const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -242,93 +231,5 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     destroyConnection,
   ]);
 
-  return (
-    <div className="p-8 bg-white rounded-lg">
-      <div className="flex flex-col gap-8"></div>
-    </div>
-  );
-};
-
-export interface SendMessageFormProps {
-  onSendMessage: (message: string) => void;
-}
-
-const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
-  const [message, setMessage] = useState('');
-
-  return (
-    <div className="flex w-full gap-4">
-      <Input
-        label="Send message"
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <Button onClick={() => onSendMessage(message)}>Send</Button>
-    </div>
-  );
-};
-
-export interface ChatWindowProps {
-  messages: RoomMessage[];
-}
-
-const ChatWindow = ({ messages }: ChatWindowProps) => {
-  return (
-    <ul className="flex flex-col flex-grow gap-4">
-      {messages.map((message, idx) => (
-        <li key={idx}>
-          {message.username}: {message.text}
-        </li>
-      ))}
-    </ul>
-  );
-};
-
-export const ChatWindowContainer = () => {
-  const dispatch = useDispatch();
-  const userId = useSelector(selectUserId);
-  const currentUser = useSelector(getUserById(userId));
-  const messages = useSelector(getAllRoomMessages);
-
-  const handleSendMessage = (text: string) => {
-    if (!currentUser) return;
-
-    const message: RoomMessage = {
-      id: nanoid(),
-      text,
-      timestamp: new Date().toISOString(),
-      username: currentUser.username,
-    };
-
-    dispatch(messageAdded(message));
-  };
-
-  const [tab, setTab] = useState('chat');
-  const handleTabChange = (value: string) => setTab(value);
-
-  return (
-    <Tabs
-      defaultValue="chat"
-      onValueChange={handleTabChange}
-      className="flex flex-col h-full p-4 bg-white rounded-xl"
-    >
-      <TabsList className="flex gap-4">
-        <TabsTrigger value="chat">Chat</TabsTrigger>
-        <TabsTrigger value="users">Users</TabsTrigger>
-      </TabsList>
-
-      <TabsContent
-        value="chat"
-        className={`flex flex-col ${tab === 'chat' ? 'flex-grow' : ''}`}
-      >
-        <ChatWindow messages={messages} />
-        <div className="mt-8">
-          <SendMessageForm onSendMessage={handleSendMessage} />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="users">
-        <div className="flex-grow">Users</div>
-      </TabsContent>
-    </Tabs>
-  );
+  return <video controls className="h-full rounded-lg" />;
 };
