@@ -1,9 +1,11 @@
 import { useCallback, useRef } from 'react';
+import { PayloadAction } from '@reduxjs/toolkit';
 import Peer, { SignalData } from 'simple-peer';
 import type { Instance } from 'simple-peer';
-import { handlePeerConnection, handlerError } from './events';
+
 import { SignalMessage, UserProfile } from '@catstack/catwatch/types';
-import { PayloadAction } from '@reduxjs/toolkit';
+
+import { handlePeerConnection, handlerError } from './events';
 
 const SERVERS: RTCConfiguration = {
   iceServers: [

@@ -13,7 +13,6 @@ import {
 import { withAuth } from '@catstack/catwatch/features/auth';
 import {
   ChatWindowContainer,
-  CreateTorrentForm,
   UsersListContainer,
   VideoCallContainer,
 } from '@catstack/catwatch/features/room';
