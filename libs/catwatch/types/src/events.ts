@@ -35,9 +35,9 @@ export const enum ServerEvents {
 export const enum Events {
   AllUsers = 'getRoomUsers',
   WebRtc = 'WebRTC',
-  SendingSignal = 'sending-signal',
-  ReturningSignal = 'returning-signal',
-  RecievingReturnedSignal = 'recieving-returneds-signal',
+  SendOffer = 'send-offer',
+  AnswerOffer = 'answer-offer',
+  onAnswer = 'on-answer',
 }
 
 export interface SignalMessage {
@@ -55,7 +55,7 @@ export interface ServerToClientEvents {
   // Signaling
   [Events.AllUsers]: (users: UserProfile[]) => void;
   [ServerEvents.RoomJoined]: (joinedUser: SignalMessage) => void;
-  [Events.RecievingReturnedSignal]: (data: SignalMessage) => void;
+  [Events.onAnswer]: (data: SignalMessage) => void;
 }
 
 export interface ClientToServerEvents {
@@ -64,8 +64,8 @@ export interface ClientToServerEvents {
   [ClientEvents.JoinRoom]: (roomToJoinId: string) => void;
   [ClientEvents.LeaveRoom]: (roomToLeaveId: string) => void;
   // Signaling
-  [Events.SendingSignal]: (data: SignalMessage) => void;
-  [Events.ReturningSignal]: (data: SignalMessage) => void;
+  [Events.SendOffer]: (data: SignalMessage) => void;
+  [Events.AnswerOffer]: (data: SignalMessage) => void;
 }
 
 /**

@@ -63,7 +63,7 @@ const MainFrame = (props: MainFrameProps) => {
   const handleCreatedTorrent = async (
     name: string,
     magnetUri: string,
-    file
+    file: File
   ) => {
     await copy(magnetUri);
     toast(`Seeding torrent ${name}`);
@@ -71,15 +71,11 @@ const MainFrame = (props: MainFrameProps) => {
     setFile(file);
   };
 
-  return (
-    <>
-      {!file ? (
-        <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
-      ) : (
-        <VideoCallContainer roomId={props.roomId} file={file} />
-      )}
-    </>
-  );
+  // if (!file) {
+  //   return <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
+  // }
+
+  return <VideoCallContainer roomId={props.roomId} file={file} />;
 };
 export const RoomPage: NextPage = () => {
   const router = useRouter();

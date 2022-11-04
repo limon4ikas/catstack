@@ -102,22 +102,22 @@ export class SignalingGateway
     this.server.to(roomId).emit(ServerEvents.onRoomLeft, client.user);
   }
 
-  @SubscribeMessage(Events.SendingSignal)
+  @SubscribeMessage(Events.SendOffer)
   handleSendingSignal(client: SocketWithAuth, message: SignalMessage) {
     this.logger.debug(
-      `⚡️ ${client.user.username} sending signal to ${message.toUserId}`
+      `⚡️ ${client.user.username} sending offer to ${message.toUserId}`
     );
     const recepient = this.sessions.getUserSocket(message.toUserId);
     this.server.to(recepient.id).emit(ServerEvents.RoomJoined, message);
   }
 
-  @SubscribeMessage(Events.ReturningSignal)
+  @SubscribeMessage(Events.AnswerOffer)
   handleReturningSignal(client: SocketWithAuth, message: SignalMessage) {
     this.logger.debug(
-      `⚡️ ${client.user.username} returning signal ${message.toUserId}`
+      `⚡️ ${client.user.username} answering signal ${message.toUserId}`
     );
 
     const recepient = this.sessions.getUserSocket(message.toUserId);
-    this.server.to(recepient.id).emit(Events.RecievingReturnedSignal, message);
+    this.server.to(recepient.id).emit(Events.onAnswer, message);
   }
 }
