@@ -1,40 +1,18 @@
-import { useState, ChangeEvent } from 'react';
-
-import { Input, toast } from '@catstack/shared/vanilla';
+import { FileDropZone } from '@catstack/shared/vanilla';
 
 export interface SeedFileFormProps {
-  onCreatedTorrent: (magnetUri: string) => void;
+  onCreatedTorrent: (name: string, magnetUri: string, file: File) => void;
 }
 
 export const CreateTorrentForm = ({ onCreatedTorrent }: SeedFileFormProps) => {
-  const [magnetURI, setMagnet] = useState('');
-
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (file: File) => {
     const WebTorrent = (await import('webtorrent')).default;
-
     const client = new WebTorrent();
 
-    const eventFile = e.target.files?.item(0);
-
-    if (!eventFile) return;
-
-    client.seed(eventFile, function (torrent) {
-      toast(`Seeding torrent ${torrent.name}`);
-      setMagnet(torrent.magnetURI);
-      console.log(torrent.magnetURI);
-      onCreatedTorrent(torrent.magnetURI);
+    client.seed(file, function (torrent) {
+      onCreatedTorrent(torrent.name, torrent.magnetURI, file);
     });
   };
 
-  return (
-    <div className="flex flex-col gap-6">
-      <input type="file" onChange={handleFileChange} />
-      <Input
-        label="Created magnet URI"
-        type="text"
-        onChange={(e) => setMagnet(e.target.value)}
-        value={magnetURI}
-      />
-    </div>
-  );
+  return <FileDropZone onFileDrop={handleFileChange} />;
 };

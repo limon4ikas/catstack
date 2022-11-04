@@ -8,6 +8,7 @@ import { selectUserId } from '@catstack/catwatch/features/auth';
 import { messageAdded } from '@catstack/catwatch/actions';
 
 import { getUserById, getAllRoomMessages } from '../room-slice';
+import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
 
 const stringToColour = (str: string) => {
   let hash = 0;
@@ -34,8 +35,16 @@ const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
       <Input
         label="Send message"
         onChange={(e) => setMessage(e.target.value)}
+        value={message}
       />
-      <Button onClick={() => onSendMessage(message)}>Send</Button>
+      <Button
+        onClick={() => {
+          setMessage('');
+          onSendMessage(message);
+        }}
+      >
+        Send
+      </Button>
     </div>
   );
 };
@@ -46,30 +55,38 @@ export interface ChatWindowProps {
 
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
-    <ul className="flex flex-col flex-grow gap-1 pt-3">
+    <ul className="flex flex-col flex-grow pt-3">
       {messages.map((message, idx) => (
-        <li key={idx} className="px-3">
-          <span
-            style={{ color: stringToColour(message.username) }}
-            className="text-sm font-semibold leading-5"
-          >
-            {message.username}:{' '}
-          </span>
-          <span className="text-sm leading-5">{message.text}</span>
+        <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
+          <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100">
+            <span
+              style={{ color: stringToColour(message.username) }}
+              className="text-sm font-semibold leading-5"
+            >
+              {message.username}:{' '}
+            </span>
+            <span className="text-sm leading-5">{message.text}</span>
+          </div>
         </li>
       ))}
     </ul>
   );
 };
 
-export const ChatWindowContainer = () => {
+export interface ChatWindowContainerProps {
+  roomId: string;
+}
+
+export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const dispatch = useDispatch();
   const userId = useSelector(selectUserId);
   const currentUser = useSelector(getUserById(userId));
   const messages = useSelector(getAllRoomMessages);
+  useGetRoomUsersQuery(props.roomId);
 
   const handleSendMessage = (text: string) => {
     if (!currentUser) return;
+    if (!text) return;
 
     const message: RoomMessage = {
       id: nanoid(),

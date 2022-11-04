@@ -11,11 +11,13 @@ export const UserList = (props: UserListProps) => {
   return (
     <ul className="flex flex-col gap-4 pt-3">
       {props.users.map((user) => (
-        <li key={user.id} className="flex items-center gap-3 px-2">
-          <Avatar username={user.username} />
-          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-            {user.username}
-          </span>
+        <li key={user.id} className="flex items-center gap-3 px-4">
+          <div className="w-full px-2 transition-colors rounded-md hover:bg-gray-100">
+            <Avatar username={user.username} />
+            <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+              {user.username}
+            </span>
+          </div>
         </li>
       ))}
     </ul>

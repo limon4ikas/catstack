@@ -27,9 +27,13 @@ export const SERVERS: RTCConfiguration = {
 
 export interface VideoCallContainerProps {
   roomId: string;
+  file: File;
 }
 
-export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
+export const VideoCallContainer = ({
+  roomId,
+  file,
+}: VideoCallContainerProps) => {
   const socket = useSocket();
   const dispatch = useDispatch();
   const userId = useSelector(selectUserId);
@@ -231,5 +235,13 @@ export const VideoCallContainer = ({ roomId }: VideoCallContainerProps) => {
     destroyConnection,
   ]);
 
-  return <video controls className="h-full rounded-lg" />;
+  return (
+    <video
+      controls
+      className="h-full rounded-lg"
+      src={URL.createObjectURL(file)}
+      muted
+      autoPlay
+    />
+  );
 };

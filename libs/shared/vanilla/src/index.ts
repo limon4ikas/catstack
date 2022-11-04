@@ -5,3 +5,4 @@ export * from './lib/toasts';
 export * from './lib/dialog';
 export * from './lib/tabs';
 export * from './lib/avatar';
+export * from './lib/file-drop-zone';

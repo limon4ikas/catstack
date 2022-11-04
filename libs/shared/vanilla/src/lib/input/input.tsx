@@ -8,7 +8,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const id = useId();
 
   return (
-    <div className="relative flex-grow border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600">
+    <div className="relative flex-grow transition-colors border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600">
       <label
         htmlFor={id}
         className="absolute inline-block px-1 -mt-px text-xs font-medium text-gray-900 bg-white -top-2 left-2"

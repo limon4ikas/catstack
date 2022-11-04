@@ -8,14 +8,16 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  toast,
 } from '@catstack/shared/vanilla';
 import { withAuth } from '@catstack/catwatch/features/auth';
 import {
   ChatWindowContainer,
-  TorrentManagerContainer,
+  CreateTorrentForm,
   UsersListContainer,
   VideoCallContainer,
 } from '@catstack/catwatch/features/room';
+import { useCopyToClipboard } from '@catstack/shared/hooks';
 
 export interface ChatWindowProps {
   roomId: string;
@@ -29,7 +31,7 @@ const ChatFrame = (props: ChatWindowProps) => {
     <Tabs
       defaultValue="chat"
       onValueChange={handleTabChange}
-      className="flex flex-col h-full bg-white rounded-xl"
+      className="flex flex-col h-full bg-white shadow rounded-xl"
     >
       <TabsList className="flex gap-4 p-4 border-b border-gray-200">
         <TabsTrigger value="chat">Chat</TabsTrigger>
@@ -39,7 +41,7 @@ const ChatFrame = (props: ChatWindowProps) => {
         value="chat"
         className={`flex flex-col ${tab === 'chat' ? 'flex-grow' : ''}`}
       >
-        <ChatWindowContainer />
+        <ChatWindowContainer roomId={props.roomId} />
       </TabsContent>
       <TabsContent value="users">
         <div className="flex-grow">
@@ -50,6 +52,35 @@ const ChatFrame = (props: ChatWindowProps) => {
   );
 };
 
+export interface MainFrameProps {
+  roomId: string;
+}
+
+const MainFrame = (props: MainFrameProps) => {
+  const { copy } = useCopyToClipboard();
+  const [file, setFile] = useState<File>(null);
+
+  const handleCreatedTorrent = async (
+    name: string,
+    magnetUri: string,
+    file
+  ) => {
+    await copy(magnetUri);
+    toast(`Seeding torrent ${name}`);
+    toast('Copied magnet uri to clipboard!');
+    setFile(file);
+  };
+
+  return (
+    <>
+      {!file ? (
+        <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
+      ) : (
+        <VideoCallContainer roomId={props.roomId} file={file} />
+      )}
+    </>
+  );
+};
 export const RoomPage: NextPage = () => {
   const router = useRouter();
   const roomId = router.query?.roomId as string | undefined;
@@ -60,7 +91,7 @@ export const RoomPage: NextPage = () => {
     <Layout>
       <div className="flex flex-grow h-full">
         <div className="flex-grow pt-4 pb-4 pl-4">
-          <VideoCallContainer roomId={roomId} />
+          <MainFrame roomId={roomId} />
         </div>
         <div className="p-4 w-96">
           <ChatFrame roomId={roomId} />
