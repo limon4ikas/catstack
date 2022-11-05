@@ -1,15 +1,16 @@
-import { nanoid } from '@reduxjs/toolkit';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { nanoid } from '@reduxjs/toolkit';
+import { useForm } from 'react-hook-form';
 
 import { RoomMessage } from '@catstack/catwatch/types';
 import { Input, Button } from '@catstack/shared/vanilla';
 import { selectUserId } from '@catstack/catwatch/features/auth';
-import { messageAdded } from '@catstack/catwatch/actions';
+import { newMessage } from '@catstack/catwatch/actions';
 
 import { getUserById, getAllRoomMessages } from '../room-slice';
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
 import { useRoomContext } from '../context';
-import { useForm } from 'react-hook-form';
 
 const stringToColour = (str: string) => {
   let hash = 0;
@@ -79,8 +80,9 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const userId = useSelector(selectUserId);
   const currentUser = useSelector(getUserById(userId));
   const messages = useSelector(getAllRoomMessages);
-  useGetRoomUsersQuery(props.roomId);
   const { send } = useRoomContext();
+  const chatRef = useRef<HTMLDivElement>(null);
+  useGetRoomUsersQuery(props.roomId);
 
   const handleSendMessage = (text: string) => {
     if (!currentUser) return;
@@ -92,13 +94,21 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
       timestamp: new Date().toISOString(),
       username: currentUser.username,
     };
-    send(messageAdded(message));
-    dispatch(messageAdded(message));
+
+    send(newMessage(message));
+    dispatch(newMessage(message));
   };
+
+  useEffect(() => {
+    const chatEl = chatRef.current;
+    const height = chatEl?.scrollHeight;
+
+    chatEl?.scrollTo({ top: height, behavior: 'smooth' });
+  }, [messages.length]);
 
   return (
     <>
-      <div className="flex-grow overflow-auto">
+      <div className="flex-grow overflow-auto" ref={chatRef}>
         <ChatWindow messages={messages} />
       </div>
       <div className="p-4 border-t border-t-gray-200">

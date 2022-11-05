@@ -7,9 +7,14 @@ import {
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { PayloadAction } from '@reduxjs/toolkit';
-import Peer from 'simple-peer';
+import { SignalData } from 'simple-peer';
 
-import { Events, ClientEvents, ServerEvents } from '@catstack/catwatch/types';
+import {
+  Events,
+  ClientEvents,
+  ServerEvents,
+  SignalMessage,
+} from '@catstack/catwatch/types';
 import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
 import { selectUserId } from '@catstack/catwatch/features/auth';
@@ -20,36 +25,40 @@ export interface IRoomContext {
 
 export const RoomContext = createContext<IRoomContext | null>(null);
 
-export type RoomContextProviderProps = PropsWithChildren & {
+export interface RoomContextProviderProps extends PropsWithChildren {
   roomId: string;
-};
+}
 
 export const RoomContextProvider = ({
   roomId,
   children,
 }: RoomContextProviderProps) => {
-  const socket = useSocket();
   const dispatch = useDispatch();
   const userId = useSelector(selectUserId);
+  const socket = useSocket();
 
   const handleSendOffer = (
-    signal: Peer.SignalData,
+    signal: SignalData,
     callerId: number,
     calleeId: number
   ) => {
-    socket.emit(Events.SendOffer, {
+    const offer: SignalMessage = {
       toUserId: calleeId,
       fromUserId: callerId,
       signal,
-    });
+    };
+
+    socket.emit(Events.SendOffer, offer);
   };
 
-  const handleReturnSignal = (signal: Peer.SignalData, callerId: number) => {
-    socket.emit(Events.AnswerOffer, {
+  const handleReturnSignal = (signal: SignalData, callerId: number) => {
+    const answer: SignalMessage = {
       toUserId: callerId,
       fromUserId: userId,
       signal,
-    });
+    };
+
+    socket.emit(Events.AnswerOffer, answer);
   };
 
   const {

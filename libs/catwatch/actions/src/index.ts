@@ -1,4 +1,4 @@
-import { createEntityAdapter, createAction, EntityId } from '@reduxjs/toolkit';
+import { createEntityAdapter, createAction } from '@reduxjs/toolkit';
 
 import { UserProfile, RoomMessage } from '@catstack/catwatch/types';
 
@@ -7,5 +7,4 @@ export const userJoined = createAction<UserProfile>('room/userJoined');
 export const userLeft = createAction<UserProfile>('room/userLeft');
 
 export const messagesAdapter = createEntityAdapter<RoomMessage>();
-export const messageAdded = createAction<RoomMessage>('room/messageAdded');
-export const messageDeleted = createAction<EntityId>('room/messageDeleted');
+export const newMessage = createAction<RoomMessage>('room/messageAdded');

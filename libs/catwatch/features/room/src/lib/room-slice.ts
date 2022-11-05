@@ -9,8 +9,7 @@ import {
 import { RoomMessage, UserProfile } from '@catstack/catwatch/types';
 import { catWatchApi } from '@catstack/catwatch/data-access';
 import {
-  messageAdded,
-  messageDeleted,
+  newMessage,
   messagesAdapter,
   userAdapter,
   userJoined,
@@ -34,6 +33,7 @@ export interface AppStateWithRoom {
 export interface RoomSliceState {
   participants: EntityState<UserProfile>;
   messages: EntityState<RoomMessage>;
+  //
   videoState: VideoState;
   lastSeek: number | null;
 }
@@ -41,6 +41,7 @@ export interface RoomSliceState {
 const initialState: RoomSliceState = {
   participants: userAdapter.getInitialState(),
   messages: messagesAdapter.getInitialState(),
+  //
   videoState: 'pause',
   lastSeek: null,
 };
@@ -68,11 +69,8 @@ export const roomSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder.addCase(messageAdded, (state, action) => {
+    builder.addCase(newMessage, (state, action) => {
       messagesAdapter.addOne(state.messages, action.payload);
-    });
-    builder.addCase(messageDeleted, (state, action) => {
-      messagesAdapter.removeOne(state.messages, action.payload);
     });
     builder.addMatcher(
       catWatchApi.endpoints.getRoomUsers.matchFulfilled,

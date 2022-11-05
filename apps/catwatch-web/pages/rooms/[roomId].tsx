@@ -41,19 +41,12 @@ const ChatFrame = (props: ChatWindowProps) => {
         value="chat"
         className={cx(
           tab !== 'chat' && 'hidden',
-          'h-[calc(100%-70px)] flex flex-col',
-          'rdx-state-active:animate-fade-in rdx-state-inactive:animate-fade-out'
+          'h-[calc(100%-70px)] flex flex-col'
         )}
       >
         <ChatWindowContainer roomId={props.roomId} />
       </TabsContent>
-      <TabsContent
-        value="users"
-        className={cx(
-          tab !== 'users' && 'hidden',
-          'rdx-state-active:animate-fade-in rdx-state-inactive:animate-fade-out'
-        )}
-      >
+      <TabsContent value="users" className={cx(tab !== 'users' && 'hidden')}>
         <UsersListContainer roomId={props.roomId} />
       </TabsContent>
     </Tabs>
