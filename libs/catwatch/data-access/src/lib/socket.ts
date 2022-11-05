@@ -12,6 +12,7 @@ export const getSocket = () => {
   if (!socket) {
     socket = io('http://localhost:3333', { withCredentials: true });
   }
+  socket.on('connect_error', (error) => socket?.disconnect());
 
   return socket;
 };

@@ -18,7 +18,7 @@ import {
 const Index: NextPage = () => {
   return (
     <Layout>
-      <div className="grid flex-grow place-items-center">
+      <div className="grid h-full place-items-center">
         <div className="flex gap-8 p-4 bg-white rounded-lg">
           <JoinRoomForm />
           <CreateRoom />

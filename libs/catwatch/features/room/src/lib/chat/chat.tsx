@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { nanoid } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -10,6 +9,7 @@ import { messageAdded } from '@catstack/catwatch/actions';
 import { getUserById, getAllRoomMessages } from '../room-slice';
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
 import { useRoomContext } from '../context';
+import { useForm } from 'react-hook-form';
 
 const stringToColour = (str: string) => {
   let hash = 0;
@@ -29,24 +29,20 @@ export interface SendMessageFormProps {
 }
 
 const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
-  const [message, setMessage] = useState('');
+  const { handleSubmit, register, reset } = useForm<{
+    message: string;
+  }>();
+
+  const onSubmit = (data: { message: string }) => {
+    onSendMessage(data.message);
+    reset({ message: '' });
+  };
 
   return (
-    <div className="flex w-full gap-4">
-      <Input
-        label="Send message"
-        onChange={(e) => setMessage(e.target.value)}
-        value={message}
-      />
-      <Button
-        onClick={() => {
-          setMessage('');
-          onSendMessage(message);
-        }}
-      >
-        Send
-      </Button>
-    </div>
+    <form className="flex w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
+      <Input label="Send message" {...register('message')} />
+      <Button type="submit">Send</Button>
+    </form>
   );
 };
 
@@ -56,7 +52,7 @@ export interface ChatWindowProps {
 
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
-    <ul className="flex flex-col flex-grow pt-3">
+    <ul className="flex flex-col pt-3">
       {messages.map((message, idx) => (
         <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
           <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100">
@@ -102,8 +98,10 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
 
   return (
     <>
-      <ChatWindow messages={messages} />
-      <div className="p-4 mt-8">
+      <div className="flex-grow overflow-auto">
+        <ChatWindow messages={messages} />
+      </div>
+      <div className="p-4 border-t border-t-gray-200">
         <SendMessageForm onSendMessage={handleSendMessage} />
       </div>
     </>

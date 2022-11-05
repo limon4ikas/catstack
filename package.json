@@ -38,6 +38,7 @@
     "@types/webtorrent": "^0.109.3",
     "class-variance-authority": "^0.2.4",
     "clipboard-copy": "^4.0.1",
+    "clsx": "^1.2.1",
     "cookie-parser": "^1.4.6",
     "core-js": "^3.6.5",
     "express": "^4.18.2",

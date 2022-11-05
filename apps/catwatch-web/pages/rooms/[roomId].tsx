@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
+import cx from 'clsx';
 
 import {
   Layout,
@@ -26,13 +27,11 @@ export interface ChatWindowProps {
 
 const ChatFrame = (props: ChatWindowProps) => {
   const [tab, setTab] = useState('chat');
-  const handleTabChange = (value: string) => setTab(value);
-
   return (
     <Tabs
-      defaultValue="chat"
-      onValueChange={handleTabChange}
-      className="flex flex-col h-full bg-white shadow rounded-xl"
+      value={tab}
+      onValueChange={setTab}
+      className="flex flex-col h-full overflow-hidden bg-white shadow rounded-xl"
     >
       <TabsList className="flex gap-4 p-4 border-b border-gray-200">
         <TabsTrigger value="chat">Chat</TabsTrigger>
@@ -40,14 +39,22 @@ const ChatFrame = (props: ChatWindowProps) => {
       </TabsList>
       <TabsContent
         value="chat"
-        className={`flex flex-col ${tab === 'chat' ? 'flex-grow' : ''}`}
+        className={cx(
+          tab !== 'chat' && 'hidden',
+          'h-[calc(100%-70px)] flex flex-col',
+          'rdx-state-active:animate-fade-in rdx-state-inactive:animate-fade-out'
+        )}
       >
         <ChatWindowContainer roomId={props.roomId} />
       </TabsContent>
-      <TabsContent value="users">
-        <div className="flex-grow">
-          <UsersListContainer roomId={props.roomId} />
-        </div>
+      <TabsContent
+        value="users"
+        className={cx(
+          tab !== 'users' && 'hidden',
+          'rdx-state-active:animate-fade-in rdx-state-inactive:animate-fade-out'
+        )}
+      >
+        <UsersListContainer roomId={props.roomId} />
       </TabsContent>
     </Tabs>
   );
@@ -78,6 +85,7 @@ const MainFrame = (props: MainFrameProps) => {
 
   return <VideoCallContainer roomId={props.roomId} file={file} />;
 };
+
 export const RoomPage: NextPage = () => {
   const router = useRouter();
   const roomId = router.query?.roomId as string | undefined;
@@ -86,15 +94,17 @@ export const RoomPage: NextPage = () => {
 
   return (
     <Layout>
-      <div className="flex flex-grow h-full">
-        <RoomContextProvider roomId={roomId}>
-          <div className="flex-grow pt-4 pb-4 pl-4">
-            <MainFrame roomId={roomId} />
-          </div>
-          <div className="p-4 w-96">
-            <ChatFrame roomId={roomId} />
-          </div>
-        </RoomContextProvider>
+      <div className="h-full pt-[64px]">
+        <div className="flex h-full gap-4 p-4">
+          <RoomContextProvider roomId={roomId}>
+            <div className="flex-grow">
+              <MainFrame roomId={roomId} />
+            </div>
+            <div className="flex-shrink-0 w-96">
+              <ChatFrame roomId={roomId} />
+            </div>
+          </RoomContextProvider>
+        </div>
       </div>
     </Layout>
   );
