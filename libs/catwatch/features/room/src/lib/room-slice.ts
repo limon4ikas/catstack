@@ -14,6 +14,9 @@ import {
   userAdapter,
   userJoined,
   userLeft,
+  Connection,
+  connectionsAdapter,
+  ConnectionState,
 } from '@catstack/catwatch/actions';
 
 /**
@@ -33,17 +36,18 @@ export interface AppStateWithRoom {
 export interface RoomSliceState {
   participants: EntityState<UserProfile>;
   messages: EntityState<RoomMessage>;
-  //
-  videoState: VideoState;
-  lastSeek: number | null;
+  connections: EntityState<Connection>;
+  playerState: { videoState: VideoState; lastSeek: number | null };
 }
 
 const initialState: RoomSliceState = {
   participants: userAdapter.getInitialState(),
   messages: messagesAdapter.getInitialState(),
-  //
-  videoState: 'pause',
-  lastSeek: null,
+  connections: connectionsAdapter.getInitialState(),
+  playerState: {
+    videoState: 'pause',
+    lastSeek: null,
+  },
 };
 
 /**
@@ -57,15 +61,24 @@ export const roomSlice = createSlice({
   initialState,
   reducers: {
     play: (state, action: PayloadAction<number>) => {
-      state.videoState = 'play';
-      state.lastSeek = action.payload;
+      state.playerState.videoState = 'play';
+      state.playerState.lastSeek = action.payload;
     },
     pause: (state, action: PayloadAction<number>) => {
-      state.videoState = 'pause';
-      state.lastSeek = action.payload;
+      state.playerState.videoState = 'pause';
+      state.playerState.lastSeek = action.payload;
     },
     seek: (state, action: PayloadAction<number>) => {
-      state.lastSeek = action.payload;
+      state.playerState.lastSeek = action.payload;
+    },
+    updateConnectionStatus: (
+      state,
+      action: PayloadAction<{ userId: EntityId; state: ConnectionState }>
+    ) => {
+      connectionsAdapter.upsertOne(state.connections, {
+        userId: action.payload.userId,
+        state: action.payload.state,
+      });
     },
   },
   extraReducers(builder) {
@@ -83,6 +96,7 @@ export const roomSlice = createSlice({
     });
     builder.addMatcher(userLeft.match, (state, action) => {
       userAdapter.removeOne(state.participants, action.payload.id);
+      connectionsAdapter.removeOne(state.connections, action.payload.id);
     });
   },
 });
@@ -111,8 +125,20 @@ export const getRoomMessages = createSelector(
   (state) => state.messages
 );
 
+export const getRoomConnection = createSelector(
+  getRoomState,
+  (state) => state.connections
+);
+
+export const getRoomPlayerState = createSelector(
+  getRoomState,
+  (state) => state.playerState
+);
+
 const roomUsersSelectors = userAdapter.getSelectors(getRoomParticipants);
 const roomMessagesSelectors = messagesAdapter.getSelectors(getRoomMessages);
+const roomConnectionsSelectors =
+  connectionsAdapter.getSelectors(getRoomConnection);
 
 // Room
 export const getAllUsers = roomUsersSelectors.selectAll;
@@ -141,12 +167,14 @@ export const getMessageById = (id: EntityId) => {
   );
 };
 
+// Player state
 export const getLastSeek = createSelector(
-  getRoomState,
+  getRoomPlayerState,
   (state) => state.lastSeek
 );
+
 export const getVideoState = createSelector(
-  getRoomState,
+  getRoomPlayerState,
   (state) => state.videoState
 );
 
@@ -155,3 +183,28 @@ export const getVideoPlayerState = createSelector(
   getVideoState,
   (seek, videoState) => ({ seek, videoState })
 );
+
+// Connections
+export const getAllConnections = roomConnectionsSelectors.selectAll;
+export const getRoomConnections = roomConnectionsSelectors.selectEntities;
+export const getRoomConnectionIds = roomConnectionsSelectors.selectIds;
+export const getTotalConnections = roomConnectionsSelectors.selectTotal;
+export const getConnectionById = (id: EntityId) => {
+  return createSelector(
+    (state: AppStateWithRoom) => state,
+    (state) => roomUsersSelectors.selectById(state, id)
+  );
+};
+
+export const getUsersWithConnections = (userId: EntityId) => {
+  return createSelector(getRoomConnection, getAllUsers, (connection, users) =>
+    users
+      .filter((user) => user.id !== userId)
+      .map((user) => ({
+        ...user,
+        isConnected:
+          connectionsAdapter.getSelectors().selectById(connection, user.id)
+            ?.state === 'connected',
+      }))
+  );
+};

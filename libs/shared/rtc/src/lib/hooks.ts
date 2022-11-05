@@ -5,7 +5,7 @@ import type { Instance } from 'simple-peer';
 
 import { SignalMessage, UserProfile } from '@catstack/catwatch/types';
 
-import { handlePeerConnection, handlerError } from './events';
+import { handlerError } from './events';
 
 const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -17,19 +17,33 @@ const SERVERS: RTCConfiguration = {
 };
 
 export interface UsePeerFactoryConfig {
+  /** Called when peer wants to send signal to another peer */
   onSendSignal: (
     signal: SignalData,
     callerId: number,
     calleeId: number
   ) => void;
+  /** Called  when peer answering offer from another peer*/
   onReturnSignal: (signal: SignalData, callerId: number) => void;
+  /** Gets channel messages parses it and sends result to handler */
   onChannelMessage: (chunk: Uint8Array) => void;
+  /** Called when peer offers user video/audio with media stream */
   onRemoteStream: (stream: MediaStream) => void;
+  /** Called when connection is established with another peer */
+  onConnection: (userId: number) => void;
+  /** Called when connection is closed with another peer */
+  onClose: (userId: number) => void;
 }
 
 export const usePeerFactory = (config: UsePeerFactoryConfig) => {
-  const { onSendSignal, onReturnSignal, onChannelMessage, onRemoteStream } =
-    config;
+  const {
+    onSendSignal,
+    onReturnSignal,
+    onChannelMessage,
+    onRemoteStream,
+    onConnection,
+    onClose,
+  } = config;
 
   const createInitiatorPeer = useCallback(
     async (callerId: number, calleeId: number) => {
@@ -45,13 +59,22 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
       pc.on('signal', (signal) => onSendSignal(signal, callerId, calleeId));
       pc.on('stream', onRemoteStream);
-      pc.on('connect', handlePeerConnection('Initiator'));
+      pc.on('connect', () => {
+        console.log(
+          `⚡️ Initiator connection established from ${callerId} to ${calleeId}`
+        );
+        onConnection(calleeId);
+      });
+      pc.on('close', () => {
+        console.log(`⚡️ Closed connection with ${calleeId}`);
+        onClose(calleeId);
+      });
       pc.on('error', handlerError);
       pc.on('data', onChannelMessage);
 
       return pc;
     },
-    [onChannelMessage, onRemoteStream, onSendSignal]
+    [onChannelMessage, onClose, onConnection, onRemoteStream, onSendSignal]
   );
 
   const createListenerPeer = useCallback(
@@ -67,37 +90,53 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
       pc.on('signal', (signal) => onReturnSignal(signal, callerId));
       pc.on('stream', onRemoteStream);
       pc.on('error', handlerError);
-      pc.on('connect', handlePeerConnection('Listener'));
+      pc.on('connect', () => {
+        console.log(`⚡️ Listener connection established with ${callerId}`);
+        onConnection(callerId);
+      });
       pc.on('data', onChannelMessage);
       pc.signal(incomingSignal);
 
       return pc;
     },
-    [onChannelMessage, onRemoteStream, onReturnSignal]
+    [onChannelMessage, onConnection, onRemoteStream, onReturnSignal]
   );
 
   return { createInitiatorPeer, createListenerPeer } as const;
 };
 
 export interface UsePeersManagerConfig
-  extends Pick<UsePeerFactoryConfig, 'onSendSignal' | 'onReturnSignal'> {
+  extends Pick<
+    UsePeerFactoryConfig,
+    'onSendSignal' | 'onReturnSignal' | 'onConnection' | 'onClose'
+  > {
+  /** Id of the current user */
   userId: number;
+  /** Called when parsed message from data channel and got message from another peer */
   onChannelMessage: (action: PayloadAction<unknown>) => void;
 }
 
 export const usePeersManager = (config: UsePeersManagerConfig) => {
-  const { userId, onChannelMessage, onSendSignal, onReturnSignal } = config;
+  const {
+    userId,
+    onChannelMessage,
+    onSendSignal,
+    onReturnSignal,
+    onConnection,
+    onClose,
+  } = config;
   const peersRef = useRef<Record<string, Instance>>({});
 
   const handleDataChannelMessage = useCallback(
     (action: Uint8Array) => {
       const decoded = new TextDecoder('utf-8').decode(action);
       console.log('⚡️ Got message from channel', decoded);
+
       try {
         const action: PayloadAction<unknown> = JSON.parse(decoded);
         onChannelMessage(action);
       } catch {
-        //
+        console.error('⚡️ Failed parsing message from data channel', decoded);
       }
     },
     [onChannelMessage]
@@ -109,8 +148,18 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     peers[message.fromUserId]?.signal(message.signal);
   };
 
+  const handleConnection = (userId: number) => {
+    onConnection(userId);
+  };
+  const handleConnectionClose = (userId: number) => {
+    destroyConnection(userId.toString());
+    onClose(userId);
+  };
+
   const { createInitiatorPeer, createListenerPeer } = usePeerFactory({
     onChannelMessage: handleDataChannelMessage,
+    onConnection: handleConnection,
+    onClose: handleConnectionClose,
     onSendSignal,
     onReturnSignal,
     onRemoteStream: () => console.log(''),
@@ -126,6 +175,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
         );
         return;
       }
+
       peer.send(JSON.stringify(action));
     });
   }, []);
@@ -136,12 +186,10 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
 
       const createConnection = async (user: UserProfile) => {
         if (user.id === userId || peers[user.id]) {
-          console.log('⚡️ Skipping connection');
-          return;
+          return console.log('⚡️ Skipping connection');
         }
-        const peer = await createInitiatorPeer(userId, user.id);
 
-        peers[user.id] = peer;
+        peers[user.id] = await createInitiatorPeer(userId, user.id);
       };
 
       if (!users.length) {
@@ -158,8 +206,10 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
       const peers = peersRef.current;
       console.log('⚡️ User joined creating listener peer');
 
-      const peer = await createListenerPeer(message.signal, message.fromUserId);
-      peers[message.fromUserId] = peer;
+      peers[message.fromUserId] = await createListenerPeer(
+        message.signal,
+        message.fromUserId
+      );
     },
     [createListenerPeer]
   );

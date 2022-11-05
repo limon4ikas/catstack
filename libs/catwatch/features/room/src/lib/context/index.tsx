@@ -19,6 +19,8 @@ import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
 import { selectUserId } from '@catstack/catwatch/features/auth';
 
+import { roomActions } from '../room-slice';
+
 export interface IRoomContext {
   send: (action: PayloadAction<unknown>) => void;
 }
@@ -61,6 +63,18 @@ export const RoomContextProvider = ({
     socket.emit(Events.AnswerOffer, answer);
   };
 
+  const handleConnection = (userId: number) => {
+    dispatch(
+      roomActions.updateConnectionStatus({ userId, state: 'connected' })
+    );
+  };
+
+  const handleConnectionClose = (userId: number) => {
+    dispatch(
+      roomActions.updateConnectionStatus({ userId, state: 'not-connected' })
+    );
+  };
+
   const {
     send,
     destroyConnection,
@@ -73,6 +87,8 @@ export const RoomContextProvider = ({
     onChannelMessage: dispatch,
     onSendSignal: handleSendOffer,
     onReturnSignal: handleReturnSignal,
+    onConnection: handleConnection,
+    onClose: handleConnectionClose,
   });
 
   useEffect(() => {

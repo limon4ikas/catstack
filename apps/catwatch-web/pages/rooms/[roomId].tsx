@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import cx from 'clsx';
 
+import { cx } from '@catstack/shared/utils';
+import { useCopyToClipboard } from '@catstack/shared/hooks';
 import {
   Layout,
   Tabs,
@@ -19,7 +20,6 @@ import {
   UsersListContainer,
   VideoCallContainer,
 } from '@catstack/catwatch/features/room';
-import { useCopyToClipboard } from '@catstack/shared/hooks';
 
 export interface ChatWindowProps {
   roomId: string;
@@ -27,6 +27,7 @@ export interface ChatWindowProps {
 
 const ChatFrame = (props: ChatWindowProps) => {
   const [tab, setTab] = useState('chat');
+
   return (
     <Tabs
       value={tab}

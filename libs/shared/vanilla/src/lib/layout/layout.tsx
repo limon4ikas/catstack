@@ -37,7 +37,7 @@ const User = () => {
         <div>
           <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <span className="sr-only">Open user menu</span>
-            <Avatar username="TEST" />
+            <Avatar username="Test" />
           </button>
         </div>
       </div>
