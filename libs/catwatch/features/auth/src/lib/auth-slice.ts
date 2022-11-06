@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 
 import { UserProfile } from '@catstack/catwatch/types';
@@ -38,9 +39,10 @@ export const authReducer = authSlice.reducer;
 
 export const selectUser = createSelector(getAuthState, (state) => state.user);
 
-export const selectUserId = createSelector(selectUser, (state) => state!.id);
+export const useAuth = () => {
+  const user = useSelector(selectUser);
 
-export const selectUsername = createSelector(
-  selectUser,
-  (state) => state?.username
-);
+  if (!user) throw new Error('You are not authenticated');
+
+  return user;
+};

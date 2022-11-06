@@ -151,6 +151,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
   const handleConnection = (userId: number) => {
     onConnection(userId);
   };
+
   const handleConnectionClose = (userId: number) => {
     destroyConnection(userId.toString());
     onClose(userId);

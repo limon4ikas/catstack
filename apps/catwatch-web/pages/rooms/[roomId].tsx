@@ -18,7 +18,7 @@ import {
   CreateTorrentForm,
   RoomContextProvider,
   UsersListContainer,
-  VideoCallContainer,
+  VideoPlayer,
 } from '@catstack/catwatch/features/room';
 
 export interface ChatWindowProps {
@@ -32,9 +32,9 @@ const ChatFrame = (props: ChatWindowProps) => {
     <Tabs
       value={tab}
       onValueChange={setTab}
-      className="flex flex-col h-full overflow-hidden bg-white shadow rounded-xl"
+      className="flex flex-col h-full overflow-hidden bg-white shadow rounded-xl dark:bg-gray-800"
     >
-      <TabsList className="flex gap-4 p-4 border-b border-gray-200">
+      <TabsList className="flex gap-4 p-4 border-b border-gray-200 dark:border-b-gray-700">
         <TabsTrigger value="chat">Chat</TabsTrigger>
         <TabsTrigger value="users">Users</TabsTrigger>
       </TabsList>
@@ -54,11 +54,7 @@ const ChatFrame = (props: ChatWindowProps) => {
   );
 };
 
-export interface MainFrameProps {
-  roomId: string;
-}
-
-const MainFrame = (props: MainFrameProps) => {
+const MainFrame = () => {
   const { copy } = useCopyToClipboard();
   const [file, setFile] = useState<string>(null);
 
@@ -77,7 +73,7 @@ const MainFrame = (props: MainFrameProps) => {
     return <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
   }
 
-  return <VideoCallContainer roomId={props.roomId} file={file} />;
+  return <VideoPlayer file={file} />;
 };
 
 export const RoomPage: NextPage = () => {
@@ -92,7 +88,7 @@ export const RoomPage: NextPage = () => {
         <div className="flex h-full gap-4 p-4">
           <RoomContextProvider roomId={roomId}>
             <div className="flex-grow">
-              <MainFrame roomId={roomId} />
+              <MainFrame />
             </div>
             <div className="flex-shrink-0 w-96">
               <ChatFrame roomId={roomId} />

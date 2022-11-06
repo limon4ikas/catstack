@@ -12,7 +12,7 @@ export const TabsTrigger = forwardRef<
   return (
     <TabsPrimitive.Trigger
       {...props}
-      className="flex-grow px-3 py-2 text-sm font-medium transition-colors rounded-md rdx-state-active:bg-indigo-100 rdx-state-active:text-indigo-700 rdx-state-inactive:text-gray-500 rdx-state-inactive:bg-gray-100 rdx-state-inactive:hover:text-gray-700"
+      className="flex-grow px-3 py-2 text-sm font-medium text-gray-500 transition-colors rounded-md rdx-state-active:bg-indigo-100 rdx-state-active:text-indigo-700 rdx-state-inactive:text-gray-500 rdx-state-inactive:bg-gray-100 rdx-state-inactive:hover:text-gray-700 dark:rdx-state-active:text-white dark:rdx-state-inactive:text-white dark:hover:rdx-state-active:text-white dark:hover:rdx-state-inactive:text-white dark:rdx-state-active:bg-gray-700 dark:rdx-state-inactive:bg-transparent dark:hover:rdx-state-inactive:bg-gray-700"
       ref={ref}
     />
   );

@@ -17,9 +17,9 @@ import {
 } from '@catstack/catwatch/types';
 import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
-import { selectUserId } from '@catstack/catwatch/features/auth';
 
 import { roomActions } from '../room-slice';
+import { useAuth } from '@catstack/catwatch/features/auth';
 
 export interface IRoomContext {
   send: (action: PayloadAction<unknown>) => void;
@@ -35,8 +35,8 @@ export const RoomContextProvider = ({
   roomId,
   children,
 }: RoomContextProviderProps) => {
+  const { id: userId } = useAuth();
   const dispatch = useDispatch();
-  const userId = useSelector(selectUserId);
   const socket = useSocket();
 
   const handleSendOffer = (
@@ -75,6 +75,10 @@ export const RoomContextProvider = ({
     );
   };
 
+  const handleChannelMessage = (action: PayloadAction<unknown>) => {
+    dispatch(action);
+  };
+
   const {
     send,
     destroyConnection,
@@ -84,7 +88,7 @@ export const RoomContextProvider = ({
     handleAnswer,
   } = usePeersManager({
     userId,
-    onChannelMessage: dispatch,
+    onChannelMessage: handleChannelMessage,
     onSendSignal: handleSendOffer,
     onReturnSignal: handleReturnSignal,
     onConnection: handleConnection,

@@ -1,5 +1,5 @@
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
-import { selectUserId } from '@catstack/catwatch/features/auth';
+import { useAuth } from '@catstack/catwatch/features/auth';
 import { UserProfile } from '@catstack/catwatch/types';
 import { Avatar } from '@catstack/shared/vanilla';
 import { useSelector } from 'react-redux';
@@ -11,7 +11,7 @@ export interface UsersListContainerProps {
 
 export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   const { isLoading, isError } = useGetRoomUsersQuery(roomId);
-  const userId = useSelector(selectUserId);
+  const { id: userId } = useAuth();
   const users = useSelector(getUsersWithConnections(userId));
 
   if (isError) return <h1>Something went wrong</h1>;
@@ -42,9 +42,9 @@ export const UserList = (props: UserListProps) => {
     <ul className="flex flex-col gap-4 pt-3">
       {props.users.map((user) => (
         <li key={user.id} className="flex items-center gap-3 px-4">
-          <div className="flex items-center w-full gap-2 px-4 py-2 transition-colors rounded-md hover:bg-gray-100">
+          <div className="flex items-center w-full gap-2 px-4 py-2 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
             <Avatar username={user.username} isOnline={user.isConnected} />
-            <span className="text-base font-medium text-gray-700 group-hover:text-gray-900">
+            <span className="text-base font-medium text-gray-700 group-hover:text-gray-900 dark:text-white">
               {user.username}
             </span>
           </div>

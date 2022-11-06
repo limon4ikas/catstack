@@ -6,7 +6,7 @@ import { Avatar } from '../avatar';
 const Logo = () => {
   return (
     <Link href="/" className="flex">
-      <div className="flex items-center flex-shrink-0">
+      <div className="flex items-center flex-shrink-0 dark:text-white">
         <img
           className="block w-auto h-8 lg:hidden"
           src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
@@ -28,7 +28,7 @@ const User = () => {
     <div className="hidden sm:ml-6 sm:flex sm:items-center">
       <button
         type="button"
-        className="p-1 text-gray-400 bg-white rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        className="p-1 text-gray-400 bg-white rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-white dark:bg-gray-800 dark:hover:text-white"
       >
         <span className="sr-only">View notifications</span>
         <BellIcon className="w-6 h-6" aria-hidden="true" />
@@ -50,13 +50,13 @@ const Navigation = () => {
     <div className="flex items-center gap-4">
       <Link
         href="/"
-        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900"
+        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white"
       >
         Room
       </Link>
       <Link
         href="/convert"
-        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900"
+        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white"
       >
         Convert
       </Link>
@@ -67,7 +67,7 @@ const Navigation = () => {
 export const Layout = (props: PropsWithChildren) => {
   return (
     <div className="h-full">
-      <nav className="fixed top-0 w-full bg-white shadow-sm">
+      <nav className="fixed top-0 w-full bg-white shadow-sm dark:bg-gray-800">
         <div className="px-4 mx-auto sm:px-6 lg:px-8">
           <header className="flex justify-between h-16">
             <div className="flex items-center gap-4">

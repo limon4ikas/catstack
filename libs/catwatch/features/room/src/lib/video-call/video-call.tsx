@@ -1,37 +1,42 @@
 import { SyntheticEvent, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { throttle } from 'lodash';
 
 import { useRoomContext } from '../context';
 import { getVideoPlayerState, roomActions } from '../room-slice';
-import { useSelector } from 'react-redux';
-import { selectUserId } from '@catstack/catwatch/features/auth';
 
 const useVideoSync = () => {
   const { send } = useRoomContext();
   const ref = useRef<HTMLVideoElement>(null);
   const { seek, videoState } = useSelector(getVideoPlayerState);
-  const userId = useSelector(selectUserId);
+  const ignoreRef = useRef(false);
 
-  const handlePause = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+  const handlePause = (_: SyntheticEvent<HTMLVideoElement, Event>) => {
     const videoEl = ref.current;
-    if (!videoEl) return;
+    if (!videoEl || ignoreRef.current) return;
+    const time = videoEl.currentTime;
 
-    if (userId === 1) send(roomActions.pause(videoEl.currentTime));
+    send(roomActions.pause(time));
+    ignoreRef.current = false;
   };
 
-  const handlePlay = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+  const handlePlay = (_: SyntheticEvent<HTMLVideoElement, Event>) => {
     const videoEl = ref.current;
-    if (!videoEl) return;
+    if (!videoEl || ignoreRef.current) return;
+    const time = videoEl.currentTime;
 
-    if (userId === 1) send(roomActions.play(videoEl.currentTime));
+    send(roomActions.play(time));
+    ignoreRef.current = false;
   };
 
   const handleSeeked = throttle(
-    (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+    (_: SyntheticEvent<HTMLVideoElement, Event>) => {
       const videoEl = ref.current;
-      if (!videoEl) return;
+      if (!videoEl || ignoreRef.current) return;
+      const time = videoEl.currentTime;
 
-      if (userId === 1) send(roomActions.seek(videoEl.currentTime));
+      send(roomActions.seek(time));
+      ignoreRef.current = false;
     },
     500
   );
@@ -44,6 +49,7 @@ const useVideoSync = () => {
 
   useEffect(() => {
     const videoEl = ref.current;
+    ignoreRef.current = true;
 
     if (!videoEl) return;
 
@@ -56,14 +62,10 @@ const useVideoSync = () => {
 };
 
 export interface VideoCallContainerProps {
-  roomId: string;
   file: string;
 }
 
-export const VideoCallContainer = ({
-  roomId,
-  file,
-}: VideoCallContainerProps) => {
+export const VideoPlayer = ({ file }: VideoCallContainerProps) => {
   const { ref, listeners } = useVideoSync();
 
   return (
@@ -74,7 +76,6 @@ export const VideoCallContainer = ({
         src={file}
         muted
         autoPlay
-        key={'1'}
         {...listeners}
         ref={ref}
       />

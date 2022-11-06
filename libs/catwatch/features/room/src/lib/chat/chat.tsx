@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 
 import { RoomMessage } from '@catstack/catwatch/types';
 import { Input, Button } from '@catstack/shared/vanilla';
-import { selectUserId } from '@catstack/catwatch/features/auth';
+import { useAuth } from '@catstack/catwatch/features/auth';
 import { newMessage } from '@catstack/catwatch/actions';
 
 import { getUserById, getAllRoomMessages } from '../room-slice';
@@ -41,7 +41,12 @@ const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
 
   return (
     <form className="flex w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <Input label="Send message" {...register('message')} />
+      <Input
+        label="Send message"
+        autoComplete="off"
+        placeholder="Message"
+        {...register('message')}
+      />
       <Button type="submit">Send</Button>
     </form>
   );
@@ -56,14 +61,16 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
     <ul className="flex flex-col pt-3">
       {messages.map((message, idx) => (
         <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
-          <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100">
+          <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
             <span
               style={{ color: stringToColour(message.username) }}
               className="text-sm font-semibold leading-5"
             >
               {message.username}:{' '}
             </span>
-            <span className="text-sm leading-5">{message.text}</span>
+            <span className="text-sm leading-5 dark:text-white">
+              {message.text}
+            </span>
           </div>
         </li>
       ))}
@@ -77,7 +84,7 @@ export interface ChatWindowContainerProps {
 
 export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const dispatch = useDispatch();
-  const userId = useSelector(selectUserId);
+  const { id: userId } = useAuth();
   const currentUser = useSelector(getUserById(userId));
   const messages = useSelector(getAllRoomMessages);
   const { send } = useRoomContext();
@@ -111,7 +118,7 @@ export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
       <div className="flex-grow overflow-auto" ref={chatRef}>
         <ChatWindow messages={messages} />
       </div>
-      <div className="p-4 border-t border-t-gray-200">
+      <div className="p-4 border-t border-t-gray-200 dark:border-t-gray-700">
         <SendMessageForm onSendMessage={handleSendMessage} />
       </div>
     </>

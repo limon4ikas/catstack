@@ -30,10 +30,10 @@ export const Avatar = ({ username, isOnline, src, ...props }: AvatarProps) => (
     </div>
 
     <AvatarPrimitive.Fallback
-      className="flex items-center justify-center w-full h-full bg-gray-500 rounded-full dark:bg-gray-800"
+      className="flex items-center justify-center w-full h-full bg-gray-400 rounded-full dark:bg-gray-600"
       delayMs={600}
     >
-      <span className="text-sm font-medium text-white uppercase dark:text-gray-400">
+      <span className="text-sm font-medium text-white uppercase dark:text-white">
         {username.slice(0, 2).toUpperCase()}
       </span>
     </AvatarPrimitive.Fallback>
