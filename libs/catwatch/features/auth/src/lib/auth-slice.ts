@@ -6,6 +6,10 @@ import { catWatchApi } from '@catstack/catwatch/data-access';
 
 export const AUTH_SLICE_NAME = 'auth';
 
+export interface RootStateWithAuth {
+  [AUTH_SLICE_NAME]: AuthSliceState;
+}
+
 export interface AuthSliceState {
   user: UserProfile | null;
 }
@@ -28,11 +32,8 @@ export const authSlice = createSlice({
   },
 });
 
-export const getAuthState = (state: {
-  [AUTH_SLICE_NAME]: AuthSliceState;
-}): AuthSliceState => {
-  return state[AUTH_SLICE_NAME];
-};
+export const getAuthState = (state: RootStateWithAuth): AuthSliceState =>
+  state[AUTH_SLICE_NAME];
 
 export const authActions = authSlice.actions;
 export const authReducer = authSlice.reducer;

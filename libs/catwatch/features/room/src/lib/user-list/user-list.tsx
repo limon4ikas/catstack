@@ -1,8 +1,10 @@
-import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
-import { useAuth } from '@catstack/catwatch/features/auth';
-import { UserProfile } from '@catstack/catwatch/types';
-import { Avatar } from '@catstack/shared/vanilla';
 import { useSelector } from 'react-redux';
+
+import { UserProfile } from '@catstack/catwatch/types';
+import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
+import { Avatar } from '@catstack/shared/vanilla';
+import { useAuth } from '@catstack/catwatch/features/auth';
+
 import { getUsersWithConnections } from '../room-slice';
 
 export interface UsersListContainerProps {
@@ -21,7 +23,9 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   if (!users.length) {
     return (
       <div className="flex justify-center pt-3">
-        <h1 className="text-lg font-medium text-gray-900">No users</h1>
+        <h1 className="text-lg font-medium text-gray-900 dark:text-white">
+          No users
+        </h1>
       </div>
     );
   }

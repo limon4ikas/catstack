@@ -148,10 +148,6 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     peers[message.fromUserId]?.signal(message.signal);
   };
 
-  const handleConnection = (userId: number) => {
-    onConnection(userId);
-  };
-
   const handleConnectionClose = (userId: number) => {
     destroyConnection(userId.toString());
     onClose(userId);
@@ -159,13 +155,14 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
 
   const { createInitiatorPeer, createListenerPeer } = usePeerFactory({
     onChannelMessage: handleDataChannelMessage,
-    onConnection: handleConnection,
     onClose: handleConnectionClose,
+    onConnection,
     onSendSignal,
     onReturnSignal,
     onRemoteStream: () => console.log(''),
   });
 
+  /** Sends messages to peers */
   const send = useCallback((action: PayloadAction<unknown>) => {
     const peers = peersRef.current;
 
@@ -203,14 +200,11 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
   );
 
   const listenForPeer = useCallback(
-    async (message: SignalMessage) => {
+    async ({ fromUserId, signal }: SignalMessage) => {
       const peers = peersRef.current;
       console.log('⚡️ User joined creating listener peer');
 
-      peers[message.fromUserId] = await createListenerPeer(
-        message.signal,
-        message.fromUserId
-      );
+      peers[fromUserId] = await createListenerPeer(signal, fromUserId);
     },
     [createListenerPeer]
   );

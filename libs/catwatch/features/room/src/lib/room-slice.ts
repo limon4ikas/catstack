@@ -27,7 +27,8 @@ import {
 
 export const ROOM_SLICE_NAME = 'room' as const;
 
-export type VideoState = 'play' | 'pause';
+export type VideoState = 'play' | 'pause' | null;
+export type VideoPlayerActionPayload = { time: number; eventFrom: string };
 
 export interface AppStateWithRoom {
   [ROOM_SLICE_NAME]: RoomSliceState;
@@ -37,17 +38,18 @@ export interface RoomSliceState {
   participants: EntityState<UserProfile>;
   messages: EntityState<RoomMessage>;
   connections: EntityState<Connection>;
-  playerState: { videoState: VideoState; lastSeek: number | null };
+  playerState: {
+    videoState: VideoState;
+    lastSeek: number | null;
+    eventFrom: string | null;
+  };
 }
 
 const initialState: RoomSliceState = {
   participants: userAdapter.getInitialState(),
   messages: messagesAdapter.getInitialState(),
   connections: connectionsAdapter.getInitialState(),
-  playerState: {
-    videoState: 'pause',
-    lastSeek: null,
-  },
+  playerState: { videoState: null, lastSeek: null, eventFrom: null },
 };
 
 /**
@@ -60,16 +62,19 @@ export const roomSlice = createSlice({
   name: ROOM_SLICE_NAME,
   initialState,
   reducers: {
-    play: (state, action: PayloadAction<number>) => {
+    play: (state, action: PayloadAction<VideoPlayerActionPayload>) => {
       state.playerState.videoState = 'play';
-      state.playerState.lastSeek = action.payload;
+      state.playerState.lastSeek = action.payload.time;
+      state.playerState.eventFrom = action.payload.eventFrom;
     },
-    pause: (state, action: PayloadAction<number>) => {
+    pause: (state, action: PayloadAction<VideoPlayerActionPayload>) => {
       state.playerState.videoState = 'pause';
-      state.playerState.lastSeek = action.payload;
+      state.playerState.lastSeek = action.payload.time;
+      state.playerState.eventFrom = action.payload.eventFrom;
     },
-    seek: (state, action: PayloadAction<number>) => {
-      state.playerState.lastSeek = action.payload;
+    seek: (state, action: PayloadAction<VideoPlayerActionPayload>) => {
+      state.playerState.lastSeek = action.payload.time;
+      state.playerState.eventFrom = action.payload.eventFrom;
     },
     updateConnectionStatus: (
       state,
@@ -178,10 +183,16 @@ export const getVideoState = createSelector(
   (state) => state.videoState
 );
 
+export const getEventFrom = createSelector(
+  getRoomPlayerState,
+  (state) => state.eventFrom
+);
+
 export const getVideoPlayerState = createSelector(
   getLastSeek,
   getVideoState,
-  (seek, videoState) => ({ seek, videoState })
+  getEventFrom,
+  (seek, videoState, eventFrom) => ({ seek, videoState, eventFrom })
 );
 
 // Connections
