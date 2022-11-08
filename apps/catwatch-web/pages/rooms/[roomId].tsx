@@ -2,7 +2,10 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
 import { Layout } from '@catstack/shared/vanilla';
-import { withAuth } from '@catstack/catwatch/features/auth';
+import {
+  UserProfileContainer,
+  withAuth,
+} from '@catstack/catwatch/features/auth';
 import { RoomScreen } from '@catstack/catwatch/features/room';
 
 export const RoomPage: NextPage = () => {
@@ -12,7 +15,7 @@ export const RoomPage: NextPage = () => {
   if (!roomId) return null;
 
   return (
-    <Layout>
+    <Layout userProfile={<UserProfileContainer />}>
       <RoomScreen roomId={roomId} />
     </Layout>
   );

@@ -85,6 +85,7 @@ export const roomSlice = createSlice({
         state: action.payload.state,
       });
     },
+    reset: () => initialState,
   },
   extraReducers(builder) {
     builder.addCase(newUserMessage, (state, action) => {

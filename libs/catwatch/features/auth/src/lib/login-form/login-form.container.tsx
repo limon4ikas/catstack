@@ -24,5 +24,14 @@ export const LoginFormContainer = () => {
     }
   };
 
-  return <LoginForm onSubmit={handleLoginFormSubmit} />;
+  return (
+    <LoginForm
+      onSubmit={handleLoginFormSubmit}
+      defaultValues={{
+        password: 'xuwi389fa',
+        username: 'limonikas',
+        shouldRemember: false,
+      }}
+    />
+  );
 };

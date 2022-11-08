@@ -3,7 +3,6 @@ import {
   PropsWithChildren,
   useMemo,
   useContext,
-  useCallback,
   useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
@@ -40,48 +39,52 @@ export const RoomContextProvider = ({
   roomId,
   children,
 }: RoomContextProviderProps) => {
-  const { id: userId } = useAuth();
+  const currentUser = useAuth();
   const dispatch = useDispatch();
   const socket = useSocket();
   const [streams, setStreams] = useState<Record<string, MediaStream>>({});
 
   const handleSendOffer = (
     signal: SignalData,
-    callerId: number,
-    calleeId: number
+    caller: UserProfile,
+    calle: UserProfile
   ) => {
     const offer: SignalMessage = {
-      toUserId: calleeId,
-      fromUserId: callerId,
+      toUserId: calle,
+      fromUserId: caller,
       signal,
     };
 
     socket.emit(Events.SendOffer, offer);
   };
 
-  const handleReturnSignal = (signal: SignalData, callerId: number) => {
+  const handleReturnSignal = (signal: SignalData, caller: UserProfile) => {
     const answer: SignalMessage = {
-      toUserId: callerId,
-      fromUserId: userId,
+      toUserId: caller,
+      fromUserId: currentUser,
       signal,
     };
 
     socket.emit(Events.AnswerOffer, answer);
   };
 
-  const handleConnection = useCallback(
-    (userId: number) => {
-      dispatch(
-        roomActions.updateConnectionStatus({ userId, state: 'connected' })
-      );
-      dispatch(newRoomEventMessage(`User ${userId} joined`));
-    },
-    [dispatch]
-  );
-
-  const handleConnectionClose = (userId: number) => {
+  const handleConnection = (user: UserProfile) => {
     dispatch(
-      roomActions.updateConnectionStatus({ userId, state: 'not-connected' })
+      roomActions.updateConnectionStatus({
+        userId: user.id,
+        state: 'connected',
+      })
+    );
+
+    send(newRoomEventMessage(`${currentUser.username} joined`));
+  };
+
+  const handleConnectionClose = (user: UserProfile) => {
+    dispatch(
+      roomActions.updateConnectionStatus({
+        userId: user.id,
+        state: 'not-connected',
+      })
     );
   };
 
@@ -89,8 +92,8 @@ export const RoomContextProvider = ({
     dispatch(action);
   };
 
-  const handleRemoteStream = (userId: number, stream: MediaStream) => {
-    setStreams((prev) => ({ ...prev, [userId]: stream }));
+  const handleRemoteStream = (user: UserProfile, stream: MediaStream) => {
+    setStreams((prev) => ({ ...prev, [user.id]: stream }));
   };
 
   const {
@@ -101,7 +104,7 @@ export const RoomContextProvider = ({
     listenForPeer,
     handleAnswer,
   } = usePeersManager({
-    userId,
+    currentUser: currentUser,
     onChannelMessage: handleChannelMessage,
     onSendSignal: handleSendOffer,
     onReturnSignal: handleReturnSignal,
@@ -124,12 +127,14 @@ export const RoomContextProvider = ({
     })();
 
     return () => {
-      send(newRoomEventMessage(`User ${userId} left chat`));
       socket.emit(ClientEvents.LeaveRoom, roomId);
       socket.off(ServerEvents.RoomJoined, listenForPeer);
       socket.off(Events.AllUsers, createPeersConnections);
       socket.off(Events.onAnswer, handleAnswer);
       socket.off(ServerEvents.onRoomLeft, handleRoomLeft);
+
+      send(newRoomEventMessage(`${currentUser.username} left chat`));
+      dispatch(roomActions.reset());
       destroyPeers();
     };
   });

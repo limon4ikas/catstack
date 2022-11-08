@@ -8,14 +8,12 @@ export interface LoginFormValues {
 
 export interface LoginFormProps {
   onSubmit: (values: LoginFormValues) => void;
+  defaultValues: LoginFormValues;
 }
 
 export const LoginForm = (props: LoginFormProps) => {
   const { register, handleSubmit } = useForm<LoginFormValues>({
-    defaultValues: {
-      password: 'xuwi389fa',
-      username: 'limonikas',
-    },
+    defaultValues: props.defaultValues,
   });
 
   return (

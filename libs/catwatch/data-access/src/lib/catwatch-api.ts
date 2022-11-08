@@ -78,6 +78,9 @@ export const catWatchApi = createApi({
         socket.off(ServerEvents.onRoomLeft, onRoomLeaveListener);
       },
     }),
+    getIsRoomExists: builder.query<unknown, string>({
+      query: (roomId) => `rooms/${roomId}/available`,
+    }),
   }),
 });
 
@@ -87,6 +90,7 @@ export const {
   useCreateRoomMutation,
   useGetRoomUsersQuery,
   useLazyGetRoomUsersQuery,
+  useLazyGetIsRoomExistsQuery,
 } = catWatchApi;
 
 export const catWatchApiReducer = catWatchApi.reducer;

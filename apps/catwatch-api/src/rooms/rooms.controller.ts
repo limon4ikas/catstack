@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 
 import { Routes } from '../constants';
 import { RoomsService } from './rooms.service';
@@ -20,6 +28,16 @@ export class RoomsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.roomsService.getRoom(id);
+  }
+
+  @Get(':id/available')
+  checkIfExists(@Param('id') id: string) {
+    const room = this.roomsService.getRoom(id);
+
+    if (!room)
+      throw new HttpException('Room does not exists!', HttpStatus.NOT_FOUND);
+
+    return room;
   }
 
   @Delete(':id')

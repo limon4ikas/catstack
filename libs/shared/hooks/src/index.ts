@@ -4,4 +4,5 @@ export {
   useEffectOnce,
   useUpdateEffect,
   useDeepCompareEffect,
+  useLifecycles,
 } from 'react-use';

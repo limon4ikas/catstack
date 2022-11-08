@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { useUserInfoQuery } from '@catstack/catwatch/data-access';
 
-import { selectUser } from './auth-slice';
+import { selectUser } from './auth-slice.selectors';
 
 export interface WithAuthConfig {
   redirectTo?: string;

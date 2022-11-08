@@ -41,8 +41,8 @@ export const enum Events {
 }
 
 export interface SignalMessage {
-  fromUserId: number;
-  toUserId: number;
+  fromUserId: UserProfile;
+  toUserId: UserProfile;
   signal: SignalData;
 }
 

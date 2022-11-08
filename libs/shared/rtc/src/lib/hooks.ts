@@ -21,19 +21,19 @@ export interface UsePeerFactoryConfig {
   /** Called when peer wants to send signal to another peer */
   onSendSignal: (
     signal: SignalData,
-    callerId: number,
-    calleeId: number
+    callerId: UserProfile,
+    calleeId: UserProfile
   ) => void;
   /** Called  when peer answering offer from another peer*/
-  onReturnSignal: (signal: SignalData, callerId: number) => void;
+  onReturnSignal: (signal: SignalData, caller: UserProfile) => void;
   /** Gets channel messages parses it and sends result to handler */
   onChannelMessage: (chunk: Uint8Array) => void;
   /** Called when peer offers user video/audio with media stream */
-  onRemoteStream: (userId: number, stream: MediaStream) => void;
+  onRemoteStream: (user: UserProfile, stream: MediaStream) => void;
   /** Called when connection is established with another peer */
-  onConnection: (userId: number) => void;
+  onConnection: (user: UserProfile) => void;
   /** Called when connection is closed with another peer */
-  onClose: (userId: number) => void;
+  onClose: (user: UserProfile) => void;
 }
 
 export const usePeerFactory = (config: UsePeerFactoryConfig) => {
@@ -49,11 +49,11 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
   const { getMedia } = useUserMedia();
 
   const createInitiatorPeer = useCallback(
-    async (callerId: number, calleeId: number) => {
+    async (caller: UserProfile, callee: UserProfile) => {
       const stream = await getMedia({ video: true });
 
       console.log(
-        `⚡️ Initiate peer connection to from ${callerId} to ${calleeId}`
+        `⚡️ Initiate peer connection to from ${caller.username} to ${callee.username}`
       );
 
       const pc = new Peer({
@@ -63,21 +63,21 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
         stream,
       });
 
-      pc.on('signal', (signal) => onSendSignal(signal, callerId, calleeId));
+      pc.on('signal', (signal) => onSendSignal(signal, caller, callee));
       pc.on('stream', (stream) => {
-        console.log(`⚡️ Got media stream from ${calleeId}`, stream);
-        onRemoteStream(calleeId, stream);
+        console.log(`⚡️ Got media stream from ${callee.username}`, stream);
+        onRemoteStream(callee, stream);
       });
 
       pc.on('connect', () => {
         console.log(
-          `⚡️ Initiator connection established from ${callerId} to ${calleeId}`
+          `⚡️ Initiator connection established from ${caller.username} to ${callee.username}`
         );
-        onConnection(calleeId);
+        onConnection(callee);
       });
       pc.on('close', () => {
-        console.log(`⚡️ Closed connection with ${calleeId}`);
-        onClose(calleeId);
+        console.log(`⚡️ Closed connection with ${callee.username}`);
+        onClose(callee);
       });
       pc.on('error', handlerError);
       pc.on('data', onChannelMessage);
@@ -95,10 +95,10 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
   );
 
   const createListenerPeer = useCallback(
-    async (incomingSignal: SignalData, callerId: number) => {
+    async (incomingSignal: SignalData, callerId: UserProfile) => {
       const stream = await getMedia({ video: true });
 
-      console.log(`⚡️ Waiting for peer connection from ${callerId}`);
+      console.log(`⚡️ Waiting for peer connection from ${callerId.username}`);
 
       const pc = new Peer({
         initiator: false,
@@ -114,7 +114,9 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
       });
       pc.on('error', handlerError);
       pc.on('connect', () => {
-        console.log(`⚡️ Listener connection established with ${callerId}`);
+        console.log(
+          `⚡️ Listener connection established with ${callerId.username}`
+        );
         onConnection(callerId);
       });
       pc.on('data', onChannelMessage);
@@ -138,14 +140,14 @@ export interface UsePeersManagerConfig
     | 'onRemoteStream'
   > {
   /** Id of the current user */
-  userId: number;
+  currentUser: UserProfile;
   /** Called when parsed message from data channel and got message from another peer */
   onChannelMessage: (action: PayloadAction<unknown>) => void;
 }
 
 export const usePeersManager = (config: UsePeersManagerConfig) => {
   const {
-    userId,
+    currentUser,
     onChannelMessage,
     onSendSignal,
     onReturnSignal,
@@ -173,10 +175,16 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
   const handleAnswer = (message: SignalMessage) => {
     const peers = peersRef.current;
 
-    peers[message.fromUserId]?.signal(message.signal);
+    const peer = peers[message.fromUserId.id];
+    if (!peer || peer.destroyed) {
+      console.warn(`⚡ Peer is destroyed cannot signal️`);
+      return;
+    }
+
+    peer.signal(message.signal);
   };
 
-  const handleConnectionClose = (userId: number) => {
+  const handleConnectionClose = (userId: UserProfile) => {
     destroyConnection(userId.toString());
     onClose(userId);
   };
@@ -211,11 +219,11 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
       const peers = peersRef.current;
 
       const createConnection = async (user: UserProfile) => {
-        if (user.id === userId || peers[user.id]) {
+        if (user.id === currentUser.id || peers[user.id]) {
           return console.log('⚡️ Skipping connection');
         }
 
-        peers[user.id] = await createInitiatorPeer(userId, user.id);
+        peers[user.id] = await createInitiatorPeer(currentUser, user);
       };
 
       if (!users.length) {
@@ -224,7 +232,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
 
       users.forEach(createConnection);
     },
-    [createInitiatorPeer, userId]
+    [createInitiatorPeer, currentUser]
   );
 
   const listenForPeer = useCallback(
@@ -232,7 +240,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
       const peers = peersRef.current;
       console.log('⚡️ User joined creating listener peer');
 
-      peers[fromUserId] = await createListenerPeer(signal, fromUserId);
+      peers[fromUserId.id] = await createListenerPeer(signal, fromUserId);
     },
     [createListenerPeer]
   );
@@ -241,15 +249,17 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     (leftUserId: string) => {
       const peers = peersRef.current;
 
-      console.log(`⚡️ Destroy connection from ${userId} to ${leftUserId}`);
+      console.log(
+        `⚡️ Destroy connection from ${currentUser.username} to ${leftUserId}`
+      );
 
       if (!peers[leftUserId]) {
         console.warn('⚡️ No connection for this user, please check');
       }
 
-      peers[leftUserId].destroy();
+      peers[leftUserId]?.destroy();
     },
-    [userId]
+    [currentUser.username]
   );
 
   const destroyPeers = useCallback(() => {

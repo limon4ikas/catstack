@@ -105,9 +105,9 @@ export class SignalingGateway
   @SubscribeMessage(Events.SendOffer)
   handleSendingSignal(client: SocketWithAuth, message: SignalMessage) {
     this.logger.debug(
-      `⚡️ ${client.user.username} sending offer to ${message.toUserId}`
+      `⚡️ ${client.user.username} sending offer to ${message.toUserId.id}`
     );
-    const recepient = this.sessions.getUserSocket(message.toUserId);
+    const recepient = this.sessions.getUserSocket(message.toUserId.id);
     this.server.to(recepient.id).emit(ServerEvents.RoomJoined, message);
   }
 
@@ -117,7 +117,7 @@ export class SignalingGateway
       `⚡️ ${client.user.username} answering signal ${message.toUserId}`
     );
 
-    const recepient = this.sessions.getUserSocket(message.toUserId);
+    const recepient = this.sessions.getUserSocket(message.toUserId.id);
     this.server.to(recepient.id).emit(Events.onAnswer, message);
   }
 }

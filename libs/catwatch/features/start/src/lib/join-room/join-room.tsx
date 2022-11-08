@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
 
 import {
   Button,
@@ -8,13 +8,25 @@ import {
   DialogTrigger,
   DialogContent,
 } from '@catstack/shared/vanilla';
+import { useLazyGetIsRoomExistsQuery } from '@catstack/catwatch/data-access';
+
+export interface JoinRoomFormValues {
+  roomId: string;
+}
 
 export const JoinRoomFormContainer = () => {
   const router = useRouter();
-  const [roomId, setRoomId] = useState('1');
+  const [getIsRoomAvailable] = useLazyGetIsRoomExistsQuery();
+  const { register, handleSubmit, formState } = useForm<JoinRoomFormValues>({
+    defaultValues: { roomId: '1' },
+  });
 
-  const handleJoinRoomClick = async () => {
-    router.push(`rooms/${roomId}`);
+  const handleJoinRoomClick = async (form: JoinRoomFormValues) => {
+    const isAvailable = await getIsRoomAvailable(form.roomId).unwrap();
+
+    if (!isAvailable) return;
+
+    router.push(`rooms/${form.roomId}`);
   };
 
   return (
@@ -23,16 +35,20 @@ export const JoinRoomFormContainer = () => {
         <Button>Join room</Button>
       </DialogTrigger>
       <DialogContent>
-        <div className="flex items-center gap-4">
+        <form
+          className="flex items-center gap-4"
+          onSubmit={handleSubmit(handleJoinRoomClick)}
+        >
           <Input
             label="Join room"
             type="text"
             placeholder="Room ID"
-            onChange={(e) => setRoomId(e.target.value)}
-            value={roomId}
+            {...register('roomId')}
           />
-          <Button onClick={handleJoinRoomClick}>Join</Button>
-        </div>
+          <Button type="submit">
+            {formState.isSubmitting ? 'Joining' : 'Join'}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );

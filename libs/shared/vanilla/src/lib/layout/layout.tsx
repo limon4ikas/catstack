@@ -1,7 +1,5 @@
-import { PropsWithChildren } from 'react';
-import { BellIcon } from '@heroicons/react/24/outline';
+import { PropsWithChildren, ReactNode } from 'react';
 import Link from 'next/link';
-import { Avatar } from '../avatar';
 
 const Logo = () => {
   return (
@@ -20,28 +18,6 @@ const Logo = () => {
       </div>
       <div />
     </Link>
-  );
-};
-
-const User = () => {
-  return (
-    <div className="hidden sm:ml-6 sm:flex sm:items-center">
-      <button
-        type="button"
-        className="p-1 text-gray-400 bg-white rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-white dark:bg-gray-800 dark:hover:text-white"
-      >
-        <span className="sr-only">View notifications</span>
-        <BellIcon className="w-6 h-6" aria-hidden="true" />
-      </button>
-      <div className="relative ml-3">
-        <div>
-          <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            <span className="sr-only">Open user menu</span>
-            <Avatar username="Test" />
-          </button>
-        </div>
-      </div>
-    </div>
   );
 };
 
@@ -64,7 +40,11 @@ const Navigation = () => {
   );
 };
 
-export const Layout = (props: PropsWithChildren) => {
+export interface LayoutProps {
+  userProfile: ReactNode;
+}
+
+export const Layout = (props: PropsWithChildren<LayoutProps>) => {
   return (
     <div className="h-full">
       <nav className="fixed top-0 w-full bg-white shadow dark:bg-gray-800">
@@ -74,7 +54,7 @@ export const Layout = (props: PropsWithChildren) => {
               <Logo />
               <Navigation />
             </div>
-            <User />
+            {props.userProfile}
           </header>
         </div>
       </nav>
