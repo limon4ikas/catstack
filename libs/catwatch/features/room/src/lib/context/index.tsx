@@ -1,10 +1,10 @@
 import {
   createContext,
   PropsWithChildren,
-  useEffect,
   useMemo,
   useContext,
   useCallback,
+  useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
 import { PayloadAction } from '@reduxjs/toolkit';
@@ -15,6 +15,7 @@ import {
   ClientEvents,
   ServerEvents,
   SignalMessage,
+  UserProfile,
 } from '@catstack/catwatch/types';
 import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
@@ -22,9 +23,11 @@ import { useAuth } from '@catstack/catwatch/features/auth';
 import { newRoomEventMessage } from '@catstack/catwatch/actions';
 
 import { roomActions } from '../room-slice';
+import { useEffectOnce } from 'react-use';
 
 export interface IRoomContext {
   send: (action: PayloadAction<unknown>) => void;
+  streams: Record<string, MediaStream | undefined>;
 }
 
 export const RoomContext = createContext<IRoomContext | null>(null);
@@ -40,6 +43,7 @@ export const RoomContextProvider = ({
   const { id: userId } = useAuth();
   const dispatch = useDispatch();
   const socket = useSocket();
+  const [streams, setStreams] = useState<Record<string, MediaStream>>({});
 
   const handleSendOffer = (
     signal: SignalData,
@@ -86,7 +90,7 @@ export const RoomContextProvider = ({
   };
 
   const handleRemoteStream = (userId: number, stream: MediaStream) => {
-    // console.log(stream);
+    setStreams((prev) => ({ ...prev, [userId]: stream }));
   };
 
   const {
@@ -106,13 +110,17 @@ export const RoomContextProvider = ({
     onRemoteStream: handleRemoteStream,
   });
 
-  useEffect(() => {
+  const handleRoomLeft = (user: UserProfile) => {
+    destroyConnection(user.id.toString());
+  };
+
+  useEffectOnce(() => {
     (async () => {
       socket.emit(ClientEvents.JoinRoom, roomId);
       socket.on(Events.AllUsers, createPeersConnections);
       socket.on(ServerEvents.RoomJoined, listenForPeer);
       socket.on(Events.onAnswer, handleAnswer);
-      socket.on(ServerEvents.onRoomLeft, destroyConnection);
+      socket.on(ServerEvents.onRoomLeft, handleRoomLeft);
     })();
 
     return () => {
@@ -121,22 +129,15 @@ export const RoomContextProvider = ({
       socket.off(ServerEvents.RoomJoined, listenForPeer);
       socket.off(Events.AllUsers, createPeersConnections);
       socket.off(Events.onAnswer, handleAnswer);
-      socket.off(ServerEvents.onRoomLeft, destroyConnection);
+      socket.off(ServerEvents.onRoomLeft, handleRoomLeft);
       destroyPeers();
     };
-  }, [
-    roomId,
-    userId,
-    socket,
-    destroyPeers,
-    destroyConnection,
-    createPeersConnections,
-    listenForPeer,
-    handleAnswer,
-    send,
-  ]);
+  });
 
-  const context = useMemo<IRoomContext>(() => ({ send }), [send]);
+  const context = useMemo<IRoomContext>(
+    () => ({ send, streams }),
+    [send, streams]
+  );
 
   return (
     <RoomContext.Provider value={context}>{children}</RoomContext.Provider>

@@ -7,15 +7,20 @@ import {
   ServerEvents,
 } from '@catstack/catwatch/types';
 
-let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
-export const getSocket = () => {
-  if (!socket) {
-    socket = io('http://localhost:3333', { withCredentials: true });
-  }
-  socket.on('connect_error', (error) => socket?.disconnect());
+const createSocket = () => {
+  let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
-  return socket;
+  return () => {
+    if (!socket) {
+      socket = io('http://localhost:3333', { withCredentials: true });
+    }
+    socket.on('connect_error', (error) => socket?.disconnect());
+
+    return socket;
+  };
 };
+
+export const getSocket = createSocket();
 
 export const createRoomQueryFn = async () => {
   const socket = getSocket();

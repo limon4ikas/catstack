@@ -4,9 +4,9 @@ import Peer, { SignalData } from 'simple-peer';
 import type { Instance } from 'simple-peer';
 
 import { SignalMessage, UserProfile } from '@catstack/catwatch/types';
+import { useUserMedia } from '@catstack/shared/hooks';
 
 import { handlerError } from './events';
-import { useUserMedia } from '@catstack/shared/hooks';
 
 const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -111,9 +111,6 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
       pc.on('stream', (stream) => {
         console.log(`⚡️ Got media stream from ${callerId}`, stream);
         onRemoteStream(callerId, stream);
-      });
-      pc.on('end', () => {
-        console.log('END EVENT RAN');
       });
       pc.on('error', handlerError);
       pc.on('connect', () => {
@@ -241,20 +238,8 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
   );
 
   const destroyConnection = useCallback(
-    (leftUserId: string | UserProfile) => {
+    (leftUserId: string) => {
       const peers = peersRef.current;
-
-      if (typeof leftUserId !== 'string') {
-        console.log(
-          `⚡️ Destroy connection from ${userId} to ${leftUserId.id}`
-        );
-
-        if (!peers[leftUserId.id]) {
-          console.warn('⚡️ No connection for this user, please check');
-        }
-        peers[leftUserId.id].destroy();
-        return;
-      }
 
       console.log(`⚡️ Destroy connection from ${userId} to ${leftUserId}`);
 
