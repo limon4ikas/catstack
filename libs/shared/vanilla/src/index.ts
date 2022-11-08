@@ -6,3 +6,4 @@ export * from './lib/dialog';
 export * from './lib/tabs';
 export * from './lib/avatar';
 export * from './lib/file-drop-zone';
+export * from './lib/alert-dialog';
