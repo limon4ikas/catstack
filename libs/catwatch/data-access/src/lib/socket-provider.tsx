@@ -37,18 +37,14 @@ export const useSocket = () => {
   return socket;
 };
 
-const onStatusChange = (listener: (isConnected: boolean) => void) => {
+const onStatusChange = (listener: () => void) => {
   const socket = getSocket();
 
-  const handleConnected = () => listener(true);
-  const handleDisconnected = () => listener(false);
-
-  socket.on('connect', handleConnected);
-  socket.on('disconnect', handleDisconnected);
-
+  socket.on('connect', listener);
+  socket.on('disconnect', listener);
   return () => {
-    socket.off('connect', handleConnected);
-    socket.off('disconnect', handleDisconnected);
+    socket.off('connect', listener);
+    socket.off('disconnect', listener);
   };
 };
 

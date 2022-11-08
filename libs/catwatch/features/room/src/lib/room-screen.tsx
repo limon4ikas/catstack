@@ -1,20 +1,17 @@
 import { useState } from 'react';
 
 import { cx } from '@catstack/shared/utils';
-import { useCopyToClipboard } from '@catstack/shared/hooks';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  toast,
 } from '@catstack/shared/vanilla';
 
 import { ChatWindowContainer } from './chat';
 import { RoomContextProvider } from './context';
-import { CreateTorrentForm } from './create-torrent-form';
 import { UsersListContainer } from './user-list';
-import { VideoPlayer } from './video-player';
+import { SharedVideoContainer } from './shared-video';
 
 export interface ChatFrameProps {
   roomId: string;
@@ -52,28 +49,6 @@ const ChatFrame = (props: ChatFrameProps) => {
   );
 };
 
-const MainFrame = () => {
-  const { copy } = useCopyToClipboard();
-  const [file, setFile] = useState<string | null>(null);
-
-  const handleCreatedTorrent = async (
-    name: string,
-    magnetUri: string,
-    file: File
-  ) => {
-    await copy(magnetUri);
-    toast(`Seeding torrent ${name}`);
-    toast('Copied magnet uri to clipboard!');
-    setFile(URL.createObjectURL(file));
-  };
-
-  if (!file) {
-    return <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
-  }
-
-  return <VideoPlayer file={file} />;
-};
-
 export interface RoomScreenProps {
   roomId: string;
 }
@@ -84,7 +59,7 @@ export const RoomScreen = ({ roomId }: RoomScreenProps) => {
       <div className="flex h-full">
         <RoomContextProvider roomId={roomId}>
           <div className="flex-grow p-4">
-            <MainFrame />
+            <SharedVideoContainer />
           </div>
           <div className="flex-shrink-0 w-96">
             <ChatFrame roomId={roomId} />

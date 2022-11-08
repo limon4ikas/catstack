@@ -14,7 +14,8 @@ const createSocket = () => {
     if (!socket) {
       socket = io('http://localhost:3333', { withCredentials: true });
     }
-    socket.on('connect_error', (error) => socket?.disconnect());
+
+    socket.on('connect_error', (_) => socket?.disconnect());
 
     return socket;
   };

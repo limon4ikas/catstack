@@ -84,3 +84,15 @@ export interface Connection {
 export const connectionsAdapter = createEntityAdapter<Connection>({
   selectId: (model) => model.userId,
 });
+
+/**
+|--------------------------------------------------
+| SUGGESTION TO DOWNLOAD FILE
+|--------------------------------------------------
+*/
+
+/** New torrent magner URI available */
+export const newTorrentFile = createAction<{
+  magnetUri: string;
+  user: UserProfile;
+}>('room/newFile');
