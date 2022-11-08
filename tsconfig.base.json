@@ -26,6 +26,9 @@
       "@catstack/catwatch/features/room": [
         "libs/catwatch/features/room/src/index.ts"
       ],
+      "@catstack/catwatch/features/start": [
+        "libs/catwatch/features/start/src/index.ts"
+      ],
       "@catstack/catwatch/models": ["libs/catwatch/models/src/index.ts"],
       "@catstack/catwatch/store": ["libs/catwatch/store/src/index.ts"],
       "@catstack/catwatch/types": ["libs/catwatch/types/src/index.ts"],

@@ -85,6 +85,10 @@ export const RoomContextProvider = ({
     dispatch(action);
   };
 
+  const handleRemoteStream = (userId: number, stream: MediaStream) => {
+    // console.log(stream);
+  };
+
   const {
     send,
     destroyConnection,
@@ -99,6 +103,7 @@ export const RoomContextProvider = ({
     onReturnSignal: handleReturnSignal,
     onConnection: handleConnection,
     onClose: handleConnectionClose,
+    onRemoteStream: handleRemoteStream,
   });
 
   useEffect(() => {
@@ -111,6 +116,7 @@ export const RoomContextProvider = ({
     })();
 
     return () => {
+      send(newRoomEventMessage(`User ${userId} left chat`));
       socket.emit(ClientEvents.LeaveRoom, roomId);
       socket.off(ServerEvents.RoomJoined, listenForPeer);
       socket.off(Events.AllUsers, createPeersConnections);
@@ -127,6 +133,7 @@ export const RoomContextProvider = ({
     createPeersConnections,
     listenForPeer,
     handleAnswer,
+    send,
   ]);
 
   const context = useMemo<IRoomContext>(() => ({ send }), [send]);

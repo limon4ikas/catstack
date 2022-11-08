@@ -7,6 +7,39 @@ import { useAuth } from '@catstack/catwatch/features/auth';
 
 import { getUsersWithConnections } from '../room-slice.selectors';
 
+type UserWithConnectionStatus = UserProfile & { isConnected: boolean };
+
+export interface UserListItemProps {
+  user: UserWithConnectionStatus;
+}
+
+export const UserListItem = ({ user }: UserListItemProps) => {
+  return (
+    <li key={user.id} className="flex items-center gap-3 px-4">
+      <div className="flex items-center w-full gap-2 px-4 py-2 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+        <Avatar username={user.username} isOnline={user.isConnected} />
+        <span className="text-base font-medium text-gray-700 group-hover:text-gray-900 dark:text-white">
+          {user.username}
+        </span>
+      </div>
+    </li>
+  );
+};
+
+export interface UserListProps {
+  users: UserWithConnectionStatus[];
+}
+
+export const UserList = (props: UserListProps) => {
+  return (
+    <ul className="flex flex-col gap-4 pt-3">
+      {props.users.map((user) => (
+        <UserListItem key={user.id} user={user} />
+      ))}
+    </ul>
+  );
+};
+
 export interface UsersListContainerProps {
   roomId: string;
 }
@@ -34,26 +67,5 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
     <div className="flex flex-col gap-4">
       <UserList users={users} />
     </div>
-  );
-};
-
-export interface UserListProps {
-  users: (UserProfile & { isConnected: boolean })[];
-}
-
-export const UserList = (props: UserListProps) => {
-  return (
-    <ul className="flex flex-col gap-4 pt-3">
-      {props.users.map((user) => (
-        <li key={user.id} className="flex items-center gap-3 px-4">
-          <div className="flex items-center w-full gap-2 px-4 py-2 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-            <Avatar username={user.username} isOnline={user.isConnected} />
-            <span className="text-base font-medium text-gray-700 group-hover:text-gray-900 dark:text-white">
-              {user.username}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
   );
 };

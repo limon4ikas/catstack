@@ -6,6 +6,7 @@ import type { Instance } from 'simple-peer';
 import { SignalMessage, UserProfile } from '@catstack/catwatch/types';
 
 import { handlerError } from './events';
+import { useUserMedia } from '@catstack/shared/hooks';
 
 const SERVERS: RTCConfiguration = {
   iceServers: [
@@ -28,7 +29,7 @@ export interface UsePeerFactoryConfig {
   /** Gets channel messages parses it and sends result to handler */
   onChannelMessage: (chunk: Uint8Array) => void;
   /** Called when peer offers user video/audio with media stream */
-  onRemoteStream: (stream: MediaStream) => void;
+  onRemoteStream: (userId: number, stream: MediaStream) => void;
   /** Called when connection is established with another peer */
   onConnection: (userId: number) => void;
   /** Called when connection is closed with another peer */
@@ -45,8 +46,12 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
     onClose,
   } = config;
 
+  const { getMedia } = useUserMedia();
+
   const createInitiatorPeer = useCallback(
     async (callerId: number, calleeId: number) => {
+      const stream = await getMedia({ video: true });
+
       console.log(
         `⚡️ Initiate peer connection to from ${callerId} to ${calleeId}`
       );
@@ -55,10 +60,15 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
         initiator: true,
         trickle: false,
         config: SERVERS,
+        stream,
       });
 
       pc.on('signal', (signal) => onSendSignal(signal, callerId, calleeId));
-      pc.on('stream', onRemoteStream);
+      pc.on('stream', (stream) => {
+        console.log(`⚡️ Got media stream from ${calleeId}`, stream);
+        onRemoteStream(calleeId, stream);
+      });
+
       pc.on('connect', () => {
         console.log(
           `⚡️ Initiator connection established from ${callerId} to ${calleeId}`
@@ -74,21 +84,37 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
       return pc;
     },
-    [onChannelMessage, onClose, onConnection, onRemoteStream, onSendSignal]
+    [
+      getMedia,
+      onChannelMessage,
+      onClose,
+      onConnection,
+      onRemoteStream,
+      onSendSignal,
+    ]
   );
 
   const createListenerPeer = useCallback(
     async (incomingSignal: SignalData, callerId: number) => {
+      const stream = await getMedia({ video: true });
+
       console.log(`⚡️ Waiting for peer connection from ${callerId}`);
 
       const pc = new Peer({
         initiator: false,
         trickle: false,
         config: SERVERS,
+        stream,
       });
 
       pc.on('signal', (signal) => onReturnSignal(signal, callerId));
-      pc.on('stream', onRemoteStream);
+      pc.on('stream', (stream) => {
+        console.log(`⚡️ Got media stream from ${callerId}`, stream);
+        onRemoteStream(callerId, stream);
+      });
+      pc.on('end', () => {
+        console.log('END EVENT RAN');
+      });
       pc.on('error', handlerError);
       pc.on('connect', () => {
         console.log(`⚡️ Listener connection established with ${callerId}`);
@@ -99,7 +125,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
       return pc;
     },
-    [onChannelMessage, onConnection, onRemoteStream, onReturnSignal]
+    [getMedia, onChannelMessage, onConnection, onRemoteStream, onReturnSignal]
   );
 
   return { createInitiatorPeer, createListenerPeer } as const;
@@ -108,7 +134,11 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 export interface UsePeersManagerConfig
   extends Pick<
     UsePeerFactoryConfig,
-    'onSendSignal' | 'onReturnSignal' | 'onConnection' | 'onClose'
+    | 'onSendSignal'
+    | 'onReturnSignal'
+    | 'onConnection'
+    | 'onClose'
+    | 'onRemoteStream'
   > {
   /** Id of the current user */
   userId: number;
@@ -124,6 +154,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     onReturnSignal,
     onConnection,
     onClose,
+    onRemoteStream,
   } = config;
   const peersRef = useRef<Record<string, Instance>>({});
 
@@ -159,7 +190,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     onConnection,
     onSendSignal,
     onReturnSignal,
-    onRemoteStream: () => console.log(''),
+    onRemoteStream,
   });
 
   /** Sends messages to peers */
