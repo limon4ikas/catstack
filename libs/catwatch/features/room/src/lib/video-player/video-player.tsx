@@ -6,11 +6,8 @@ import { throttle } from 'lodash';
 import { useAuth } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
-import {
-  getVideoPlayerState,
-  roomActions,
-  VideoPlayerActionPayload,
-} from '../room-slice';
+import { roomActions, VideoPlayerActionPayload } from '../room-slice';
+import { getVideoPlayerState } from '../room-slice.selectors';
 
 const useVideoSync = () => {
   const dispatch = useDispatch();

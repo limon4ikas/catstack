@@ -6,3 +6,4 @@ export * from './lib/chat';
 export * from './lib/create-torrent-form';
 export * from './lib/download-torrent-form';
 export * from './lib/context';
+export * from './lib/room-screen';

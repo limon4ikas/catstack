@@ -4,6 +4,7 @@ import {
   useEffect,
   useMemo,
   useContext,
+  useCallback,
 } from 'react';
 import { useDispatch } from 'react-redux';
 import { PayloadAction } from '@reduxjs/toolkit';
@@ -17,9 +18,10 @@ import {
 } from '@catstack/catwatch/types';
 import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
+import { useAuth } from '@catstack/catwatch/features/auth';
+import { newRoomEventMessage } from '@catstack/catwatch/actions';
 
 import { roomActions } from '../room-slice';
-import { useAuth } from '@catstack/catwatch/features/auth';
 
 export interface IRoomContext {
   send: (action: PayloadAction<unknown>) => void;
@@ -63,11 +65,15 @@ export const RoomContextProvider = ({
     socket.emit(Events.AnswerOffer, answer);
   };
 
-  const handleConnection = (userId: number) => {
-    dispatch(
-      roomActions.updateConnectionStatus({ userId, state: 'connected' })
-    );
-  };
+  const handleConnection = useCallback(
+    (userId: number) => {
+      dispatch(
+        roomActions.updateConnectionStatus({ userId, state: 'connected' })
+      );
+      dispatch(newRoomEventMessage(`User ${userId} joined`));
+    },
+    [dispatch]
+  );
 
   const handleConnectionClose = (userId: number) => {
     dispatch(

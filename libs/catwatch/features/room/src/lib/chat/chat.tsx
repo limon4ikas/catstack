@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { nanoid } from '@reduxjs/toolkit';
 import { useForm } from 'react-hook-form';
 
 import { RoomMessage } from '@catstack/catwatch/types';
+import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
+import { newUserMessage } from '@catstack/catwatch/actions';
 import { Input, Button } from '@catstack/shared/vanilla';
 import { useAuth } from '@catstack/catwatch/features/auth';
-import { newMessage } from '@catstack/catwatch/actions';
 
-import { getUserById, getAllRoomMessages } from '../room-slice';
-import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
+import { getAllRoomMessages } from '../room-slice.selectors';
 import { useRoomContext } from '../context';
 
 const stringToColour = (str: string) => {
@@ -61,17 +60,23 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
     <ul className="flex flex-col pt-3">
       {messages.map((message, idx) => (
         <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
-          <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-            <span
-              style={{ color: stringToColour(message.username) }}
-              className="text-sm font-semibold leading-5"
-            >
-              {message.username}:{' '}
-            </span>
-            <span className="text-sm leading-5 dark:text-white">
+          {message.type === 'chat-event' ? (
+            <span className="block py-1 text-sm font-semibold leading-5 text-center transition-colors rounded-md text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-700">
               {message.text}
             </span>
-          </div>
+          ) : (
+            <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+              <span
+                style={{ color: stringToColour(message.username) }}
+                className="text-sm font-semibold leading-5"
+              >
+                {message.username}:{' '}
+              </span>
+              <span className="text-sm leading-5 dark:text-white">
+                {message.text}
+              </span>
+            </div>
+          )}
         </li>
       ))}
     </ul>
@@ -84,26 +89,18 @@ export interface ChatWindowContainerProps {
 
 export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const dispatch = useDispatch();
-  const { id: userId } = useAuth();
-  const currentUser = useSelector(getUserById(userId));
+  const { username } = useAuth();
   const messages = useSelector(getAllRoomMessages);
   const { send } = useRoomContext();
   const chatRef = useRef<HTMLDivElement>(null);
   useGetRoomUsersQuery(props.roomId);
 
   const handleSendMessage = (text: string) => {
-    if (!currentUser) return;
     if (!text) return;
+    const messageAction = newUserMessage({ text, username });
 
-    const message: RoomMessage = {
-      id: nanoid(),
-      text,
-      timestamp: new Date().toISOString(),
-      username: currentUser.username,
-    };
-
-    send(newMessage(message));
-    dispatch(newMessage(message));
+    send(messageAction);
+    dispatch(messageAction);
   };
 
   useEffect(() => {

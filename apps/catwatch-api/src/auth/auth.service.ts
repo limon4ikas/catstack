@@ -11,7 +11,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService
-  ) {}
+  ) { }
 
   async validateUser(username: string, password: string): Promise<UserProfile> {
     const user = await this.usersService.findByUsername(username);
@@ -36,8 +36,7 @@ export class AuthService {
         expiresIn: '1h',
       }),
       this.jwtService.signAsync(user, {
-        secret: jwtConstants.accessSecret,
-        expiresIn: '7d',
+        secret: jwtConstants.accessSecret, expiresIn: '7d',
       }),
     ]);
 

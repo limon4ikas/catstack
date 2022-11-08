@@ -5,7 +5,7 @@ import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
 import { Avatar } from '@catstack/shared/vanilla';
 import { useAuth } from '@catstack/catwatch/features/auth';
 
-import { getUsersWithConnections } from '../room-slice';
+import { getUsersWithConnections } from '../room-slice.selectors';
 
 export interface UsersListContainerProps {
   roomId: string;

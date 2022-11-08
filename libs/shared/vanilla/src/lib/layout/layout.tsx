@@ -67,7 +67,7 @@ const Navigation = () => {
 export const Layout = (props: PropsWithChildren) => {
   return (
     <div className="h-full">
-      <nav className="fixed top-0 w-full bg-white shadow-sm dark:bg-gray-800">
+      <nav className="fixed top-0 w-full bg-white shadow dark:bg-gray-800">
         <div className="px-4 mx-auto sm:px-6 lg:px-8">
           <header className="flex justify-between h-16">
             <div className="flex items-center gap-4">
