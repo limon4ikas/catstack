@@ -43,6 +43,7 @@ export const UserProfileContainer = () => {
 
   const handleConnected = () => setIsSocketConnected(true);
   const handleDisconnected = () => setIsSocketConnected(false);
+
   useEffect(() => {
     socket.on('connect', handleConnected);
     socket.on('disconnect', handleDisconnected);

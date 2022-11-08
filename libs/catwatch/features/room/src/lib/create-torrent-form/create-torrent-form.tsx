@@ -10,7 +10,6 @@ export const CreateTorrentForm = ({ onCreatedTorrent }: SeedFileFormProps) => {
     const client = new WebTorrent();
     onCreatedTorrent('', '', file);
     // client.seed(file, function (torrent) {
-    //
     // });
   };
 

@@ -16,13 +16,13 @@ import {
   SignalMessage,
   UserProfile,
 } from '@catstack/catwatch/types';
+import { useEffectOnce } from '@catstack/shared/hooks';
 import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
 import { useAuth } from '@catstack/catwatch/features/auth';
 import { newRoomEventMessage } from '@catstack/catwatch/actions';
 
 import { roomActions } from '../room-slice';
-import { useEffectOnce } from 'react-use';
 
 export interface IRoomContext {
   send: (action: PayloadAction<unknown>) => void;

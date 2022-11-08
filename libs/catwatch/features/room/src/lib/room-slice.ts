@@ -28,7 +28,13 @@ import {
 export const ROOM_SLICE_NAME = 'room' as const;
 
 export type VideoState = 'play' | 'pause' | null;
+
 export type VideoPlayerActionPayload = { time: number; eventFrom: string };
+
+export type ConnectionStatusPayload = {
+  userId: EntityId;
+  state: ConnectionState;
+};
 
 export interface AppStateWithRoom {
   [ROOM_SLICE_NAME]: RoomSliceState;
@@ -78,7 +84,7 @@ export const roomSlice = createSlice({
     },
     updateConnectionStatus: (
       state,
-      action: PayloadAction<{ userId: EntityId; state: ConnectionState }>
+      action: PayloadAction<ConnectionStatusPayload>
     ) => {
       connectionsAdapter.upsertOne(state.connections, {
         userId: action.payload.userId,

@@ -64,34 +64,44 @@ export const UserList = (props: UserListProps) => {
   );
 };
 
+const UserListLoading = () => {
+  return <h1>Loading</h1>;
+};
+
+const UserListError = () => {
+  return <h1>Something went wrong</h1>;
+};
+
+const UserListEmpty = () => {
+  return (
+    <div className="flex justify-center pt-3">
+      <h1 className="text-lg font-medium text-gray-900 dark:text-white">
+        No users
+      </h1>
+    </div>
+  );
+};
+
 export interface UsersListContainerProps {
   roomId: string;
 }
 
 export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
-  const { isLoading, isError } = useGetRoomUsersQuery(roomId);
   const { id: userId } = useAuth();
-  const users = useSelector(getUsersWithConnections(userId));
   const { streams } = useRoomContext();
+  const users = useSelector(getUsersWithConnections(userId));
+  const { isLoading, isError } = useGetRoomUsersQuery(roomId);
 
   const usersWithStreams = users.map((user) => ({
     ...user,
     stream: streams[user.id],
   }));
 
-  if (isError) return <h1>Something went wrong</h1>;
+  if (isError) return <UserListError />;
 
-  if (isLoading) return <h1>Loading</h1>;
+  if (isLoading) return <UserListLoading />;
 
-  if (!users.length) {
-    return (
-      <div className="flex justify-center pt-3">
-        <h1 className="text-lg font-medium text-gray-900 dark:text-white">
-          No users
-        </h1>
-      </div>
-    );
-  }
+  if (!users.length) <UserListEmpty />;
 
   return (
     <div className="flex flex-col gap-4">
