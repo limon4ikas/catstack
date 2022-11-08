@@ -3,6 +3,8 @@ import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 
 import { cva } from '@catstack/shared/utils';
 
+import { DialogOverlay } from '../dialog';
+
 const alertDialogContentStyles = cva([
   'fixed z-50',
   'w-[95vw] max-w-md rounded-lg p-4 md:w-full',
@@ -26,6 +28,7 @@ export const AlertDialogContent = forwardRef<
   );
 });
 
+export const AlertDialogOverlay = DialogOverlay;
 export const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 export const AlertDialogTitle = AlertDialogPrimitive.Title;
 export const AlertDialogDescription = AlertDialogPrimitive.Description;

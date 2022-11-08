@@ -23,20 +23,21 @@ const StyledContent = forwardRef<
   />
 ));
 
-export const DialogContent = ({
-  children,
-  ...props
-}: DialogPrimitive.DialogContentProps) => {
+export const DialogContent = forwardRef<
+  HTMLDivElement,
+  DialogPrimitive.DialogContentProps
+>(({ children, ...props }) => {
   return (
     <DialogPrimitive.Portal>
       <StyledOverlay />
       <StyledContent {...props}>{children}</StyledContent>
     </DialogPrimitive.Portal>
   );
-};
+});
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogTitle = DialogPrimitive.Title;
 export const DialogDescription = DialogPrimitive.DialogDescription;
 export const DialogClose = DialogPrimitive.DialogClose;
+export const DialogOverlay = StyledOverlay;
