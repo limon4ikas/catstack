@@ -248,7 +248,6 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
   const destroyConnection = useCallback(
     (leftUserId: string) => {
       const peers = peersRef.current;
-
       console.log(
         `⚡️ Destroy connection from ${currentUser.username} to ${leftUserId}`
       );

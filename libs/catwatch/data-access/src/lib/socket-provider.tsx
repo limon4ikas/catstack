@@ -1,4 +1,10 @@
-import { createContext, PropsWithChildren, useContext, useRef } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import { Socket } from 'socket.io-client';
 
 import {
@@ -29,4 +35,29 @@ export const useSocket = () => {
   if (!socket) throw new Error('No socket found, check context');
 
   return socket;
+};
+
+const onStatusChange = (listener: (isConnected: boolean) => void) => {
+  const socket = getSocket();
+
+  const handleConnected = () => listener(true);
+  const handleDisconnected = () => listener(false);
+
+  socket.on('connect', handleConnected);
+  socket.on('disconnect', handleDisconnected);
+
+  return () => {
+    socket.off('connect', handleConnected);
+    socket.off('disconnect', handleDisconnected);
+  };
+};
+
+export const useSocketIsOnline = () => {
+  const socket = useSocket();
+
+  return useSyncExternalStore<boolean>(
+    onStatusChange,
+    () => socket.connected,
+    () => true
+  );
 };

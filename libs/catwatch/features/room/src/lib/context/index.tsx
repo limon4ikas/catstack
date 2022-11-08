@@ -113,8 +113,8 @@ export const RoomContextProvider = ({
     onRemoteStream: handleRemoteStream,
   });
 
-  const handleRoomLeft = (user: UserProfile) => {
-    destroyConnection(user.id.toString());
+  const handleRoomLeft = (leftUser: UserProfile) => {
+    destroyConnection(leftUser.id.toString());
   };
 
   useEffectOnce(() => {

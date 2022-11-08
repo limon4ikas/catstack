@@ -1,10 +1,9 @@
 import { BellIcon } from '@heroicons/react/24/outline';
 
 import { Avatar } from '@catstack/shared/vanilla';
-import { useSocket } from '@catstack/catwatch/data-access';
+import { useSocketIsOnline } from '@catstack/catwatch/data-access';
 
 import { useAuth } from '../auth-slice';
-import { useEffect, useState } from 'react';
 
 export interface UserProfileProps {
   isSocketConnected: boolean;
@@ -38,21 +37,7 @@ export const UserProfile = (props: UserProfileProps) => {
 
 export const UserProfileContainer = () => {
   const { username } = useAuth();
-  const socket = useSocket();
-  const [isSocketConnected, setIsSocketConnected] = useState(socket.connected);
-
-  const handleConnected = () => setIsSocketConnected(true);
-  const handleDisconnected = () => setIsSocketConnected(false);
-
-  useEffect(() => {
-    socket.on('connect', handleConnected);
-    socket.on('disconnect', handleDisconnected);
-
-    return () => {
-      socket.off('connect', handleConnected);
-      socket.off('disconnect', handleDisconnected);
-    };
-  });
+  const isSocketConnected = useSocketIsOnline();
 
   return (
     <UserProfile isSocketConnected={isSocketConnected} username={username} />
