@@ -7,6 +7,7 @@ import {
   withAuth,
 } from '@catstack/catwatch/features/auth';
 import { RoomScreen } from '@catstack/catwatch/features/room';
+import { SocketProvider } from '@catstack/catwatch/data-access';
 
 export const RoomPage: NextPage = () => {
   const router = useRouter();
@@ -15,9 +16,11 @@ export const RoomPage: NextPage = () => {
   if (!roomId) return null;
 
   return (
-    <Layout userProfile={<UserProfileContainer />}>
-      <RoomScreen roomId={roomId} />
-    </Layout>
+    <SocketProvider>
+      <Layout userProfile={<UserProfileContainer />}>
+        <RoomScreen roomId={roomId} />
+      </Layout>
+    </SocketProvider>
   );
 };
 

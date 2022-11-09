@@ -5,4 +5,5 @@ export {
   useUpdateEffect,
   useDeepCompareEffect,
   useLifecycles,
+  useUnmount,
 } from 'react-use';

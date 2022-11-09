@@ -2,7 +2,8 @@ import {
   createContext,
   PropsWithChildren,
   useContext,
-  useRef,
+  useEffect,
+  useState,
   useSyncExternalStore,
 } from 'react';
 import { Socket } from 'socket.io-client';
@@ -20,10 +21,21 @@ const SocketContext = createContext<Socket<
 > | null>(null);
 
 export const SocketProvider = (props: PropsWithChildren) => {
-  const socketRef = useRef(getSocket());
+  const [socket, setSocket] = useState<
+    Socket<ServerToClientEvents, ClientToServerEvents>
+  >(getSocket());
+
+  useEffect(() => {
+    const socket = getSocket();
+    socket.connect();
+    setSocket(socket);
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   return (
-    <SocketContext.Provider value={socketRef.current}>
+    <SocketContext.Provider value={socket}>
       {props.children}
     </SocketContext.Provider>
   );
@@ -31,8 +43,6 @@ export const SocketProvider = (props: PropsWithChildren) => {
 
 export const useSocket = () => {
   const socket = useContext(SocketContext);
-
-  if (!socket) throw new Error('No socket found, check context');
 
   return socket;
 };
@@ -53,7 +63,7 @@ export const useSocketIsOnline = () => {
 
   return useSyncExternalStore<boolean>(
     onStatusChange,
-    () => socket.connected,
+    () => socket?.connected || false,
     () => true
   );
 };

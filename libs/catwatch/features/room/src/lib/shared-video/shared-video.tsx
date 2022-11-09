@@ -7,6 +7,7 @@ import {
   newTorrentFile,
 } from '@catstack/catwatch/actions';
 import { ProgressBar, toast } from '@catstack/shared/vanilla';
+import { useUnmount } from '@catstack/shared/hooks';
 import { useAuth } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
@@ -24,6 +25,10 @@ export const SharedVideoContainer = () => {
   const { isSuggestionAlertOpen, magnetUri } = useSelector(getRoomState);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  useUnmount(() => {
+    if (file) URL.revokeObjectURL(file);
+  });
 
   const handleCreatedTorrent = async (
     torrentName: string,

@@ -202,11 +202,12 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
   const send = useCallback((action: PayloadAction<unknown>) => {
     const peers = peersRef.current;
 
-    Object.values(peers).forEach((peer) => {
-      if (!peer) {
+    Object.entries(peers).forEach(([userId, peer]) => {
+      if (!peer || peer.destroyed) {
         console.log(
-          '⚡️ Cannot send message because peer connection destroyed, probably you are in DEV mode or something went wrong'
+          '⚡️ Cannot send message because peer connection destroyed'
         );
+        delete peers[userId];
         return;
       }
 
