@@ -1,13 +1,11 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
-import { Layout } from '@catstack/shared/vanilla';
-import {
-  UserProfileContainer,
-  withAuth,
-} from '@catstack/catwatch/features/auth';
+import { withAuth } from '@catstack/catwatch/features/auth';
 import { RoomScreen } from '@catstack/catwatch/features/room';
 import { SocketProvider } from '@catstack/catwatch/data-access';
+
+import { MainLayout } from '../../components/layout';
 
 export const RoomPage: NextPage = () => {
   const router = useRouter();
@@ -17,9 +15,9 @@ export const RoomPage: NextPage = () => {
 
   return (
     <SocketProvider>
-      <Layout userProfile={<UserProfileContainer />}>
+      <MainLayout>
         <RoomScreen roomId={roomId} />
-      </Layout>
+      </MainLayout>
     </SocketProvider>
   );
 };

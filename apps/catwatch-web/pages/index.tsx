@@ -1,17 +1,15 @@
 import { NextPage } from 'next';
 
-import {
-  UserProfileContainer,
-  withAuth,
-} from '@catstack/catwatch/features/auth';
-import { Layout } from '@catstack/shared/vanilla';
+import { withAuth } from '@catstack/catwatch/features/auth';
 import { StartScreen } from '@catstack/catwatch/features/start';
+
+import { MainLayout } from '../components/layout';
 
 const Index: NextPage = () => {
   return (
-    <Layout userProfile={<UserProfileContainer />}>
+    <MainLayout>
       <StartScreen />
-    </Layout>
+    </MainLayout>
   );
 };
 
