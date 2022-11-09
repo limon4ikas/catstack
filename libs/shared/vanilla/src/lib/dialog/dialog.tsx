@@ -1,13 +1,19 @@
 import { forwardRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 
+import { cva } from '@catstack/shared/utils';
+
+export const dialogOverlayStyles = cva(
+  'fixed inset-0 z-20 bg-black/50 rdx-state-open:animate-fade-in rdx-state-closed:animate-fade-out'
+);
+
 const StyledOverlay = forwardRef<
   HTMLDivElement,
   DialogPrimitive.DialogOverlayProps
 >((props, ref) => (
   <DialogPrimitive.Overlay
-    className="fixed inset-0 z-20 bg-black/50 rdx-state-open:animate-fade-in rdx-state-closed:animate-fade-out"
     {...props}
+    className={dialogOverlayStyles()}
     ref={ref}
   />
 ));
@@ -26,11 +32,13 @@ const StyledContent = forwardRef<
 export const DialogContent = forwardRef<
   HTMLDivElement,
   DialogPrimitive.DialogContentProps
->(({ children, ...props }) => {
+>(({ children, ...props }, ref) => {
   return (
     <DialogPrimitive.Portal>
       <StyledOverlay />
-      <StyledContent {...props}>{children}</StyledContent>
+      <StyledContent {...props} ref={ref}>
+        {children}
+      </StyledContent>
     </DialogPrimitive.Portal>
   );
 });
