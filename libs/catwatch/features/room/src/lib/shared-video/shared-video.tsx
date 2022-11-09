@@ -49,7 +49,13 @@ export const SharedVideoContainer = () => {
     const client = new WebTorrent();
 
     client.add(magnetUri, function(torrent) {
+      const roomStartDownloadMessage = newRoomEventMessage(
+        `${user.username} started downloading file`
+      );
+
       setIsDownloading(true);
+      send(roomStartDownloadMessage);
+      dispatch(roomStartDownloadMessage);
 
       torrent.on(
         'download',
@@ -81,8 +87,26 @@ export const SharedVideoContainer = () => {
 
   const handleCancel = () => dispatch(roomActions.toggleDialog(false));
 
+  const renderContent = () => {
+    if (file) return <VideoPlayer file={file} />;
+
+    if (isDownloading) {
+      return (
+        <div className="w-full h-full grid place-items-center">
+          <h1 className="dark:text-white">Loading file...</h1>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-4 w-full h-full">
+        <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
+      </div>
+    );
+  };
+
   return (
-    <div className="relative p-4 w-full h-full">
+    <div className="relative w-full h-full">
       <div className="absolute top-0 left-0 w-full">
         {isDownloading && <ProgressBar value={downloadProgress} max={100} />}
       </div>
@@ -92,13 +116,7 @@ export const SharedVideoContainer = () => {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       >
-        <div className="w-full h-full">
-          {file ? (
-            <VideoPlayer file={file} />
-          ) : (
-            <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
-          )}
-        </div>
+        <div className="w-full h-full">{renderContent()}</div>
       </DownloadConfirmAlert>
     </div>
   );

@@ -112,7 +112,7 @@ export const VideoPlayer = ({ file }: VideoCallContainerProps) => {
   const { ref, listeners } = useVideoSync();
 
   return (
-    <div className="w-full h-full bg-black rounded-lg">
+    <div className="w-full h-full bg-black">
       <video
         id="video-player"
         controls
