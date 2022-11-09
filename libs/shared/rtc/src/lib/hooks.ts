@@ -50,7 +50,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
   const createInitiatorPeer = useCallback(
     async (caller: UserProfile, callee: UserProfile) => {
-      const stream = await getMedia({ video: true });
+      // const stream = await getMedia({ video: true });
 
       console.log(
         `⚡️ Initiate peer connection to from ${caller.username} to ${callee.username}`
@@ -60,7 +60,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
         initiator: true,
         trickle: false,
         config: SERVERS,
-        stream,
+        // stream,
       });
 
       pc.on('signal', (signal) => onSendSignal(signal, caller, callee));
@@ -96,7 +96,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
   const createListenerPeer = useCallback(
     async (incomingSignal: SignalData, callerId: UserProfile) => {
-      const stream = await getMedia({ video: true });
+      // const stream = await getMedia({ video: true });
 
       console.log(`⚡️ Waiting for peer connection from ${callerId.username}`);
 
@@ -104,7 +104,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
         initiator: false,
         trickle: false,
         config: SERVERS,
-        stream,
+        // stream,
       });
 
       pc.on('signal', (signal) => onReturnSignal(signal, callerId));

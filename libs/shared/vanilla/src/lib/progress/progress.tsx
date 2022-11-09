@@ -13,7 +13,7 @@ export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
       >
         <Progress.Indicator
           className="bg-indigo-600 w-full h-full transition-[width] duration-700"
-          style={{ width: `${props.value}%` }}
+          style={{ transform: `translateX(-${100 - (props.value ?? 0)}%)` }}
         />
       </Progress.Root>
     );

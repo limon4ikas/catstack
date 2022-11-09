@@ -11,9 +11,10 @@ export const CreateTorrentForm = forwardRef<HTMLDivElement, SeedFileFormProps>(
     const handleFileChange = async (file: File) => {
       const WebTorrent = (await import('webtorrent')).default;
       const client = new WebTorrent();
-      onCreatedTorrent('', '', file);
-      // client.seed(file, function(torrent) {
-      // });
+
+      client.seed(file, function(torrent) {
+        onCreatedTorrent(torrent.name, torrent.magnetURI, file);
+      });
     };
 
     return <FileDropZone onFileDrop={handleFileChange} ref={ref} />;

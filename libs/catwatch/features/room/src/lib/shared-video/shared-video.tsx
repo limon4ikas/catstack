@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { newTorrentFile } from '@catstack/catwatch/actions';
@@ -19,6 +19,7 @@ export const SharedVideoContainer = () => {
   const [file, setFile] = useState<string | null>(null);
   const { isSuggestionAlertOpen, magnetUri } = useSelector(getRoomState);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleCreatedTorrent = async (
     torrentName: string,
@@ -29,12 +30,6 @@ export const SharedVideoContainer = () => {
     send(newTorrentFile({ magnetUri, user }));
     setFile(URL.createObjectURL(file));
   };
-
-  useEffect(() => () => {
-    if (!file) return;
-    URL.revokeObjectURL(file);
-    setFile(null);
-  });
 
   const handleConfirm = async () => {
     dispatch(roomActions.toggleDialog(false));
@@ -47,6 +42,11 @@ export const SharedVideoContainer = () => {
     client.add(magnetUri, function(torrent) {
       torrent.on('download', function() {
         setDownloadProgress(torrent.progress * 100);
+        setIsDownloading(true);
+      });
+      torrent.on('done', function() {
+        setIsDownloading(false);
+        toast(`${torrent.name} finished downloading`);
       });
 
       const movie = torrent.files.find((file) => file.name.endsWith('.mp4'));
@@ -66,7 +66,7 @@ export const SharedVideoContainer = () => {
   return (
     <div className="relative p-4 w-full h-full">
       <div className="absolute top-0 left-0 w-full">
-        <ProgressBar value={downloadProgress} max={100} />
+        {isDownloading && <ProgressBar value={downloadProgress} max={100} />}
       </div>
 
       <DownloadConfirmAlert
@@ -74,11 +74,13 @@ export const SharedVideoContainer = () => {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       >
-        {file ? (
-          <VideoPlayer file={file} />
-        ) : (
-          <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
-        )}
+        <div className="w-full h-full">
+          {file ? (
+            <VideoPlayer file={file} />
+          ) : (
+            <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
+          )}
+        </div>
       </DownloadConfirmAlert>
     </div>
   );
