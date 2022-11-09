@@ -4,7 +4,6 @@ import { EntityState } from '@reduxjs/toolkit';
 
 import { catwatchConfig } from '@catstack/catwatch/config';
 import { UserProfile, ServerEvents } from '@catstack/catwatch/types';
-import { toast } from '@catstack/shared/vanilla';
 import { userAdapter, userJoined, userLeft } from '@catstack/catwatch/actions';
 
 import { createRoomQueryFn, getSocket } from './socket';
@@ -55,13 +54,11 @@ export const catWatchApi = createApi({
         if (!currenUserId) return;
 
         const onRoomJoinListener = async (user: UserProfile) => {
-          if (currenUserId !== user.id) toast(`${user.username} joined room`);
           updateCachedData((draft) => userAdapter.addOne(draft, user));
           dispatch(userJoined(user));
         };
 
         const onRoomLeaveListener = (user: UserProfile) => {
-          if (currenUserId !== user.id) toast(`${user.username} left room`);
           updateCachedData((draft) => userAdapter.removeOne(draft, user.id));
           dispatch(userLeft(user));
         };
@@ -78,7 +75,7 @@ export const catWatchApi = createApi({
         socket.off(ServerEvents.onRoomLeft, onRoomLeaveListener);
       },
     }),
-    getIsRoomExists: builder.query<unknown, string>({
+    getIsRoomAvailable: builder.query<unknown, string>({
       query: (roomId) => `rooms/${roomId}/available`,
     }),
   }),
@@ -90,7 +87,7 @@ export const {
   useCreateRoomMutation,
   useGetRoomUsersQuery,
   useLazyGetRoomUsersQuery,
-  useLazyGetIsRoomExistsQuery,
+  useLazyGetIsRoomAvailableQuery,
 } = catWatchApi;
 
 export const catWatchApiReducer = catWatchApi.reducer;

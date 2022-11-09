@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 
+import { useLazyGetIsRoomAvailableQuery } from '@catstack/catwatch/data-access';
 import {
   Button,
   Input,
@@ -8,7 +9,6 @@ import {
   DialogTrigger,
   DialogContent,
 } from '@catstack/shared/vanilla';
-import { useLazyGetIsRoomExistsQuery } from '@catstack/catwatch/data-access';
 
 export interface JoinRoomFormValues {
   roomId: string;
@@ -16,17 +16,22 @@ export interface JoinRoomFormValues {
 
 export const JoinRoomFormContainer = () => {
   const router = useRouter();
-  const [getIsRoomAvailable] = useLazyGetIsRoomExistsQuery();
+  const [getIsRoomAvailable] = useLazyGetIsRoomAvailableQuery();
   const { register, handleSubmit, formState } = useForm<JoinRoomFormValues>({
     defaultValues: { roomId: '1' },
   });
 
   const handleJoinRoomClick = async (form: JoinRoomFormValues) => {
-    const isAvailable = await getIsRoomAvailable(form.roomId).unwrap();
+    try {
+      const isAvailable = await getIsRoomAvailable(form.roomId).unwrap();
+      console.log(isAvailable);
 
-    if (!isAvailable) return;
+      if (!isAvailable) return;
 
-    router.push(`rooms/${form.roomId}`);
+      router.push(`rooms/${form.roomId}`);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (

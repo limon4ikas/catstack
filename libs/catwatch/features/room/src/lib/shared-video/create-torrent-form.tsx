@@ -9,8 +9,8 @@ export interface SeedFileFormProps {
 export const CreateTorrentForm = forwardRef<HTMLDivElement, SeedFileFormProps>(
   ({ onCreatedTorrent }, ref) => {
     const handleFileChange = async (file: File) => {
-      // const WebTorrent = (await import('webtorrent')).default;
-      // const client = new WebTorrent();
+      const WebTorrent = (await import('webtorrent')).default;
+      const client = new WebTorrent();
       onCreatedTorrent('', '', file);
       // client.seed(file, function(torrent) {
       // });

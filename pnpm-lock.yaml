@@ -29,6 +29,7 @@ specifiers:
   '@radix-ui/react-alert-dialog': ^1.0.2
   '@radix-ui/react-avatar': ^1.0.1
   '@radix-ui/react-dialog': ^1.0.2
+  '@radix-ui/react-progress': ^1.0.1
   '@radix-ui/react-tabs': ^1.0.1
   '@reduxjs/toolkit': ^1.8.6
   '@swc/core': ^1.2.173
@@ -117,6 +118,7 @@ dependencies:
   '@radix-ui/react-alert-dialog': 1.0.2_7ey2zzynotv32rpkwno45fsx4e
   '@radix-ui/react-avatar': 1.0.1_biqbaboplfbrettd7655fr4n2y
   '@radix-ui/react-dialog': 1.0.2_7ey2zzynotv32rpkwno45fsx4e
+  '@radix-ui/react-progress': 1.0.1_biqbaboplfbrettd7655fr4n2y
   '@radix-ui/react-tabs': 1.0.1_biqbaboplfbrettd7655fr4n2y
   '@reduxjs/toolkit': 1.8.6_kuo2ie247izvzll3jejufdtq3q
   '@types/express': 4.17.14
@@ -3150,6 +3152,19 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.4
       '@radix-ui/react-slot': 1.0.1_react@18.2.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
+
+  /@radix-ui/react-progress/1.0.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-QbDf9eguM5QtkvGcGHe/nUgloM9yfRGpJTB/Te5cn4WmVHvcbhHyHw39/rbCZxNX4E+GEPp5Vs6+mEoyIotUbg==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.19.4
+      '@radix-ui/react-context': 1.0.0_react@18.2.0
+      '@radix-ui/react-primitive': 1.0.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false

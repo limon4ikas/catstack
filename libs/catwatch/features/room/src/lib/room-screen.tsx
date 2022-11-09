@@ -58,7 +58,7 @@ export const RoomScreen = ({ roomId }: RoomScreenProps) => {
     <div className="h-full pt-[64px]">
       <div className="flex h-full">
         <RoomContextProvider roomId={roomId}>
-          <div className="flex-grow p-4">
+          <div className="flex-grow">
             <SharedVideoContainer />
           </div>
           <div className="flex-shrink-0 w-96">

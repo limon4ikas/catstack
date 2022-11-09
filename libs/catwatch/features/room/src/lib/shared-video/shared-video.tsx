@@ -36,12 +36,6 @@ export const SharedVideoContainer = () => {
     setFile(null);
   });
 
-  const content = !file ? (
-    <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
-  ) : (
-    <VideoPlayer file={file} />
-  );
-
   const handleConfirm = () => {
     console.log('CONFIRMJkk');
     dispatch(roomActions.toggleDialog(false));
@@ -58,7 +52,11 @@ export const SharedVideoContainer = () => {
       onConfirm={handleConfirm}
       onCancel={handleCancel}
     >
-      {content}
+      {file ? (
+        <VideoPlayer file={file} />
+      ) : (
+        <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
+      )}
     </DownloadConfirmAlert>
   );
 };
