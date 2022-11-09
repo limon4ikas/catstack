@@ -88,6 +88,7 @@ export const {
   useGetRoomUsersQuery,
   useLazyGetRoomUsersQuery,
   useLazyGetIsRoomAvailableQuery,
+  useLazyUserInfoQuery,
 } = catWatchApi;
 
 export const catWatchApiReducer = catWatchApi.reducer;

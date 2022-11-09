@@ -64,7 +64,7 @@ export const SharedVideoContainer = () => {
   const handleCancel = () => dispatch(roomActions.toggleDialog(false));
 
   return (
-    <div className="relative p-4">
+    <div className="relative p-4 w-full h-full">
       <div className="absolute top-0 left-0 w-full">
         <ProgressBar value={downloadProgress} max={100} />
       </div>
