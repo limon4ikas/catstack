@@ -1,35 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { newTorrentFile } from '@catstack/catwatch/actions';
-import { toast, FileDropZone } from '@catstack/shared/vanilla';
+import { toast } from '@catstack/shared/vanilla';
 import { useAuth } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
 import { VideoPlayer } from '../video-player';
-import { getUsersWithConnections } from '../room-slice.selectors';
-
-export interface SeedFileFormProps {
-  onCreatedTorrent: (name: string, magnetUri: string, file: File) => void;
-}
-
-export const CreateTorrentForm = ({ onCreatedTorrent }: SeedFileFormProps) => {
-  const handleFileChange = async (file: File) => {
-    const WebTorrent = (await import('webtorrent')).default;
-    const client = new WebTorrent();
-    onCreatedTorrent('', '', file);
-    // client.seed(file, function (torrent) {
-    // });
-  };
-
-  return <FileDropZone onFileDrop={handleFileChange} />;
-};
+import { getRoomState } from '../room-slice.selectors';
+import { roomActions } from '../room-slice';
+import { DownloadConfirmAlert } from './confirm-alert';
+import { CreateTorrentForm } from './create-torrent-form';
 
 export const SharedVideoContainer = () => {
-  const [file, setFile] = useState<string | null>(null);
-  const { send } = useRoomContext();
+  const dispatch = useDispatch();
   const user = useAuth();
-  const users = useSelector(getUsersWithConnections(user.id));
+  const { send } = useRoomContext();
+  const [file, setFile] = useState<string | null>(null);
+  const { isSuggestionAlertOpen, magnetUri } = useSelector(getRoomState);
 
   const handleCreatedTorrent = async (
     torrentName: string,
@@ -48,9 +36,29 @@ export const SharedVideoContainer = () => {
     setFile(null);
   });
 
-  if (!file) {
-    return <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
-  }
+  const content = !file ? (
+    <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
+  ) : (
+    <VideoPlayer file={file} />
+  );
 
-  return <VideoPlayer file={file} />;
+  const handleConfirm = () => {
+    console.log('CONFIRMJkk');
+    dispatch(roomActions.toggleDialog(false));
+  };
+
+  const handleCancel = () => {
+    console.log('CANCEL');
+    dispatch(roomActions.toggleDialog(false));
+  };
+
+  return (
+    <DownloadConfirmAlert
+      isOpen={isSuggestionAlertOpen}
+      onConfirm={handleConfirm}
+      onCancel={handleCancel}
+    >
+      {content}
+    </DownloadConfirmAlert>
+  );
 };

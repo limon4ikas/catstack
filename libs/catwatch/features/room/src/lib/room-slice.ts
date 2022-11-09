@@ -17,6 +17,7 @@ import {
   connectionsAdapter,
   ConnectionState,
   newRoomEventMessage,
+  newTorrentFile,
 } from '@catstack/catwatch/actions';
 
 /**
@@ -49,6 +50,8 @@ export interface RoomSliceState {
     lastSeek: number | null;
     eventFrom: string | null;
   };
+  magnetUri: string;
+  isSuggestionAlertOpen: boolean;
 }
 
 const initialState: RoomSliceState = {
@@ -56,6 +59,8 @@ const initialState: RoomSliceState = {
   messages: messagesAdapter.getInitialState(),
   connections: connectionsAdapter.getInitialState(),
   playerState: { videoState: null, lastSeek: null, eventFrom: null },
+  isSuggestionAlertOpen: false,
+  magnetUri: '',
 };
 
 /**
@@ -91,9 +96,16 @@ export const roomSlice = createSlice({
         state: action.payload.state,
       });
     },
+    toggleDialog: (state, action: PayloadAction<boolean>) => {
+      state.isSuggestionAlertOpen = action.payload;
+    },
     reset: () => initialState,
   },
   extraReducers(builder) {
+    builder.addCase(newTorrentFile, (state, action) => {
+      state.magnetUri = action.payload.magnetUri;
+      state.isSuggestionAlertOpen = true;
+    });
     builder.addCase(newUserMessage, (state, action) => {
       messagesAdapter.addOne(state.messages, action.payload);
     });
