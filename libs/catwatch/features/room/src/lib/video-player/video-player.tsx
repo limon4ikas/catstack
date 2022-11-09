@@ -36,7 +36,9 @@ const useVideoSync = () => {
         const payload = { time: video.currentTime, eventFrom: username };
         const action = playerAction(payload);
 
-        if (eventFrom !== username) return dispatch(action);
+        if (eventFrom && eventFrom !== username) {
+          return dispatch(action);
+        }
 
         return send(action);
       };

@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { throttle } from 'lodash';
 
-import { newTorrentFile } from '@catstack/catwatch/actions';
+import {
+  newRoomEventMessage,
+  newTorrentFile,
+} from '@catstack/catwatch/actions';
 import { ProgressBar, toast } from '@catstack/shared/vanilla';
 import { useAuth } from '@catstack/catwatch/features/auth';
 
@@ -40,13 +44,22 @@ export const SharedVideoContainer = () => {
     const client = new WebTorrent();
 
     client.add(magnetUri, function(torrent) {
-      torrent.on('download', function() {
-        setDownloadProgress(torrent.progress * 100);
-        setIsDownloading(true);
-      });
+      setIsDownloading(true);
+
+      torrent.on(
+        'download',
+        throttle(function() {
+          setDownloadProgress(torrent.progress * 100);
+        }, 500)
+      );
+
       torrent.on('done', function() {
+        const readyAction = newRoomEventMessage(`${user.username} is ready`);
+
         setIsDownloading(false);
         toast(`${torrent.name} finished downloading`);
+        send(readyAction);
+        dispatch(readyAction);
       });
 
       const movie = torrent.files.find((file) => file.name.endsWith('.mp4'));

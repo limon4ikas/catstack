@@ -24,7 +24,6 @@ export const JoinRoomFormContainer = () => {
   const handleJoinRoomClick = async (form: JoinRoomFormValues) => {
     try {
       const isAvailable = await getIsRoomAvailable(form.roomId).unwrap();
-      console.log(isAvailable);
 
       if (!isAvailable) return;
 
