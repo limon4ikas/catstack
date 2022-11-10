@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
 import { UserProfile } from '@catstack/catwatch/types';
@@ -10,7 +10,6 @@ import {
 } from '@catstack/catwatch/data-access';
 
 import { selectUser } from './auth-slice.selectors';
-import { useRouter } from 'next/router';
 
 export const AUTH_SLICE_NAME = 'auth';
 
@@ -39,6 +38,9 @@ export const authSlice = createSlice({
         state.user = action.payload;
       }
     );
+    builder.addMatcher(catWatchApi.endpoints.logout.matchFulfilled, (state) => {
+      state.user = null;
+    });
   },
 });
 
@@ -48,7 +50,7 @@ export const authReducer = authSlice.reducer;
 export const useAuthUser = () => {
   const user = useSelector(selectUser);
 
-  if (!user) throw new Error('You are not authenticated');
+  if (!user) throw new Error('No user found, are you authenticated?');
 
   return user;
 };

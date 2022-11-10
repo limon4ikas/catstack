@@ -6,7 +6,8 @@ import {
   AUTH_SLICE_NAME,
 } from './auth-slice';
 
-export const getAuthState = (state: RootStateWithAuth): AuthSliceState =>
-  state[AUTH_SLICE_NAME];
+export const getAuthState = (state: RootStateWithAuth): AuthSliceState => {
+  return state[AUTH_SLICE_NAME];
+};
 
 export const selectUser = createSelector(getAuthState, (state) => state.user);

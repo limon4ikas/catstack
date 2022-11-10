@@ -112,19 +112,19 @@ export const roomSlice = createSlice({
     builder.addCase(newRoomEventMessage, (state, action) => {
       messagesAdapter.addOne(state.messages, action.payload);
     });
+    builder.addCase(userJoined, (state, action) => {
+      userAdapter.addOne(state.participants, action.payload);
+    });
+    builder.addCase(userLeft, (state, action) => {
+      userAdapter.removeOne(state.participants, action.payload.id);
+      connectionsAdapter.removeOne(state.connections, action.payload.id);
+    });
     builder.addMatcher(
       catWatchApi.endpoints.getRoomUsers.matchFulfilled,
       (state, action) => {
         state.participants = action.payload;
       }
     );
-    builder.addMatcher(userJoined.match, (state, action) => {
-      userAdapter.addOne(state.participants, action.payload);
-    });
-    builder.addMatcher(userLeft.match, (state, action) => {
-      userAdapter.removeOne(state.participants, action.payload.id);
-      connectionsAdapter.removeOne(state.connections, action.payload.id);
-    });
   },
 });
 

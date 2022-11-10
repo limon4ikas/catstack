@@ -42,19 +42,9 @@ export const catWatchApi = createApi({
       },
       async onCacheEntryAdded(
         _roomId,
-        {
-          updateCachedData,
-          cacheDataLoaded,
-          cacheEntryRemoved,
-          getState,
-          dispatch,
-        }
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch }
       ) {
         const socket = getSocket();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const currenUserId = (getState() as any).auth.user?.id;
-
-        if (!currenUserId) return;
 
         const onRoomJoinListener = async (user: UserProfile) => {
           updateCachedData((draft) => userAdapter.addOne(draft, user));
