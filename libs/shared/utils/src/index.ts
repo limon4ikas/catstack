@@ -26,19 +26,15 @@ export const prettyBytes = (num: number) => {
   return (neg ? '-' : '') + num + ' ' + unit;
 };
 
-export const getRemainingTime = (timeRemaining: number, isDone: boolean) => {
+export const getRemainingTime = (timeRemaining: number) => {
   let remaining = '';
 
-  if (isDone) {
-    remaining = 'Done.';
-  } else {
-    const rawSeconds = timeRemaining / 1000;
-    const duration = intervalToDuration({ start: 0, end: rawSeconds * 1000 });
-    const hours = duration.hours?.toString().padStart(2, '0');
-    const minutes = duration.minutes?.toString().padStart(2, '0');
-    const seconds = duration.seconds?.toString().padStart(2, '0');
-    remaining = `${hours}:${minutes}:${seconds}`;
-  }
+  const rawSeconds = timeRemaining / 1000;
+  const duration = intervalToDuration({ start: 0, end: rawSeconds * 1000 });
+  const hours = duration.hours?.toString().padStart(2, '0');
+  const minutes = duration.minutes?.toString().padStart(2, '0');
+  const seconds = duration.seconds?.toString().padStart(2, '0');
+  remaining = `${hours}:${minutes}:${seconds}`;
 
   return remaining;
 };

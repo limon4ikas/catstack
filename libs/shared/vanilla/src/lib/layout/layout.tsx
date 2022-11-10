@@ -4,17 +4,13 @@ import Link from 'next/link';
 const Logo = () => {
   return (
     <Link href="/" className="flex">
-      <div className="flex items-center flex-shrink-0 dark:text-white">
+      <div className="flex items-center flex-shrink-0 dark:text-white gap-4">
         <img
-          className="block w-auto h-8 lg:hidden"
+          className="block w-auto h-8"
           src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
           alt="Catwatch"
         />
-        <img
-          className="hidden w-auto h-8 lg:block"
-          src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
-          alt="Catwatch"
-        />
+        <span className="text-xl font-bold">Catwatch</span>
       </div>
       <div />
     </Link>

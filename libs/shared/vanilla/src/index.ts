@@ -9,3 +9,4 @@ export * from './lib/file-drop-zone';
 export * from './lib/alert-dialog';
 export * from './lib/progress';
 export * from './lib/popover';
+export * from './lib/torrent-info';

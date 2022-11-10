@@ -6,7 +6,12 @@ import {
   newRoomEventMessage,
   newTorrentFile,
 } from '@catstack/catwatch/actions';
-import { ProgressBar, toast } from '@catstack/shared/vanilla';
+import {
+  ProgressBar,
+  toast,
+  TorrenDownloadInfo,
+  TorrentDownloadInfoProps,
+} from '@catstack/shared/vanilla';
 import { useUnmount } from '@catstack/shared/hooks';
 import { useAuthUser } from '@catstack/catwatch/features/auth';
 
@@ -16,7 +21,6 @@ import { getRoomState } from '../room-slice.selectors';
 import { roomActions } from '../room-slice';
 import { DownloadConfirmAlert } from './confirm-alert';
 import { CreateTorrentForm } from './create-torrent-form';
-import { getRemainingTime, prettyBytes } from '@catstack/shared/utils';
 
 export const SharedVideoContainer = () => {
   const dispatch = useDispatch();
@@ -24,11 +28,14 @@ export const SharedVideoContainer = () => {
   const { send } = useRoomContext();
   const [file, setFile] = useState<string | null>(null);
   const { isSuggestionAlertOpen, magnetUri } = useSelector(getRoomState);
-  const [downloadProgress, setDownloadProgress] = useState(0);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadSpeed, setDownloadSpeed] = useState('');
-  const [uploadSpeed, setUploadSpeed] = useState('');
-  const [remaining, setRemainig] = useState('');
+  const [torrentInfo, setTorrentInfo] = useState<TorrentDownloadInfoProps>({
+    timeRemaining: 0,
+    peers: 0,
+    uploadSpeed: 0,
+    downloadSpeed: 0,
+    isLoading: false,
+    progrees: 0,
+  });
 
   useUnmount(() => {
     if (file) URL.revokeObjectURL(file);
@@ -57,24 +64,30 @@ export const SharedVideoContainer = () => {
         `${user.username} started downloading file`
       );
 
-      setIsDownloading(true);
+      setTorrentInfo((prev) => ({ ...prev, isLoading: true }));
       send(roomStartDownloadMessage);
       dispatch(roomStartDownloadMessage);
 
       torrent.on(
         'download',
         throttle(function () {
-          setDownloadProgress(torrent.progress * 100);
-          setDownloadSpeed(prettyBytes(torrent.downloadSpeed));
-          setUploadSpeed(prettyBytes(torrent.uploadSpeed));
-          setRemainig(getRemainingTime(torrent.timeRemaining, torrent.done));
+          const info: TorrentDownloadInfoProps = {
+            downloadSpeed: torrent.downloadSpeed,
+            uploadSpeed: torrent.uploadSpeed,
+            timeRemaining: torrent.timeRemaining,
+            peers: torrent.numPeers,
+            progrees: torrent.progress * 100,
+            isLoading: true,
+          };
+
+          setTorrentInfo(info);
         }, 500)
       );
 
       torrent.on('done', function () {
         const readyAction = newRoomEventMessage(`${user.username} is ready`);
 
-        setIsDownloading(false);
+        setTorrentInfo((prev) => ({ ...prev, isLoading: false }));
         toast(`${torrent.name} finished downloading`);
         send(readyAction);
         dispatch(readyAction);
@@ -96,13 +109,17 @@ export const SharedVideoContainer = () => {
   const handleCancel = () => dispatch(roomActions.toggleDialog(false));
 
   const renderContent = () => {
-    if (isDownloading) {
+    if (torrentInfo.isLoading) {
       return (
         <div className="w-full h-full grid place-items-center">
-          <h1 className="dark:text-white">Loading file...</h1>
-          <h1 className="dark:text-white">Download Speed: {downloadSpeed}</h1>
-          <h1 className="dark:text-white">Upload Speed: {uploadSpeed}</h1>
-          <h1 className="dark:text-white">Time remainig: {remaining}</h1>
+          <TorrenDownloadInfo
+            downloadSpeed={torrentInfo.downloadSpeed}
+            uploadSpeed={torrentInfo.uploadSpeed}
+            timeRemaining={torrentInfo.timeRemaining}
+            peers={torrentInfo.peers}
+            isLoading={torrentInfo.isLoading}
+            progrees={torrentInfo.progrees}
+          />
         </div>
       );
     }
@@ -119,7 +136,9 @@ export const SharedVideoContainer = () => {
   return (
     <div className="relative h-full">
       <div className="absolute top-0 left-0 w-full">
-        {isDownloading && <ProgressBar value={downloadProgress} max={100} />}
+        {torrentInfo.isLoading && (
+          <ProgressBar value={torrentInfo.progrees} max={100} />
+        )}
       </div>
 
       <DownloadConfirmAlert
