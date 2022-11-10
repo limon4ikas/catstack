@@ -10,6 +10,33 @@ import {
   DialogContent,
 } from '@catstack/shared/vanilla';
 
+export interface JoinRoomFormProps {
+  onSubmit: (values: JoinRoomFormValues) => void;
+}
+
+export const JoinRoomForm = (props: JoinRoomFormProps) => {
+  const { register, handleSubmit, formState } = useForm<JoinRoomFormValues>({
+    defaultValues: { roomId: '1' },
+  });
+
+  return (
+    <form
+      className="flex items-center gap-4"
+      onSubmit={handleSubmit(props.onSubmit)}
+    >
+      <Input
+        label="Join room"
+        type="text"
+        placeholder="Room ID"
+        {...register('roomId')}
+      />
+      <Button type="submit">
+        {formState.isSubmitting ? 'Joining' : 'Join'}
+      </Button>
+    </form>
+  );
+};
+
 export interface JoinRoomFormValues {
   roomId: string;
 }
@@ -17,11 +44,8 @@ export interface JoinRoomFormValues {
 export const JoinRoomFormContainer = () => {
   const router = useRouter();
   const [getIsRoomAvailable] = useLazyGetIsRoomAvailableQuery();
-  const { register, handleSubmit, formState } = useForm<JoinRoomFormValues>({
-    defaultValues: { roomId: '1' },
-  });
 
-  const handleJoinRoomClick = async (form: JoinRoomFormValues) => {
+  const handleJoinRoomSubmit = async (form: JoinRoomFormValues) => {
     try {
       const isAvailable = await getIsRoomAvailable(form.roomId).unwrap();
 
@@ -39,20 +63,7 @@ export const JoinRoomFormContainer = () => {
         <Button>Join room</Button>
       </DialogTrigger>
       <DialogContent>
-        <form
-          className="flex items-center gap-4"
-          onSubmit={handleSubmit(handleJoinRoomClick)}
-        >
-          <Input
-            label="Join room"
-            type="text"
-            placeholder="Room ID"
-            {...register('roomId')}
-          />
-          <Button type="submit">
-            {formState.isSubmitting ? 'Joining' : 'Join'}
-          </Button>
-        </form>
+        <JoinRoomForm onSubmit={handleJoinRoomSubmit} />
       </DialogContent>
     </Dialog>
   );

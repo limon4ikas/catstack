@@ -58,6 +58,7 @@ specifiers:
   cookie-parser: ^1.4.6
   core-js: ^3.6.5
   cypress: ^10.7.0
+  date-fns: ^2.29.3
   eslint: ~8.15.0
   eslint-config-next: 13.0.0
   eslint-config-prettier: 8.1.0
@@ -132,6 +133,7 @@ dependencies:
   clsx: 1.2.1
   cookie-parser: 1.4.6
   core-js: 3.26.0
+  date-fns: 2.29.3
   express: 4.18.2
   lodash: 4.17.21
   nanoid: 3.3.4
@@ -6003,6 +6005,11 @@ packages:
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
     dev: true
+
+  /date-fns/2.29.3:
+    resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
+    engines: {node: '>=0.11'}
+    dev: false
 
   /dayjs/1.11.6:
     resolution: {integrity: sha512-zZbY5giJAinCG+7AGaw0wIhNZ6J8AhWuSXKvuc1KAyMiRsvGQWqh4L+MomvhdAYjN+lqvVCMq1I41e3YHvXkyQ==}

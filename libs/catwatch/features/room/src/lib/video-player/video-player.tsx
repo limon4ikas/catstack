@@ -36,7 +36,7 @@ const useVideoSync = () => {
         const payload = { time: video.currentTime, eventFrom: username };
         const action = playerAction(payload);
 
-        if (eventFrom) {
+        if (eventFrom && eventFrom !== username) {
           return dispatch(action);
         }
 
@@ -82,7 +82,6 @@ const useVideoSync = () => {
   useEffect(() => {
     const handlePlayPauseSync = async () => {
       const videoEl = await getVideo();
-      console.log(videoEl, eventFrom, username);
 
       if (eventFrom === username) return;
 

@@ -28,7 +28,7 @@ const Navigation = () => {
         href="/"
         className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white"
       >
-        Room
+        Join
       </Link>
       <Link
         href="/convert"

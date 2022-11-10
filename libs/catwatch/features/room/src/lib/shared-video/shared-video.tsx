@@ -16,6 +16,7 @@ import { getRoomState } from '../room-slice.selectors';
 import { roomActions } from '../room-slice';
 import { DownloadConfirmAlert } from './confirm-alert';
 import { CreateTorrentForm } from './create-torrent-form';
+import { getRemainingTime, prettyBytes } from '@catstack/shared/utils';
 
 export const SharedVideoContainer = () => {
   const dispatch = useDispatch();
@@ -25,6 +26,9 @@ export const SharedVideoContainer = () => {
   const { isSuggestionAlertOpen, magnetUri } = useSelector(getRoomState);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadSpeed, setDownloadSpeed] = useState('');
+  const [uploadSpeed, setUploadSpeed] = useState('');
+  const [remaining, setRemainig] = useState('');
 
   useUnmount(() => {
     if (file) URL.revokeObjectURL(file);
@@ -48,7 +52,7 @@ export const SharedVideoContainer = () => {
     const WebTorrent = (await import('webtorrent')).default;
     const client = new WebTorrent();
 
-    client.add(magnetUri, function(torrent) {
+    client.add(magnetUri, function (torrent) {
       const roomStartDownloadMessage = newRoomEventMessage(
         `${user.username} started downloading file`
       );
@@ -59,12 +63,15 @@ export const SharedVideoContainer = () => {
 
       torrent.on(
         'download',
-        throttle(function() {
+        throttle(function () {
           setDownloadProgress(torrent.progress * 100);
+          setDownloadSpeed(prettyBytes(torrent.downloadSpeed));
+          setUploadSpeed(prettyBytes(torrent.uploadSpeed));
+          setRemainig(getRemainingTime(torrent.timeRemaining, torrent.done));
         }, 500)
       );
 
-      torrent.on('done', function() {
+      torrent.on('done', function () {
         const readyAction = newRoomEventMessage(`${user.username} is ready`);
 
         setIsDownloading(false);
@@ -77,9 +84,10 @@ export const SharedVideoContainer = () => {
 
       if (!movie) return;
 
-      movie.getBlobURL(function(err, url) {
+      movie.getBlobURL(function (err, url) {
         if (err) throw err;
         if (!url) throw new Error('No Url');
+        // downloadFile(`${torrent.name}`, url);
         setFile(url);
       });
     });
@@ -88,15 +96,18 @@ export const SharedVideoContainer = () => {
   const handleCancel = () => dispatch(roomActions.toggleDialog(false));
 
   const renderContent = () => {
-    if (file) return <VideoPlayer file={file} />;
-
     if (isDownloading) {
       return (
         <div className="w-full h-full grid place-items-center">
           <h1 className="dark:text-white">Loading file...</h1>
+          <h1 className="dark:text-white">Download Speed: {downloadSpeed}</h1>
+          <h1 className="dark:text-white">Upload Speed: {uploadSpeed}</h1>
+          <h1 className="dark:text-white">Time remainig: {remaining}</h1>
         </div>
       );
     }
+
+    if (file) return <VideoPlayer file={file} />;
 
     return (
       <div className="p-4 h-full">

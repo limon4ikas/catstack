@@ -7,7 +7,3 @@ body,
 #__next {
   height: 100%;
 }
-
-body {
-  @apply bg-gray-100 dark:bg-gray-900;
-}
