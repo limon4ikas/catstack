@@ -8,13 +8,12 @@ import {
 } from '@catstack/catwatch/types';
 
 const createSocket = () => {
-  let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
+  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
+    'http://localhost:3333',
+    { withCredentials: true, autoConnect: false }
+  );
 
   return () => {
-    if (!socket) {
-      socket = io('http://localhost:3333', { withCredentials: true });
-    }
-
     return socket;
   };
 };

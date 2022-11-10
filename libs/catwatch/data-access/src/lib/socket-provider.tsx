@@ -2,8 +2,7 @@ import {
   createContext,
   PropsWithChildren,
   useContext,
-  useEffect,
-  useState,
+  useRef,
   useSyncExternalStore,
 } from 'react';
 import { Socket } from 'socket.io-client';
@@ -12,30 +11,28 @@ import {
   ServerToClientEvents,
   ClientToServerEvents,
 } from '@catstack/catwatch/types';
+import { useEffectOnce } from '@catstack/shared/hooks';
 
 import { getSocket } from './socket';
 
-const SocketContext = createContext<Socket<
-  ServerToClientEvents,
-  ClientToServerEvents
-> | null>(null);
+const SocketContext = createContext<
+  Socket<ServerToClientEvents, ClientToServerEvents>
+>(getSocket());
 
 export const SocketProvider = (props: PropsWithChildren) => {
-  const [socket, setSocket] = useState<
-    Socket<ServerToClientEvents, ClientToServerEvents>
-  >(getSocket());
+  const socketRef = useRef(getSocket());
 
-  useEffect(() => {
-    const socket = getSocket();
+  useEffectOnce(() => {
+    const socket = socketRef.current;
+
     socket.connect();
-    setSocket(socket);
     return () => {
       socket.close();
     };
-  }, []);
+  });
 
   return (
-    <SocketContext.Provider value={socket}>
+    <SocketContext.Provider value={socketRef.current}>
       {props.children}
     </SocketContext.Provider>
   );

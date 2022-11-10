@@ -59,7 +59,7 @@ export const SharedVideoContainer = () => {
     const WebTorrent = (await import('webtorrent')).default;
     const client = new WebTorrent();
 
-    client.add(magnetUri, function (torrent) {
+    client.add(magnetUri, function(torrent) {
       const roomStartDownloadMessage = newRoomEventMessage(
         `${user.username} started downloading file`
       );
@@ -70,21 +70,20 @@ export const SharedVideoContainer = () => {
 
       torrent.on(
         'download',
-        throttle(function () {
-          const info: TorrentDownloadInfoProps = {
+        throttle(function() {
+          const info: Partial<TorrentDownloadInfoProps> = {
             downloadSpeed: torrent.downloadSpeed,
             uploadSpeed: torrent.uploadSpeed,
             timeRemaining: torrent.timeRemaining,
             peers: torrent.numPeers,
             progrees: torrent.progress * 100,
-            isLoading: true,
           };
 
-          setTorrentInfo(info);
+          setTorrentInfo((prev) => ({ ...prev, ...info }));
         }, 500)
       );
 
-      torrent.on('done', function () {
+      torrent.on('done', function() {
         const readyAction = newRoomEventMessage(`${user.username} is ready`);
 
         setTorrentInfo((prev) => ({ ...prev, isLoading: false }));
@@ -97,7 +96,7 @@ export const SharedVideoContainer = () => {
 
       if (!movie) return;
 
-      movie.getBlobURL(function (err, url) {
+      movie.getBlobURL(function(err, url) {
         if (err) throw err;
         if (!url) throw new Error('No Url');
         // downloadFile(`${torrent.name}`, url);
