@@ -29,7 +29,7 @@ const StyledContent = forwardRef<
   AlertDialogPrimitive.DialogContentProps
 >((props, ref) => (
   <AlertDialogPrimitive.Content
-    className="fixed z-50 w-[95vw] max-w-md rounded-lg p-4 md:w-full top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] bg-white dark:bg-gray-800 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75 rdx-state-open:animate-fade-in-scale rdx-state-closed:animate-fade-out"
+    className={alertDialogContentStyles()}
     {...props}
     ref={ref}
   />
@@ -42,11 +42,7 @@ export const AlertDialogContent = forwardRef<
   return (
     <AlertDialogPrimitive.Portal>
       <StyledOverlay />
-      <StyledContent
-        className={alertDialogContentStyles()}
-        {...props}
-        ref={ref}
-      >
+      <StyledContent {...props} ref={ref}>
         {props.children}
       </StyledContent>
     </AlertDialogPrimitive.Portal>

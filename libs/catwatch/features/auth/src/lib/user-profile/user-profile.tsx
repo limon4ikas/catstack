@@ -1,13 +1,17 @@
 import { forwardRef } from 'react';
-import { BellIcon } from '@heroicons/react/24/outline';
-
-import { Avatar, Popover, PopoverContent } from '@catstack/shared/vanilla';
-import { useSocketIsOnline } from '@catstack/catwatch/data-access';
-
-import { useAuth } from '../auth-slice';
-import { PopoverTrigger } from '@radix-ui/react-popover';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { BellIcon } from '@heroicons/react/24/outline';
+
+import {
+  Avatar,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@catstack/shared/vanilla';
+import { useSocketIsOnline } from '@catstack/catwatch/data-access';
+
+import { useAuth, useAuthUser } from '../auth-slice';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type NotificationBellProps = {};
@@ -37,7 +41,7 @@ export interface UserProfileProps {
 export const UserProfile = forwardRef<HTMLDivElement, UserProfileProps>(
   (props, ref) => {
     return (
-      <div className="relative ml-3" ref={ref}>
+      <div className="relative" ref={ref}>
         <div>
           <div className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <span className="sr-only">Open user menu</span>
@@ -53,16 +57,18 @@ export const UserProfile = forwardRef<HTMLDivElement, UserProfileProps>(
 );
 
 export const UserProfileContainer = () => {
-  const { username } = useAuth();
-  const isSocketConnected = useSocketIsOnline();
   const router = useRouter();
+  const { username } = useAuthUser();
+  const { logout } = useAuth();
+  const isSocketConnected = useSocketIsOnline();
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = async () => {
+    await logout();
     router.push('/auth/login');
   };
 
   return (
-    <div className="hidden sm:ml-6 sm:flex sm:items-center">
+    <div className="hidden sm:ml-6 sm:flex sm:items-center sm:gap-4">
       <NotificationsBell />
       <Popover>
         <PopoverTrigger>
@@ -72,22 +78,22 @@ export const UserProfileContainer = () => {
           />
         </PopoverTrigger>
         <PopoverContent align="end" sideOffset={4}>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 w-48 shadow-md flex flex-col gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 py-1 w-48 shadow-lg flex flex-col dark:border-gray-700">
             <Link
               href="/user/profile"
-              className="text-gray-700 dark:text-gray-300"
+              className="block text-gray-700 dark:text-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Profile
             </Link>
             <Link
               href="/user/settings"
-              className="text-gray-700 dark:text-gray-300"
+              className="block jtext-gray-700 dark:text-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Settings
             </Link>
             <button
               onClick={handleLogoutClick}
-              className="text-gray-700 dark:text-gray-300"
+              className="block text-left jtext-gray-700 dark:text-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Logout
             </button>

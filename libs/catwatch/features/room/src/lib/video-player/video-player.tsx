@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { throttle } from 'lodash';
 
-import { useAuth } from '@catstack/catwatch/features/auth';
+import { useAuthUser } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
 import { roomActions, VideoPlayerActionPayload } from '../room-slice';
@@ -12,7 +12,7 @@ import { getVideoPlayerState } from '../room-slice.selectors';
 const useVideoSync = () => {
   const dispatch = useDispatch();
   const { seek, videoState, eventFrom } = useSelector(getVideoPlayerState);
-  const { username } = useAuth();
+  const { username } = useAuthUser();
   const { send } = useRoomContext();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -36,7 +36,7 @@ const useVideoSync = () => {
         const payload = { time: video.currentTime, eventFrom: username };
         const action = playerAction(payload);
 
-        if (eventFrom && eventFrom !== username) {
+        if (eventFrom) {
           return dispatch(action);
         }
 
@@ -82,6 +82,8 @@ const useVideoSync = () => {
   useEffect(() => {
     const handlePlayPauseSync = async () => {
       const videoEl = await getVideo();
+      console.log(videoEl, eventFrom, username);
+
       if (eventFrom === username) return;
 
       if (videoState === 'play') videoEl.play();

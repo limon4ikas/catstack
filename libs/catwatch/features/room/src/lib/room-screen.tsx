@@ -55,7 +55,7 @@ export interface RoomScreenProps {
 
 export const RoomScreen = ({ roomId }: RoomScreenProps) => {
   return (
-    <div className="h-full pt-[64px]">
+    <div className="h-full">
       <div className="flex h-full">
         <RoomContextProvider roomId={roomId}>
           <div className="flex-grow">

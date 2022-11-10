@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { UserProfile } from '@catstack/catwatch/types';
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
 import { Avatar } from '@catstack/shared/vanilla';
-import { useAuth } from '@catstack/catwatch/features/auth';
+import { useAuthUser } from '@catstack/catwatch/features/auth';
 
 import { getUsersWithConnections } from '../room-slice.selectors';
 import { useRoomContext } from '../context';
@@ -87,7 +87,7 @@ export interface UsersListContainerProps {
 }
 
 export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
-  const { id: userId } = useAuth();
+  const { id: userId } = useAuthUser();
   const { streams } = useRoomContext();
   const users = useSelector(getUsersWithConnections(userId));
   const { isLoading, isError } = useGetRoomUsersQuery(roomId);

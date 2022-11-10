@@ -19,7 +19,7 @@ import {
 import { useEffectOnce } from '@catstack/shared/hooks';
 import { usePeersManager } from '@catstack/shared/rtc';
 import { useSocket } from '@catstack/catwatch/data-access';
-import { useAuth } from '@catstack/catwatch/features/auth';
+import { useAuthUser } from '@catstack/catwatch/features/auth';
 import { newRoomEventMessage } from '@catstack/catwatch/actions';
 
 import { roomActions } from '../room-slice';
@@ -39,7 +39,7 @@ export const RoomContextProvider = ({
   roomId,
   children,
 }: RoomContextProviderProps) => {
-  const currentUser = useAuth();
+  const currentUser = useAuthUser();
   const dispatch = useDispatch();
   const socket = useSocket();
   const [streams, setStreams] = useState<Record<string, MediaStream>>({});

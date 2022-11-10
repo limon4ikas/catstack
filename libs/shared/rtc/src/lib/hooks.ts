@@ -203,7 +203,7 @@ export const usePeersManager = (config: UsePeersManagerConfig) => {
     const peers = peersRef.current;
 
     Object.entries(peers).forEach(([userId, peer]) => {
-      if (!peer || peer.destroyed) {
+      if (!peer || peer.destroyed || !peer.connected) {
         console.log(
           '⚡️ Cannot send message because peer connection destroyed'
         );

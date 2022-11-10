@@ -6,7 +6,7 @@ import { RoomMessage } from '@catstack/catwatch/types';
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
 import { newUserMessage } from '@catstack/catwatch/actions';
 import { Input, Button } from '@catstack/shared/vanilla';
-import { useAuth } from '@catstack/catwatch/features/auth';
+import { useAuthUser } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
 import { getAllRoomMessages } from '../room-slice.selectors';
@@ -89,7 +89,7 @@ export interface ChatWindowContainerProps {
 
 export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const dispatch = useDispatch();
-  const { username } = useAuth();
+  const { username } = useAuthUser();
   const messages = useSelector(getAllRoomMessages);
   const { send } = useRoomContext();
   const chatRef = useRef<HTMLDivElement>(null);

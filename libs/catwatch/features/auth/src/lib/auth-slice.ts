@@ -1,10 +1,16 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
 import { UserProfile } from '@catstack/catwatch/types';
-import { catWatchApi } from '@catstack/catwatch/data-access';
+import {
+  catWatchApi,
+  useLazyUserInfoQuery,
+  useLoginMutation,
+  useLogoutMutation,
+} from '@catstack/catwatch/data-access';
 
 import { selectUser } from './auth-slice.selectors';
+import { useRouter } from 'next/router';
 
 export const AUTH_SLICE_NAME = 'auth';
 
@@ -23,7 +29,9 @@ const initialState: AuthSliceState = {
 export const authSlice = createSlice({
   name: AUTH_SLICE_NAME,
   initialState,
-  reducers: {},
+  reducers: {
+    logout: () => initialState,
+  },
   extraReducers(builder) {
     builder.addMatcher(
       catWatchApi.endpoints.userInfo.matchFulfilled,
@@ -37,10 +45,31 @@ export const authSlice = createSlice({
 export const authActions = authSlice.actions;
 export const authReducer = authSlice.reducer;
 
-export const useAuth = () => {
+export const useAuthUser = () => {
   const user = useSelector(selectUser);
 
   if (!user) throw new Error('You are not authenticated');
 
   return user;
+};
+
+export const useAuth = () => {
+  const [loginMutation] = useLoginMutation();
+  const [logoutMutation] = useLogoutMutation();
+  const [getUserInfo] = useLazyUserInfoQuery();
+
+  const logout = async () => {
+    await logoutMutation();
+  };
+
+  const login = async (username: string, password: string) => {
+    try {
+      await loginMutation({ username, password });
+      await getUserInfo();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  return { login, logout };
 };

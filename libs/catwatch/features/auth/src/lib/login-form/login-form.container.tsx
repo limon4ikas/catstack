@@ -1,32 +1,18 @@
-import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-import {
-  useLazyUserInfoQuery,
-  useLoginMutation,
-} from '@catstack/catwatch/data-access';
+import { useAuth } from '../auth-slice';
 
 import { LoginForm, LoginFormValues } from './login-form';
 
 export const LoginFormContainer = () => {
   const router = useRouter();
-  const [login] = useLoginMutation();
-  const [getUserInfo] = useLazyUserInfoQuery();
-
-  useEffect(() => {
-    router.prefetch('/rooms');
-  }, [router]);
+  const { login } = useAuth();
 
   const handleLoginFormSubmit = async (values: LoginFormValues) => {
-    const { shouldRemember, ...rest } = values;
+    const { username, password } = values;
 
-    try {
-      await login(rest);
-      await getUserInfo();
-      await router.push('/');
-    } catch (e) {
-      console.log(e);
-    }
+    await login(username, password);
+    await router.push('/');
   };
 
   return (

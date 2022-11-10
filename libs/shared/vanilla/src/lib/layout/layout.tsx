@@ -46,8 +46,8 @@ export interface LayoutProps {
 
 export const Layout = (props: PropsWithChildren<LayoutProps>) => {
   return (
-    <div className="h-full">
-      <nav className="fixed top-0 w-full bg-white shadow dark:bg-gray-800">
+    <div className="h-full flex flex-col overflow-hidden">
+      <nav className="bg-white shadow dark:bg-gray-800">
         <div className="px-4 mx-auto sm:px-6 lg:px-8">
           <header className="flex justify-between h-16">
             <div className="flex items-center gap-4">

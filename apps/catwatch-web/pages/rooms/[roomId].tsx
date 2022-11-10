@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 
 import { withAuth } from '@catstack/catwatch/features/auth';
 import { RoomScreen } from '@catstack/catwatch/features/room';
-import { SocketProvider } from '@catstack/catwatch/data-access';
 
 import { MainLayout } from '../../components/layout';
 
@@ -14,11 +13,9 @@ export const RoomPage: NextPage = () => {
   if (!roomId) return null;
 
   return (
-    <SocketProvider>
-      <MainLayout>
-        <RoomScreen roomId={roomId} />
-      </MainLayout>
-    </SocketProvider>
+    <MainLayout>
+      <RoomScreen roomId={roomId} />
+    </MainLayout>
   );
 };
 

@@ -30,6 +30,9 @@ export const catWatchApi = createApi({
         responseHandler: (response) => response.text(),
       }),
     }),
+    logout: builder.mutation<void, void>({
+      query: () => ({ method: 'POST', url: 'auth/logout' }),
+    }),
     userInfo: builder.query<UserProfile, void>({ query: () => 'auth/profile' }),
     createRoom: builder.mutation<string, void>({ queryFn: createRoomQueryFn }),
     getRoomUsers: builder.query<EntityState<UserProfile>, string>({
@@ -89,6 +92,7 @@ export const {
   useLazyGetRoomUsersQuery,
   useLazyGetIsRoomAvailableQuery,
   useLazyUserInfoQuery,
+  useLogoutMutation,
 } = catWatchApi;
 
 export const catWatchApiReducer = catWatchApi.reducer;
