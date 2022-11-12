@@ -12,7 +12,7 @@ export const CreateTorrentForm = forwardRef<HTMLDivElement, SeedFileFormProps>(
       const WebTorrent = (await import('webtorrent')).default;
       const client = new WebTorrent();
 
-      client.seed(file, function(torrent) {
+      client.seed(file, function (torrent) {
         onCreatedTorrent(torrent.name, torrent.magnetURI, file);
       });
     };

@@ -70,7 +70,7 @@ export const UserProfileContainer = () => {
   return (
     <div className="hidden sm:ml-6 sm:flex sm:items-center sm:gap-4">
       <NotificationsBell />
-      <Popover>
+      <Popover modal>
         <PopoverTrigger>
           <UserProfile
             isSocketConnected={isSocketConnected}
@@ -78,22 +78,22 @@ export const UserProfileContainer = () => {
           />
         </PopoverTrigger>
         <PopoverContent align="end" sideOffset={4}>
-          <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 py-1 w-48 shadow-lg flex flex-col dark:border-gray-700">
+          <div className="flex flex-col w-48 py-1 bg-white border border-gray-200 rounded-md shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <Link
               href="/user/profile"
-              className="block text-gray-700 dark:text-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Profile
             </Link>
             <Link
               href="/user/settings"
-              className="block jtext-gray-700 dark:text-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block px-4 py-2 text-sm jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Settings
             </Link>
             <button
               onClick={handleLogoutClick}
-              className="block text-left jtext-gray-700 dark:text-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block px-4 py-2 text-sm text-left jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Logout
             </button>

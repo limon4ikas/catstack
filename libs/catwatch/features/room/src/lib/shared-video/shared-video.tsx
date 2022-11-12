@@ -33,8 +33,8 @@ export const SharedVideoContainer = () => {
     peers: 0,
     uploadSpeed: 0,
     downloadSpeed: 0,
-    isLoading: false,
     progrees: 0,
+    isLoading: false,
   });
 
   useUnmount(() => {
@@ -59,7 +59,7 @@ export const SharedVideoContainer = () => {
     const WebTorrent = (await import('webtorrent')).default;
     const client = new WebTorrent();
 
-    client.add(magnetUri, function(torrent) {
+    client.add(magnetUri, function (torrent) {
       const roomStartDownloadMessage = newRoomEventMessage(
         `${user.username} started downloading file`
       );
@@ -70,7 +70,7 @@ export const SharedVideoContainer = () => {
 
       torrent.on(
         'download',
-        throttle(function() {
+        throttle(function () {
           const info: Partial<TorrentDownloadInfoProps> = {
             downloadSpeed: torrent.downloadSpeed,
             uploadSpeed: torrent.uploadSpeed,
@@ -83,7 +83,7 @@ export const SharedVideoContainer = () => {
         }, 500)
       );
 
-      torrent.on('done', function() {
+      torrent.on('done', function () {
         const readyAction = newRoomEventMessage(`${user.username} is ready`);
 
         setTorrentInfo((prev) => ({ ...prev, isLoading: false }));
@@ -96,7 +96,7 @@ export const SharedVideoContainer = () => {
 
       if (!movie) return;
 
-      movie.getBlobURL(function(err, url) {
+      movie.getBlobURL(function (err, url) {
         if (err) throw err;
         if (!url) throw new Error('No Url');
         // downloadFile(`${torrent.name}`, url);
@@ -110,7 +110,7 @@ export const SharedVideoContainer = () => {
   const renderContent = () => {
     if (torrentInfo.isLoading) {
       return (
-        <div className="w-full h-full grid place-items-center">
+        <div className="grid w-full h-full place-items-center">
           <TorrenDownloadInfo
             downloadSpeed={torrentInfo.downloadSpeed}
             uploadSpeed={torrentInfo.uploadSpeed}
@@ -126,7 +126,7 @@ export const SharedVideoContainer = () => {
     if (file) return <VideoPlayer file={file} />;
 
     return (
-      <div className="p-4 h-full">
+      <div className="h-full p-4">
         <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
       </div>
     );

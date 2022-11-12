@@ -90,7 +90,7 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   const { id: userId } = useAuthUser();
   const { streams } = useRoomContext();
   const users = useSelector(getUsersWithConnections(userId));
-  const { isLoading, isError } = useGetRoomUsersQuery(roomId, {
+  const { isFetching, isError } = useGetRoomUsersQuery(roomId, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
     refetchOnReconnect: true,
@@ -101,9 +101,9 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
     stream: streams[user.id],
   }));
 
-  if (isError) return <UserListError />;
+  if (isFetching) return <UserListLoading />;
 
-  if (isLoading) return <UserListLoading />;
+  if (isError) return <UserListError />;
 
   if (!users.length) <UserListEmpty />;
 
