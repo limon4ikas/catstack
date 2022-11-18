@@ -4,12 +4,7 @@ import Link from 'next/link';
 const Logo = () => {
   return (
     <Link href="/" className="flex">
-      <div className="flex items-center flex-shrink-0 dark:text-white gap-4">
-        <img
-          className="block w-auto h-8"
-          src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-          alt="Catwatch"
-        />
+      <div className="flex items-center flex-shrink-0 gap-4 dark:text-white">
         <span className="text-xl font-bold">Catwatch</span>
       </div>
       <div />
@@ -42,7 +37,7 @@ export interface LayoutProps {
 
 export const Layout = (props: PropsWithChildren<LayoutProps>) => {
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden">
       <nav className="bg-white shadow dark:bg-gray-800">
         <div className="px-4 mx-auto sm:px-6 lg:px-8">
           <header className="flex justify-between h-16">

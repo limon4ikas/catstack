@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 import { RoomMessage } from '@catstack/catwatch/types';
 import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
@@ -11,10 +12,10 @@ import { useAuthUser } from '@catstack/catwatch/features/auth';
 import { useRoomContext } from '../context';
 import { getAllRoomMessages } from '../room-slice.selectors';
 
-const stringToColour = (str: string) => {
+const stringToColour = (string: string) => {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < string.length; i++) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
   }
   let color = '#';
   for (let i = 0; i < 3; i++) {
@@ -51,34 +52,57 @@ const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
   );
 };
 
+export interface ChatMessageProps {
+  username: string;
+  text: string;
+}
+
+export const ChatMessage = ({ username, text }: ChatMessageProps) => {
+  return (
+    <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+      <span
+        style={{ color: stringToColour(username) }}
+        className="text-sm font-semibold leading-5"
+      >
+        {username}:{' '}
+      </span>
+      <span className="text-sm leading-5 dark:text-white">{text}</span>
+    </div>
+  );
+};
+
+export interface ChatEventMessageProps {
+  text: string;
+}
+
+export const ChatEventMessage = ({ text }: ChatEventMessageProps) => {
+  return (
+    <span className="block py-1 text-sm font-semibold leading-5 text-center transition-colors rounded-md text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+      {text}
+    </span>
+  );
+};
+
 export interface ChatWindowProps {
   messages: RoomMessage[];
 }
 
 const ChatWindow = ({ messages }: ChatWindowProps) => {
+  const [parent] = useAutoAnimate<HTMLUListElement>({ duration: 150 });
+
   return (
-    <ul className="flex flex-col pt-3">
-      {messages.map((message, idx) => (
-        <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
-          {message.type === 'chat-event' ? (
-            <span className="block py-1 text-sm font-semibold leading-5 text-center transition-colors rounded-md text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {message.text}
-            </span>
-          ) : (
-            <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-              <span
-                style={{ color: stringToColour(message.username) }}
-                className="text-sm font-semibold leading-5"
-              >
-                {message.username}:{' '}
-              </span>
-              <span className="text-sm leading-5 dark:text-white">
-                {message.text}
-              </span>
-            </div>
-          )}
-        </li>
-      ))}
+    <ul className="flex flex-col pt-3" ref={parent}>
+      {messages.map((message, idx) => {
+        return (
+          <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
+            {message.type === 'chat-event' ? (
+              <ChatEventMessage text={message.text} />
+            ) : (
+              <ChatMessage username={message.username} text={message.text} />
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 };

@@ -1,17 +1,16 @@
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 import {
-  ServerToClientEvents,
-  ClientToServerEvents,
   ClientEvents,
   ServerEvents,
+  CatwatchClientSocket,
 } from '@catstack/catwatch/types';
 
 const createSocket = () => {
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-    'http://localhost:3333',
-    { withCredentials: true, autoConnect: false }
-  );
+  const socket: CatwatchClientSocket = io('http://localhost:3333', {
+    withCredentials: true,
+    autoConnect: false,
+  });
 
   return () => {
     return socket;

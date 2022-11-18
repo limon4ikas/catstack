@@ -6,11 +6,11 @@ import { Button, FileDropZone, Input } from '@catstack/shared/vanilla';
 
 import { MainLayout } from '../../components/layout';
 
-import { createFFmpeg } from '@ffmpeg/ffmpeg';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
 const ffmpeg = createFFmpeg({
   log: true,
-  corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js',
+  corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
 });
 
 const initialCommand: string[] = ['-i', 'test.avi', 'test.mp4'];
@@ -20,7 +20,9 @@ const ConvertContainer = () => {
   const [command, setCommand] = useState<string[]>(initialCommand);
 
   const handleCommandChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCommand(e.target.value.split(' '));
+    const value = e.target.value;
+
+    setCommand(value.split(' '));
   };
 
   const handleFileDrop = (file: File) => {
@@ -29,16 +31,16 @@ const ConvertContainer = () => {
 
   const handleConvertClick = async () => {
     console.log('Command:', command);
-    // if (!file) return;
+    if (!file) return;
 
     await ffmpeg.load();
 
-    // ffmpeg.FS('writeFile', 'test.avi', await fetchFile('./test.avi'));
-    // await ffmpeg.run(...command);
+    ffmpeg.FS('writeFile', 'test.avi', await fetchFile('./test.avi'));
+    await ffmpeg.run(...command);
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+    <div className="p-4 bg-white rounded-lg dark:bg-gray-800">
       <div className="flex flex-col gap-4">
         <Input
           label="Command"
@@ -55,7 +57,7 @@ const ConvertContainer = () => {
 const ConvertPage: NextPage = () => {
   return (
     <MainLayout>
-      <div className="grid place-items-center h-full w-full">
+      <div className="grid w-full h-full place-items-center">
         <ConvertContainer />
       </div>
     </MainLayout>

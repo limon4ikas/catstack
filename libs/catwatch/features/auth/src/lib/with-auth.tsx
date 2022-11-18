@@ -1,11 +1,11 @@
 import { PropsWithChildren, ReactNode } from 'react';
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 
 import { useUserInfoQuery } from '@catstack/catwatch/data-access';
 
 import { selectUser } from './auth-slice.selectors';
-import { useRouter } from 'next/router';
 
 const ProtectedRoute = ({ children }: PropsWithChildren) => {
   const router = useRouter();

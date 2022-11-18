@@ -4,6 +4,7 @@ import {
   useMemo,
   useContext,
   useState,
+  useCallback,
 } from 'react';
 import { useDispatch } from 'react-redux';
 import { PayloadAction } from '@reduxjs/toolkit';
@@ -27,6 +28,7 @@ import { roomActions } from '../room-slice';
 export interface IRoomContext {
   send: (action: PayloadAction<unknown>) => void;
   streams: Record<string, MediaStream | undefined>;
+  dispatchSharedEvent: (action: PayloadAction<unknown>) => void;
 }
 
 export const RoomContext = createContext<IRoomContext | null>(null);
@@ -39,8 +41,8 @@ export const RoomContextProvider = ({
   roomId,
   children,
 }: RoomContextProviderProps) => {
-  const currentUser = useAuthUser();
   const dispatch = useDispatch();
+  const currentUser = useAuthUser();
   const socket = useSocket();
   const [streams, setStreams] = useState<Record<string, MediaStream>>({});
 
@@ -117,6 +119,14 @@ export const RoomContextProvider = ({
     destroyConnection(leftUser.id.toString());
   };
 
+  const dispatchSharedEvent = useCallback(
+    (action: PayloadAction<unknown>) => {
+      send(action);
+      dispatch(action);
+    },
+    [dispatch, send]
+  );
+
   useEffectOnce(() => {
     (async () => {
       socket.emit(ClientEvents.JoinRoom, roomId);
@@ -140,8 +150,8 @@ export const RoomContextProvider = ({
   });
 
   const context = useMemo<IRoomContext>(
-    () => ({ send, streams }),
-    [send, streams]
+    () => ({ send, dispatchSharedEvent, streams }),
+    [send, dispatchSharedEvent, streams]
   );
 
   return (

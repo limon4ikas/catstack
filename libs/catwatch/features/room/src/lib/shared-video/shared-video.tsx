@@ -25,7 +25,7 @@ import { CreateTorrentForm } from './create-torrent-form';
 export const SharedVideoContainer = () => {
   const dispatch = useDispatch();
   const user = useAuthUser();
-  const { send } = useRoomContext();
+  const { send, dispatchSharedEvent } = useRoomContext();
   const [file, setFile] = useState<string | null>(null);
   const { isSuggestionAlertOpen, magnetUri } = useSelector(getRoomState);
   const [torrentInfo, setTorrentInfo] = useState<TorrentDownloadInfoProps>({
@@ -60,13 +60,10 @@ export const SharedVideoContainer = () => {
     const client = new WebTorrent();
 
     client.add(magnetUri, function (torrent) {
-      const roomStartDownloadMessage = newRoomEventMessage(
-        `${user.username} started downloading file`
-      );
-
       setTorrentInfo((prev) => ({ ...prev, isLoading: true }));
-      send(roomStartDownloadMessage);
-      dispatch(roomStartDownloadMessage);
+      dispatchSharedEvent(
+        newRoomEventMessage(`${user.username} started downloading file`)
+      );
 
       torrent.on(
         'download',
@@ -84,12 +81,9 @@ export const SharedVideoContainer = () => {
       );
 
       torrent.on('done', function () {
-        const readyAction = newRoomEventMessage(`${user.username} is ready`);
-
         setTorrentInfo((prev) => ({ ...prev, isLoading: false }));
         toast(`${torrent.name} finished downloading`);
-        send(readyAction);
-        dispatch(readyAction);
+        dispatchSharedEvent(newRoomEventMessage(`${user.username} is ready`));
       });
 
       const movie = torrent.files.find((file) => file.name.endsWith('.mp4'));

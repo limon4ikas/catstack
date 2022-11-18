@@ -2,12 +2,13 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import { SignalData } from 'simple-peer';
+import { Socket } from 'socket.io-client';
 
 import { UserProfile } from './user';
 
-export interface InterServerEvents {}
+export interface InterServerEvents { }
 
-export interface SocketData {}
+export interface SocketData { }
 
 /**
 |--------------------------------------------------
@@ -67,6 +68,11 @@ export interface ClientToServerEvents {
   [Events.SendOffer]: (data: SignalMessage) => void;
   [Events.AnswerOffer]: (data: SignalMessage) => void;
 }
+
+export type CatwatchClientSocket = Socket<
+  ServerToClientEvents,
+  ClientToServerEvents
+>;
 
 /**
 |--------------------------------------------------

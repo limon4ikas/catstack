@@ -32,16 +32,16 @@ const useVideoSync = () => {
 
   const handlePlayerAction =
     (playerAction: ActionCreatorWithPayload<VideoPlayerActionPayload>) =>
-      (video: HTMLVideoElement) => {
-        const payload = { time: video.currentTime, eventFrom: username };
-        const action = playerAction(payload);
+    (video: HTMLVideoElement) => {
+      const payload = { time: video.currentTime, eventFrom: username };
+      const action = playerAction(payload);
 
-        if (eventFrom && eventFrom !== username) {
-          return dispatch(action);
-        }
+      if (eventFrom && eventFrom !== username) {
+        return dispatch(action);
+      }
 
-        return send(action);
-      };
+      return send(action);
+    };
 
   const handlePlay = async (_: SyntheticEvent<HTMLVideoElement, Event>) => {
     getVideo().then(handlePlayerAction(roomActions.play));

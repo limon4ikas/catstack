@@ -5,25 +5,25 @@ import {
   useRef,
   useSyncExternalStore,
 } from 'react';
-import { Socket } from 'socket.io-client';
 
-import {
-  ServerToClientEvents,
-  ClientToServerEvents,
-} from '@catstack/catwatch/types';
+import { CatwatchClientSocket } from '@catstack/catwatch/types';
 import { useEffectOnce } from '@catstack/shared/hooks';
 
 import { getSocket } from './socket';
 
-const SocketContext = createContext<
-  Socket<ServerToClientEvents, ClientToServerEvents>
->(getSocket());
+const SocketContext = createContext<CatwatchClientSocket | null>(null);
 
-export const SocketProvider = (props: PropsWithChildren) => {
-  const socketRef = useRef(getSocket());
+export const SocketProvider = ({ children }: PropsWithChildren) => {
+  const socketRef = useRef<CatwatchClientSocket | null>(null);
+
+  if (!socketRef.current) {
+    socketRef.current = getSocket();
+  }
 
   useEffectOnce(() => {
     const socket = socketRef.current;
+
+    if (!socket) return;
 
     socket.connect();
     return () => {
@@ -33,13 +33,15 @@ export const SocketProvider = (props: PropsWithChildren) => {
 
   return (
     <SocketContext.Provider value={socketRef.current}>
-      {props.children}
+      {children}
     </SocketContext.Provider>
   );
 };
 
 export const useSocket = () => {
   const socket = useContext(SocketContext);
+
+  if (!socket) throw new Error('No socket found!');
 
   return socket;
 };
@@ -60,7 +62,7 @@ export const useSocketIsOnline = () => {
 
   return useSyncExternalStore<boolean>(
     onStatusChange,
-    () => socket?.connected || false,
-    () => true
+    () => socket.connected,
+    () => false
   );
 };

@@ -81,19 +81,19 @@ export const UserProfileContainer = () => {
           <div className="flex flex-col w-48 py-1 bg-white border border-gray-200 rounded-md shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <Link
               href="/user/profile"
-              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               Profile
             </Link>
             <Link
               href="/user/settings"
-              className="block px-4 py-2 text-sm jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block px-4 py-2 text-sm jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               Settings
             </Link>
             <button
               onClick={handleLogoutClick}
-              className="block px-4 py-2 text-sm text-left jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block px-4 py-2 text-sm text-left jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               Logout
             </button>

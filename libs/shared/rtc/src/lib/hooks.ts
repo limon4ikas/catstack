@@ -1,10 +1,8 @@
 import { useCallback, useRef } from 'react';
 import { PayloadAction } from '@reduxjs/toolkit';
-import Peer, { SignalData } from 'simple-peer';
-import type { Instance } from 'simple-peer';
+import Peer, { SignalData, Instance } from 'simple-peer';
 
 import { SignalMessage, UserProfile } from '@catstack/catwatch/types';
-import { useUserMedia } from '@catstack/shared/hooks';
 
 import { handlerError } from './events';
 
@@ -46,8 +44,6 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
     onClose,
   } = config;
 
-  const { getMedia } = useUserMedia();
-
   const createInitiatorPeer = useCallback(
     async (caller: UserProfile, callee: UserProfile) => {
       // const stream = await getMedia({ video: true });
@@ -84,14 +80,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
       return pc;
     },
-    [
-      getMedia,
-      onChannelMessage,
-      onClose,
-      onConnection,
-      onRemoteStream,
-      onSendSignal,
-    ]
+    [onChannelMessage, onClose, onConnection, onRemoteStream, onSendSignal]
   );
 
   const createListenerPeer = useCallback(
@@ -124,7 +113,7 @@ export const usePeerFactory = (config: UsePeerFactoryConfig) => {
 
       return pc;
     },
-    [getMedia, onChannelMessage, onConnection, onRemoteStream, onReturnSignal]
+    [onChannelMessage, onConnection, onRemoteStream, onReturnSignal]
   );
 
   return { createInitiatorPeer, createListenerPeer } as const;

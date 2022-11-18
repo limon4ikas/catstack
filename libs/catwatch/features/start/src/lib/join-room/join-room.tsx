@@ -15,7 +15,7 @@ export interface JoinRoomFormProps {
 }
 
 export const JoinRoomForm = (props: JoinRoomFormProps) => {
-  const { register, handleSubmit, formState } = useForm<JoinRoomFormValues>({
+  const { register, handleSubmit } = useForm<JoinRoomFormValues>({
     defaultValues: { roomId: '1' },
   });
 
@@ -30,9 +30,7 @@ export const JoinRoomForm = (props: JoinRoomFormProps) => {
         placeholder="Room ID"
         {...register('roomId')}
       />
-      <Button type="submit">
-        {formState.isSubmitting ? 'Joining' : 'Join'}
-      </Button>
+      <Button type="submit">Join</Button>
     </form>
   );
 };

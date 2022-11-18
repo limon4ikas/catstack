@@ -1,12 +1,12 @@
 import { Controller, Req, Post, UseGuards, Get, Res } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 
+import { RequestWithAuth } from '@catstack/catwatch/types';
+
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshTokenGuard } from './guards/refresh-auth.guard';
-
-import { RequestWithAuth } from '@catstack/catwatch/types';
 
 @Controller('auth')
 export class AuthController {
@@ -15,7 +15,8 @@ export class AuthController {
     sameSite: 'strict',
     secure: true,
   };
-  constructor(private authService: AuthService) { }
+
+  constructor(private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -26,7 +27,6 @@ export class AuthController {
     const { accessToken, refreshToken } = await this.authService.login(
       req.user
     );
-
     res.cookie('accessToken', accessToken, this.cookieOptions);
     res.cookie('refreshToken', refreshToken, this.cookieOptions);
     res.status(200);
@@ -37,7 +37,6 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('accessToken', this.cookieOptions);
     res.clearCookie('refreshToken', this.cookieOptions);
-
     res.status(200);
   }
 

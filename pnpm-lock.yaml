@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@ffmpeg/core': ^0.11.0
   '@ffmpeg/ffmpeg': ^0.11.6
+  '@formkit/auto-animate': 1.0.0-beta.5
   '@heroicons/react': ^2.0.12
   '@nestjs/common': ^9.0.0
   '@nestjs/config': ^2.2.0
@@ -108,6 +109,7 @@ specifiers:
 dependencies:
   '@ffmpeg/core': 0.11.0
   '@ffmpeg/ffmpeg': 0.11.6
+  '@formkit/auto-animate': 1.0.0-beta.5
   '@heroicons/react': 2.0.12_react@18.2.0
   '@nestjs/common': 9.1.6_yzt46al3aifnexifjjdb4dxxja
   '@nestjs/config': 2.2.0_yjxybkvltbh2d3oivnq5etx3oi
@@ -1580,6 +1582,10 @@ packages:
       use-isomorphic-layout-effect: 1.1.2_w5j4k42lgipnm43s3brx6h3c34
     transitivePeerDependencies:
       - '@types/react'
+    dev: false
+
+  /@formkit/auto-animate/1.0.0-beta.5:
+    resolution: {integrity: sha512-WoSwyhAZPOe6RB/IgicOtCHtrWwEpfKIZ/H/nxpKfnZL9CB6hhhBGU5bCdMRw7YpAUF2CDlQa+WWh+gCqz5lDg==}
     dev: false
 
   /@heroicons/react/2.0.12_react@18.2.0:

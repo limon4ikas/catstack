@@ -8,6 +8,7 @@ import { useAuthUser } from '@catstack/catwatch/features/auth';
 
 import { getUsersWithConnections } from '../room-slice.selectors';
 import { useRoomContext } from '../context';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 type UserWithMedia = UserProfile & {
   isConnected: boolean;
@@ -54,18 +55,16 @@ export interface UserListProps {
   users: UserWithMedia[];
 }
 
-export const UserList = (props: UserListProps) => {
+export const UserList = ({ users }: UserListProps) => {
+  const [userListAnimateRef] = useAutoAnimate<HTMLUListElement>();
+
   return (
-    <ul className="flex flex-col gap-4 pt-3">
-      {props.users.map((user) => (
+    <ul className="flex flex-col gap-4 pt-3" ref={userListAnimateRef}>
+      {users.map((user) => (
         <UserListItem key={user.id} user={user} />
       ))}
     </ul>
   );
-};
-
-const UserListLoading = () => {
-  return <h1>Loading</h1>;
 };
 
 const UserListError = () => {
@@ -92,8 +91,6 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
   const users = useSelector(getUsersWithConnections(userId));
   const { isFetching, isError } = useGetRoomUsersQuery(roomId, {
     refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
   });
 
   const usersWithStreams = users.map((user) => ({
@@ -101,15 +98,11 @@ export const UsersListContainer = ({ roomId }: UsersListContainerProps) => {
     stream: streams[user.id],
   }));
 
-  if (isFetching) return <UserListLoading />;
+  if (isFetching) return null;
 
   if (isError) return <UserListError />;
 
-  if (!users.length) <UserListEmpty />;
+  if (!users.length) return <UserListEmpty />;
 
-  return (
-    <div className="flex flex-col gap-4">
-      <UserList users={usersWithStreams} />
-    </div>
-  );
+  return <UserList users={usersWithStreams} />;
 };

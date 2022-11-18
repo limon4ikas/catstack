@@ -3,15 +3,20 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cva } from '@catstack/shared/utils';
 
 const popoverStyles = cva([
+  'z-10',
   'rdx-side-top:animate-slide-up rdx-side-bottom:animate-slide-down',
 ]);
 
 export const PopoverContent = forwardRef<
   HTMLDivElement,
   PopoverPrimitive.PopoverContentProps
->((props, ref) => {
+>(({ className, ...props }, ref) => {
   return (
-    <PopoverPrimitive.Content {...props} className={popoverStyles()} ref={ref}>
+    <PopoverPrimitive.Content
+      {...props}
+      className={popoverStyles({ class: className })}
+      ref={ref}
+    >
       {props.children}
     </PopoverPrimitive.Content>
   );
