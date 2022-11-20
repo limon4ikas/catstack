@@ -112,10 +112,6 @@ export const ChatWindow = ({ messages }: ChatWindowProps) => {
   );
 };
 
-export interface ChatWindowContainerProps {
-  roomId: string;
-}
-
 export interface ChatProps {
   messages: RoomMessage[];
   onSendMessage: (text: string) => void;

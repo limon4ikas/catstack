@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { cx } from '@catstack/shared/utils';
 import {
@@ -14,10 +14,11 @@ import { UsersListContainer } from './user-list';
 import { SharedVideoContainer } from './shared-video';
 
 export interface ChatFrameProps {
-  roomId: string;
+  chat: ReactNode;
+  usersList: ReactNode;
 }
 
-const ChatFrame = (props: ChatFrameProps) => {
+const ChatFrame = ({ chat, usersList }: ChatFrameProps) => {
   const [tab, setTab] = useState('chat');
 
   return (
@@ -38,13 +39,13 @@ const ChatFrame = (props: ChatFrameProps) => {
             : 'hidden'
         )}
       >
-        <ChatWindowContainer roomId={props.roomId} />
+        {chat}
       </TabsContent>
       <TabsContent
         value="users"
         className={cx(tab === 'users' ? '' : 'hidden')}
       >
-        <UsersListContainer roomId={props.roomId} />
+        {usersList}
       </TabsContent>
     </Tabs>
   );
@@ -61,7 +62,10 @@ export const RoomScreen = ({ roomId }: RoomScreenProps) => {
         <SharedVideoContainer />
       </div>
       <div className="flex flex-shrink-0 bg-white shadow w-96 dark:bg-gray-800">
-        <ChatFrame roomId={roomId} />
+        <ChatFrame
+          chat={<ChatWindowContainer roomId={roomId} />}
+          usersList={<UsersListContainer roomId={roomId} />}
+        />
       </div>
     </RoomContextProvider>
   );

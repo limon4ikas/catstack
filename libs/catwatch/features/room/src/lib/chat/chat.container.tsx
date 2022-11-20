@@ -6,7 +6,11 @@ import { useAuthUser } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
 import { getAllRoomMessages } from '../room-slice.selectors';
-import { ChatWindowContainerProps, Chat } from './chat';
+import { Chat } from './chat';
+
+export interface ChatWindowContainerProps {
+  roomId: string;
+}
 
 export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
   const { username } = useAuthUser();

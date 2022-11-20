@@ -5,13 +5,6 @@
   "projectType": "library",
   "tags": [],
   "targets": {
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/catwatch/storybook/**/*.{ts,tsx,js,jsx}"]
-      }
-    },
     "storybook": {
       "executor": "@nrwl/storybook:storybook",
       "options": {

@@ -8,6 +8,8 @@ import {
   JoinRoomFormContainer,
 } from '@catstack/catwatch/features/start';
 
+import { Providers } from '../providers';
+
 const context = {
   JoinRoomFormContainer,
   CreateRoomContainer,
@@ -15,11 +17,13 @@ const context = {
 
 export const Index: NextPage = () => {
   return (
-    <MainLayout>
-      <StartScreenContextProvider value={context}>
-        <StartScreen />
-      </StartScreenContextProvider>
-    </MainLayout>
+    <Providers>
+      <MainLayout>
+        <StartScreenContextProvider value={context}>
+          <StartScreen />
+        </StartScreenContextProvider>
+      </MainLayout>
+    </Providers>
   );
 };
 
