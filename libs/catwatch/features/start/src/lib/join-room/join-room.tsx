@@ -20,10 +20,13 @@ export const JoinRoomForm = (props: JoinRoomFormProps) => {
     defaultValues: { roomId: '1' },
   });
 
-  const onSubmit = (form: JoinRoomFormValues) => props.onSubmit?.(form);
-
   return (
-    <form className="flex items-center gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="flex items-center gap-4"
+      onSubmit={handleSubmit((form: JoinRoomFormValues) =>
+        props.onSubmit?.(form)
+      )}
+    >
       <Input
         label="Join room"
         type="text"

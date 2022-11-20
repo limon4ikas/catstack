@@ -1,11 +1,15 @@
 import { NextPage } from 'next';
 
-import { withAuth } from '@catstack/catwatch/features/auth';
+import { MainLayout, withAuth } from '@catstack/catwatch/features/auth';
 
-import { MainLayout } from '../../components/layout';
+import { Providers } from '../../providers';
 
 const ProfilePage: NextPage = () => {
-  return <MainLayout>Profile Page</MainLayout>;
+  return (
+    <Providers>
+      <MainLayout>Profile Page</MainLayout>
+    </Providers>
+  );
 };
 
 export default withAuth(ProfilePage)();

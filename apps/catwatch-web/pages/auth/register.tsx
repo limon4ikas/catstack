@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 
-const RegisterPage: NextPage = () => {
-  return <div>Register Page</div>;
-};
+import { RegisterScreen } from '@catstack/catwatch/features/auth';
+
+const RegisterPage: NextPage = () => <RegisterScreen />;
 
 export default RegisterPage;

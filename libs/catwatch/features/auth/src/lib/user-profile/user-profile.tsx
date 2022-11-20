@@ -1,4 +1,4 @@
-import { forwardRef, PropsWithChildren } from 'react';
+import { forwardRef } from 'react';
 import { useRouter } from 'next/router';
 import { BellIcon } from '@heroicons/react/24/outline';
 
@@ -14,28 +14,25 @@ import { useAuth, useAuthUser } from '../auth-slice';
 import { UserMenu } from './user-menu';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type NotificationBellProps = {};
-
-export const NotificationsBell = forwardRef<
-  HTMLButtonElement,
-  NotificationBellProps
->((props, ref) => {
-  return (
-    <button
-      type="button"
-      className="p-1 text-gray-400 bg-white rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-white dark:bg-gray-800 dark:hover:text-white"
-      {...props}
-      ref={ref}
-    >
-      <span className="sr-only">View notifications</span>
-      <BellIcon className="w-6 h-6" aria-hidden="true" />
-    </button>
-  );
-});
+export const NotificationsBell = forwardRef<HTMLButtonElement, {}>(
+  (props, ref) => {
+    return (
+      <button
+        type="button"
+        className="p-1 text-gray-400 bg-white rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-white dark:bg-gray-800 dark:hover:text-white"
+        {...props}
+        ref={ref}
+      >
+        <span className="sr-only">View notifications</span>
+        <BellIcon className="w-6 h-6" aria-hidden="true" />
+      </button>
+    );
+  }
+);
 
 export interface UserProfileAvatarProps {
-  isSocketConnected?: boolean;
   username?: string;
+  isSocketConnected?: boolean;
 }
 
 export const UserProfileAvatar = forwardRef<

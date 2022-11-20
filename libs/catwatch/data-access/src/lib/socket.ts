@@ -12,9 +12,7 @@ const createSocket = () => {
     autoConnect: false,
   });
 
-  return () => {
-    return socket;
-  };
+  return () => socket;
 };
 
 export const getSocket = createSocket();
