@@ -13,7 +13,7 @@ export interface WithAuthConfig {
 }
 
 export const withAuth = (Component: NextPage) => (config?: WithAuthConfig) => {
-  const AuthenticatedComponent = () => {
+  const AuthenticatedComponent = (): ReactNode => {
     const router = useRouter();
     const user = useSelector(selectUser);
     const { isError, isFetching } = useUserInfoQuery();

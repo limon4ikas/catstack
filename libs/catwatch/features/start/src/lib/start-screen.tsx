@@ -1,7 +1,10 @@
-import { CreateRoomContainer } from './create-room';
-import { JoinRoomFormContainer } from './join-room';
+import { FC } from 'react';
+import { useStartScreenProvider } from './start-screen.context';
 
-export const StartScreen = () => {
+export const StartScreen: FC = () => {
+  const { CreateRoomContainer, JoinRoomFormContainer } =
+    useStartScreenProvider();
+
   return (
     <div className="grid w-full h-full place-items-center">
       <div className="flex gap-8 p-4 bg-white rounded-lg dark:bg-gray-800">

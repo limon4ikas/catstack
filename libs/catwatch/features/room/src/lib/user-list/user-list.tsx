@@ -67,11 +67,11 @@ export const UserList = ({ users }: UserListProps) => {
   );
 };
 
-const UserListError = () => {
+export const UserListError = () => {
   return <h1>Something went wrong</h1>;
 };
 
-const UserListEmpty = () => {
+export const UserListEmpty = () => {
   return (
     <div className="flex justify-center pt-3">
       <h1 className="text-lg font-medium text-gray-900 dark:text-white">

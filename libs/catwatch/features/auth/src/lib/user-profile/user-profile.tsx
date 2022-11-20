@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, PropsWithChildren } from 'react';
 import { useRouter } from 'next/router';
 import { BellIcon } from '@heroicons/react/24/outline';
 
@@ -33,28 +33,55 @@ export const NotificationsBell = forwardRef<
   );
 });
 
-export interface UserProfileProps {
-  isSocketConnected: boolean;
-  username: string;
+export interface UserProfileAvatarProps {
+  isSocketConnected?: boolean;
+  username?: string;
 }
 
-export const UserProfile = forwardRef<HTMLDivElement, UserProfileProps>(
-  (props, ref) => {
-    return (
-      <div className="relative" ref={ref}>
-        <div>
-          <div className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            <span className="sr-only">Open user menu</span>
-            <Avatar
-              username={props.username}
-              isOnline={props.isSocketConnected}
-            />
-          </div>
+export const UserProfileAvatar = forwardRef<
+  HTMLDivElement,
+  UserProfileAvatarProps
+>((props, ref) => {
+  return (
+    <div className="relative" ref={ref}>
+      <div>
+        <div className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <span className="sr-only">Open user menu</span>
+          <Avatar
+            username={props.username || ''}
+            isOnline={props.isSocketConnected}
+          />
         </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
+export interface UserProfileProps {
+  username?: string;
+  isSocketConnected?: boolean;
+  onLogoutClick?: () => void;
+}
+
+export const UserProfile = (props: UserProfileProps) => {
+  const { username, isSocketConnected, onLogoutClick } = props;
+
+  return (
+    <div className="hidden sm:ml-6 sm:flex sm:items-center sm:gap-4">
+      <NotificationsBell />
+      <Popover modal>
+        <PopoverTrigger>
+          <UserProfileAvatar
+            isSocketConnected={isSocketConnected}
+            username={username}
+          />
+        </PopoverTrigger>
+        <PopoverContent align="end" sideOffset={4}>
+          <UserMenu onLogoutClick={onLogoutClick} />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
 
 export const UserProfileContainer = () => {
   const router = useRouter();
@@ -68,19 +95,10 @@ export const UserProfileContainer = () => {
   };
 
   return (
-    <div className="hidden sm:ml-6 sm:flex sm:items-center sm:gap-4">
-      <NotificationsBell />
-      <Popover modal>
-        <PopoverTrigger>
-          <UserProfile
-            isSocketConnected={isSocketConnected}
-            username={username}
-          />
-        </PopoverTrigger>
-        <PopoverContent align="end" sideOffset={4}>
-          <UserMenu onLogoutClick={handleLogoutClick} />
-        </PopoverContent>
-      </Popover>
-    </div>
+    <UserProfile
+      username={username}
+      isSocketConnected={isSocketConnected}
+      onLogoutClick={handleLogoutClick}
+    />
   );
 };

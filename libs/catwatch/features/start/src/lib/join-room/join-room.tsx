@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 
@@ -11,7 +12,7 @@ import {
 } from '@catstack/shared/vanilla';
 
 export interface JoinRoomFormProps {
-  onSubmit: (values: JoinRoomFormValues) => void;
+  onSubmit?: (values: JoinRoomFormValues) => void;
 }
 
 export const JoinRoomForm = (props: JoinRoomFormProps) => {
@@ -19,11 +20,10 @@ export const JoinRoomForm = (props: JoinRoomFormProps) => {
     defaultValues: { roomId: '1' },
   });
 
+  const onSubmit = (form: JoinRoomFormValues) => props.onSubmit?.(form);
+
   return (
-    <form
-      className="flex items-center gap-4"
-      onSubmit={handleSubmit(props.onSubmit)}
-    >
+    <form className="flex items-center gap-4" onSubmit={handleSubmit(onSubmit)}>
       <Input
         label="Join room"
         type="text"
@@ -35,11 +35,28 @@ export const JoinRoomForm = (props: JoinRoomFormProps) => {
   );
 };
 
+export interface JoinRoomProps {
+  onJoinRoomSubmit?: (form: JoinRoomFormValues) => void;
+}
+
+export const JoinRoom = (props: JoinRoomProps) => {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Join room</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <JoinRoomForm onSubmit={props.onJoinRoomSubmit} />
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export interface JoinRoomFormValues {
   roomId: string;
 }
 
-export const JoinRoomFormContainer = () => {
+export const JoinRoomFormContainer: FC = () => {
   const router = useRouter();
   const [getIsRoomAvailable] = useLazyGetIsRoomAvailableQuery();
 
@@ -55,14 +72,5 @@ export const JoinRoomFormContainer = () => {
     }
   };
 
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>Join room</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <JoinRoomForm onSubmit={handleJoinRoomSubmit} />
-      </DialogContent>
-    </Dialog>
-  );
+  return <JoinRoom onJoinRoomSubmit={handleJoinRoomSubmit} />;
 };

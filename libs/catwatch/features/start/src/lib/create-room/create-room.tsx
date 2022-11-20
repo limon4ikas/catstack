@@ -1,14 +1,23 @@
+import { FC } from 'react';
 import { useRouter } from 'next/router';
 
 import { useCreateRoomMutation } from '@catstack/catwatch/data-access';
 import { useCopyToClipboard } from '@catstack/shared/hooks';
 import { Button, toast } from '@catstack/shared/vanilla';
 
+export interface CreateRoomProps {
+  onCreateRoomClick?: () => void;
+}
+
+export const CreateRoom: FC<CreateRoomProps> = (props) => {
+  return <Button onClick={props.onCreateRoomClick}>Create room</Button>;
+};
+
 export interface CreateRoomFormProps {
   handleCreateRoomClick: () => void;
 }
 
-export const CreateRoomContainer = () => {
+export const CreateRoomContainer: FC = () => {
   const router = useRouter();
   const [createRoom] = useCreateRoomMutation();
   const { copy } = useCopyToClipboard();
@@ -26,5 +35,5 @@ export const CreateRoomContainer = () => {
     router.push(`rooms/${roomId}`);
   };
 
-  return <Button onClick={handleCreateRoomClick}>Create room</Button>;
+  return <CreateRoom onCreateRoomClick={handleCreateRoomClick} />;
 };

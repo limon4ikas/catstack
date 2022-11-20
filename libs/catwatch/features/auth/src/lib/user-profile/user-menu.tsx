@@ -29,7 +29,7 @@ export const MenuLink = forwardRef<HTMLAnchorElement, MenuLinkProps>(
 );
 
 export interface UserMenuProps {
-  onLogoutClick: () => void;
+  onLogoutClick?: () => void;
 }
 
 export const UserMenu = forwardRef<HTMLDivElement, UserMenuProps>(

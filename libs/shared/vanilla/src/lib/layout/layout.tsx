@@ -9,7 +9,6 @@ const Logo = () => {
       <div className="flex items-center flex-shrink-0 gap-4 dark:text-white">
         <span className="text-xl font-bold">Catwatch</span>
       </div>
-      <div />
     </Link>
   );
 };

@@ -1,14 +1,24 @@
 import { NextPage } from 'next';
 
-import { withAuth } from '@catstack/catwatch/features/auth';
-import { StartScreen } from '@catstack/catwatch/features/start';
+import { withAuth, MainLayout } from '@catstack/catwatch/features/auth';
+import {
+  StartScreen,
+  StartScreenContextProvider,
+  CreateRoomContainer,
+  JoinRoomFormContainer,
+} from '@catstack/catwatch/features/start';
 
-import { MainLayout } from '../components/layout';
+const context = {
+  JoinRoomFormContainer,
+  CreateRoomContainer,
+};
 
-const Index: NextPage = () => {
+export const Index: NextPage = () => {
   return (
     <MainLayout>
-      <StartScreen />
+      <StartScreenContextProvider value={context}>
+        <StartScreen />
+      </StartScreenContextProvider>
     </MainLayout>
   );
 };

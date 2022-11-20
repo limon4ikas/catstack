@@ -127,6 +127,8 @@
     "prisma": "^4.5.0",
     "react-test-renderer": "18.2.0",
     "sass": "1.55.0",
+    "storybook-addon-next": "^1.6.10",
+    "storybook-addon-next-router": "^4.0.1",
     "tailwindcss": "3.1.8",
     "ts-jest": "28.0.5",
     "ts-node": "10.9.1",

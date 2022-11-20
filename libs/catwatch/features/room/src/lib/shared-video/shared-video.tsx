@@ -7,6 +7,7 @@ import {
   newTorrentFile,
 } from '@catstack/catwatch/actions';
 import {
+  ConfirmDialog,
   ProgressBar,
   toast,
   TorrenDownloadInfo,
@@ -17,10 +18,9 @@ import { useAuthUser } from '@catstack/catwatch/features/auth';
 
 import { useRoomContext } from '../context';
 import { VideoPlayer } from '../video-player';
+import { CreateTorrentForm } from './create-torrent-form';
 import { getRoomState } from '../room-slice.selectors';
 import { roomActions } from '../room-slice';
-import { DownloadConfirmAlert } from './confirm-alert';
-import { CreateTorrentForm } from './create-torrent-form';
 
 export const SharedVideoContainer = () => {
   const dispatch = useDispatch();
@@ -134,13 +134,16 @@ export const SharedVideoContainer = () => {
         )}
       </div>
 
-      <DownloadConfirmAlert
-        isOpen={isSuggestionAlertOpen}
+      <ConfirmDialog
+        title="New video file"
+        description="User suggested to download torrent file for media playback, do you
+        want to continue?"
+        open={isSuggestionAlertOpen}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       >
         <div className="w-full h-full">{renderContent()}</div>
-      </DownloadConfirmAlert>
+      </ConfirmDialog>
     </div>
   );
 };
