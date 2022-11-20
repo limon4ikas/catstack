@@ -44,11 +44,11 @@ export const newUserMessage = createAction<ChatMessageActionCreator>(
   (message) => {
     return {
       payload: {
-        type: 'user-message',
         id: nanoid(),
+        createdAt: new Date().toISOString(),
+        type: 'user-message',
         text: message.text,
         username: message.username,
-        createdAt: new Date().toISOString(),
       },
     };
   }
@@ -60,8 +60,8 @@ export const newRoomEventMessage = createAction<ChatEventMessageActionCreator>(
     return {
       payload: {
         id: nanoid(),
-        type: 'chat-event',
         createdAt: new Date().toISOString(),
+        type: 'chat-event',
         text: message,
       },
     };

@@ -9,12 +9,9 @@ const menuLinkStyles = cva([
   'py-2',
   'text-sm',
   'text-left',
-  'text-gray-700',
-  'dark:text-gray-300',
-  'hover:bg-gray-100',
-  'dark:hover:bg-gray-700',
-  'focus:bg-gray-100',
-  'dark:focus:bg-gray-700',
+  'text-gray-700 dark:text-gray-300',
+  'hover:bg-gray-100 dark:hover:bg-gray-700 dark:focus:bg-gray-700',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500',
 ]);
 
 export interface MenuLinkProps extends LinkProps {

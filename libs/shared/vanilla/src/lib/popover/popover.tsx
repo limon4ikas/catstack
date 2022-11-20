@@ -4,7 +4,8 @@ import { cva } from '@catstack/shared/utils';
 
 const popoverStyles = cva([
   'z-10',
-  'rdx-side-top:animate-slide-up rdx-side-bottom:animate-slide-down',
+  'rdx-side-top:animate-slide-up-fade rdx-side-bottom:animate-slide-down',
+  'rdx-side-bottom:rdx-state-closed:animate-fade-out',
 ]);
 
 export const PopoverContent = forwardRef<
