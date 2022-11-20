@@ -4,10 +4,10 @@ import { Layout } from '@catstack/shared/vanilla';
 import { UserProfileContainer } from '@catstack/catwatch/features/auth';
 import { SocketProvider } from '@catstack/catwatch/data-access';
 
-export const MainLayout = (props: PropsWithChildren) => {
+export const MainLayout = ({ children }: PropsWithChildren) => {
   return (
     <SocketProvider>
-      <Layout userProfile={<UserProfileContainer />}>{props.children}</Layout>
+      <Layout userProfile={<UserProfileContainer />}>{children}</Layout>
     </SocketProvider>
   );
 };

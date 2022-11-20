@@ -35,7 +35,10 @@ export interface LayoutProps {
   userProfile: ReactNode;
 }
 
-export const Layout = (props: PropsWithChildren<LayoutProps>) => {
+export const Layout = ({
+  userProfile,
+  children,
+}: PropsWithChildren<LayoutProps>) => {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <nav className="bg-white shadow dark:bg-gray-800">
@@ -45,11 +48,11 @@ export const Layout = (props: PropsWithChildren<LayoutProps>) => {
               <Logo />
               <Navigation />
             </div>
-            {props.userProfile}
+            {userProfile}
           </header>
         </div>
       </nav>
-      {props.children}
+      <main className="flex flex-grow overflow-hidden">{children}</main>
     </div>
   );
 };

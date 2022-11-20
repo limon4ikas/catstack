@@ -24,7 +24,7 @@ const ChatFrame = (props: ChatFrameProps) => {
     <Tabs
       value={tab}
       onValueChange={setTab}
-      className="flex flex-col h-full overflow-hidden bg-white shadow dark:bg-gray-800"
+      className="flex flex-col flex-grow"
     >
       <TabsList className="flex border-b border-gray-200 dark:border-b-gray-700">
         <TabsTrigger value="chat">Chat</TabsTrigger>
@@ -33,15 +33,16 @@ const ChatFrame = (props: ChatFrameProps) => {
       <TabsContent
         value="chat"
         className={cx(
-          tab !== 'chat' ? 'hidden' : '',
-          'h-[calc(100%-42px)] flex flex-col'
+          tab === 'chat'
+            ? 'flex-grow flex flex-col h-[calc(100%-45px)]'
+            : 'hidden'
         )}
       >
         <ChatWindowContainer roomId={props.roomId} />
       </TabsContent>
       <TabsContent
         value="users"
-        className={cx(tab !== 'users' ? 'hidden' : '')}
+        className={cx(tab === 'users' ? '' : 'hidden')}
       >
         <UsersListContainer roomId={props.roomId} />
       </TabsContent>
@@ -55,17 +56,13 @@ export interface RoomScreenProps {
 
 export const RoomScreen = ({ roomId }: RoomScreenProps) => {
   return (
-    <div className="h-full">
-      <div className="flex h-full">
-        <RoomContextProvider roomId={roomId}>
-          <div className="flex-grow">
-            <SharedVideoContainer />
-          </div>
-          <div className="flex-shrink-0 w-96">
-            <ChatFrame roomId={roomId} />
-          </div>
-        </RoomContextProvider>
+    <RoomContextProvider roomId={roomId}>
+      <div className="flex-grow">
+        <SharedVideoContainer />
       </div>
-    </div>
+      <div className="flex flex-shrink-0 bg-white shadow w-96 dark:bg-gray-800">
+        <ChatFrame roomId={roomId} />
+      </div>
+    </RoomContextProvider>
   );
 };

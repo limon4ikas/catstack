@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
@@ -90,8 +90,20 @@ export interface ChatWindowProps {
 const ChatWindow = ({ messages }: ChatWindowProps) => {
   const [parent] = useAutoAnimate<HTMLUListElement>({ duration: 150 });
 
+  useEffect(() => {
+    const chatEl = parent.current;
+    const height = chatEl?.scrollHeight;
+
+    if (!height || !chatEl) return;
+
+    chatEl.scrollTo({ top: height, behavior: 'smooth' });
+  }, [messages.length, parent]);
+
   return (
-    <ul className="flex flex-col pt-3" ref={parent}>
+    <ul
+      className="flex flex-col flex-grow min-h-0 overflow-x-hidden overflow-y-auto"
+      ref={parent}
+    >
       {messages.map((message, idx) => {
         return (
           <li key={idx} className="px-3" style={{ overflowWrap: 'anywhere' }}>
@@ -112,34 +124,21 @@ export interface ChatWindowContainerProps {
 }
 
 export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
-  const dispatch = useDispatch();
   const { username } = useAuthUser();
   const messages = useSelector(getAllRoomMessages);
-  const { send } = useRoomContext();
-  const chatRef = useRef<HTMLDivElement>(null);
+  const { dispatchSharedEvent } = useRoomContext();
   useGetRoomUsersQuery(props.roomId);
 
   const handleSendMessage = (text: string) => {
     if (!text) return;
-    const messageAction = newUserMessage({ text, username });
 
-    send(messageAction);
-    dispatch(messageAction);
+    dispatchSharedEvent(newUserMessage({ username, text }));
   };
-
-  useEffect(() => {
-    const chatEl = chatRef.current;
-    const height = chatEl?.scrollHeight;
-
-    chatEl?.scrollTo({ top: height, behavior: 'smooth' });
-  }, [messages.length]);
 
   return (
     <>
-      <div className="flex-grow overflow-auto" ref={chatRef}>
-        <ChatWindow messages={messages} />
-      </div>
-      <div className="p-4 border-t border-t-gray-200 dark:border-t-gray-700">
+      <ChatWindow messages={messages} />
+      <div className="p-4 bg-white border-t dark:bg-gray-800 border-t-gray-200 dark:border-t-gray-700">
         <SendMessageForm onSendMessage={handleSendMessage} />
       </div>
     </>

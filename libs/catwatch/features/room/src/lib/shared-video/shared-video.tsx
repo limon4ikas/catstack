@@ -121,7 +121,7 @@ export const SharedVideoContainer = () => {
 
     return (
       <div className="h-full p-4">
-        <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />;
+        <CreateTorrentForm onCreatedTorrent={handleCreatedTorrent} />
       </div>
     );
   };
