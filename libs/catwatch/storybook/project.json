@@ -1,7 +1,7 @@
 {
-  "name": "shared-vanilla",
+  "name": "catwatch-storybook",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/shared/vanilla/src",
+  "sourceRoot": "libs/catwatch/storybook/src",
   "projectType": "library",
   "tags": [],
   "targets": {
@@ -9,24 +9,16 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/shared/vanilla/**/*.{ts,tsx,js,jsx}"]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "libs/shared/vanilla/jest.config.ts",
-        "passWithNoTests": true
+        "lintFilePatterns": ["libs/catwatch/storybook/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "storybook": {
       "executor": "@nrwl/storybook:storybook",
       "options": {
         "uiFramework": "@storybook/react",
-        "port": 4401,
+        "port": 4400,
         "config": {
-          "configFolder": "libs/shared/vanilla/.storybook"
+          "configFolder": "libs/catwatch/storybook/.storybook"
         }
       },
       "configurations": {
@@ -40,9 +32,9 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "uiFramework": "@storybook/react",
-        "outputPath": "dist/storybook/shared-vanilla",
+        "outputPath": "dist/storybook/catwatch-storybook",
         "config": {
-          "configFolder": "libs/shared/vanilla/.storybook"
+          "configFolder": "libs/catwatch/storybook/.storybook"
         }
       },
       "configurations": {

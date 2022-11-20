@@ -10,5 +10,5 @@ module.exports = {
     ),
     ...createGlobPatternsForDependencies(__dirname),
   ],
-  presets: ['../../libs/catwatch/catwatch-tailwind.config.js'],
+  presets: ['../catwatch-tailwind.config.js'],
 };

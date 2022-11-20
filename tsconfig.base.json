@@ -31,6 +31,7 @@
       ],
       "@catstack/catwatch/models": ["libs/catwatch/models/src/index.ts"],
       "@catstack/catwatch/store": ["libs/catwatch/store/src/index.ts"],
+      "@catstack/catwatch/storybook": ["libs/catwatch/storybook/src/index.ts"],
       "@catstack/catwatch/types": ["libs/catwatch/types/src/index.ts"],
       "@catstack/shared/hooks": ["libs/shared/hooks/src/index.ts"],
       "@catstack/shared/rtc": ["libs/shared/rtc/src/index.ts"],

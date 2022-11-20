@@ -4,8 +4,8 @@ import { cx } from '@catstack/shared/utils';
 
 export type AvatarProps = AvatarPrimitive.AvatarProps & {
   username: string;
-  src?: string;
   isOnline?: boolean;
+  src?: string;
 };
 
 export const Avatar = ({ username, isOnline, src, ...props }: AvatarProps) => (

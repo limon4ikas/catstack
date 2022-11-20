@@ -1,9 +1,10 @@
-import { forwardRef } from 'react';
+import { forwardRef, PropsWithChildren } from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 
 import { cva } from '@catstack/shared/utils';
 
 import { dialogOverlayStyles } from '../dialog';
+import { Button } from '../button';
 
 const alertDialogContentStyles = cva([
   'fixed z-50',
@@ -56,3 +57,46 @@ export const AlertDialogTitle = AlertDialogPrimitive.Title;
 export const AlertDialogDescription = AlertDialogPrimitive.Description;
 export const AlertDialogAction = AlertDialogPrimitive.Action;
 export const AlertDialogCancel = AlertDialogPrimitive.Cancel;
+
+export interface ConfirmDialogProps
+  extends AlertDialogPrimitive.AlertDialogProps {
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export const ConfirmDialog = (props: PropsWithChildren<ConfirmDialogProps>) => {
+  const {
+    title,
+    description,
+    confirmLabel = 'Confirm',
+    cancelLabel = 'Cancel',
+    onConfirm,
+    onCancel,
+  } = props;
+
+  return (
+    <AlertDialog {...props}>
+      <AlertDialogTrigger asChild>{props.children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          {title}
+        </AlertDialogTitle>
+        <AlertDialogDescription className="mt-2 text-sm font-normal text-gray-700 dark:text-gray-400">
+          {description}
+        </AlertDialogDescription>
+        <div className="flex justify-end gap-4 mt-4">
+          <AlertDialogAction asChild onClick={onConfirm}>
+            <Button>{confirmLabel}</Button>
+          </AlertDialogAction>
+          <AlertDialogCancel asChild onClick={onCancel}>
+            <Button variant="secondary">{cancelLabel}</Button>
+          </AlertDialogCancel>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
