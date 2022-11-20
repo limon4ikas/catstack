@@ -4,7 +4,7 @@ import { UserList, UserListEmpty, UserListError } from './user-list';
 
 const Story: ComponentMeta<typeof UserList> = {
   component: UserList,
-  title: 'screens/Room Screen/User List',
+  title: 'components/User List',
   decorators: [
     (story) => (
       <div className="p-4 bg-white rounded-lg dark:bg-gray-700 w-80">

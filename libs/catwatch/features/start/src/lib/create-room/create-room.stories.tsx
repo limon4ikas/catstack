@@ -3,7 +3,7 @@ import { CreateRoom } from './create-room';
 
 const Story: ComponentMeta<typeof CreateRoom> = {
   component: CreateRoom,
-  title: 'screens/Start Screen/Create Room',
+  title: 'components/Create Room',
 };
 export default Story;
 

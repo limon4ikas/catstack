@@ -1,16 +1,9 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 import { RoomMessage } from '@catstack/catwatch/types';
-import { useGetRoomUsersQuery } from '@catstack/catwatch/data-access';
-import { newUserMessage } from '@catstack/catwatch/actions';
 import { Input, Button } from '@catstack/shared/vanilla';
-import { useAuthUser } from '@catstack/catwatch/features/auth';
-
-import { useRoomContext } from '../context';
-import { getAllRoomMessages } from '../room-slice.selectors';
 
 const stringToColor = (string: string) => {
   let hash = 0;
@@ -26,16 +19,16 @@ const stringToColor = (string: string) => {
 };
 
 export interface SendMessageFormProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage?: (message: string) => void;
 }
 
-const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
+export const SendMessageForm = ({ onSendMessage }: SendMessageFormProps) => {
   const { handleSubmit, register, reset } = useForm<{
     message: string;
   }>();
 
-  const onSubmit = (data: { message: string }) => {
-    onSendMessage(data.message);
+  const onSubmit = ({ message }: { message: string }) => {
+    onSendMessage?.(message);
     reset({ message: '' });
   };
 
@@ -87,7 +80,7 @@ export interface ChatWindowProps {
   messages: RoomMessage[];
 }
 
-const ChatWindow = ({ messages }: ChatWindowProps) => {
+export const ChatWindow = ({ messages }: ChatWindowProps) => {
   const [parent] = useAutoAnimate<HTMLUListElement>({ duration: 150 });
 
   useEffect(() => {
@@ -123,23 +116,17 @@ export interface ChatWindowContainerProps {
   roomId: string;
 }
 
-export const ChatWindowContainer = (props: ChatWindowContainerProps) => {
-  const { username } = useAuthUser();
-  const messages = useSelector(getAllRoomMessages);
-  const { dispatchSharedEvent } = useRoomContext();
-  useGetRoomUsersQuery(props.roomId);
+export interface ChatProps {
+  messages: RoomMessage[];
+  onSendMessage: (text: string) => void;
+}
 
-  const handleSendMessage = (text: string) => {
-    if (!text) return;
-
-    dispatchSharedEvent(newUserMessage({ username, text }));
-  };
-
+export const Chat = ({ messages, onSendMessage }: ChatProps) => {
   return (
     <>
       <ChatWindow messages={messages} />
       <div className="p-4 bg-white border-t dark:bg-gray-800 border-t-gray-200 dark:border-t-gray-700">
-        <SendMessageForm onSendMessage={handleSendMessage} />
+        <SendMessageForm onSendMessage={onSendMessage} />
       </div>
     </>
   );

@@ -17,7 +17,6 @@ export const parameters = {
       },
     ],
   },
-  nextRouter: {
-    Provider: RouterContext.Provider,
-  },
+  nextRouter: { Provider: RouterContext.Provider },
+  actions: { argTypesRegex: '^on.*' },
 };

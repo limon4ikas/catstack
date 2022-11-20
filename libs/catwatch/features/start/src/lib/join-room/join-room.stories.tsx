@@ -3,10 +3,7 @@ import { JoinRoom } from './join-room';
 
 const Story: ComponentMeta<typeof JoinRoom> = {
   component: JoinRoom,
-  title: 'screens/Start Screen/Join Room',
-  argTypes: {
-    onJoinRoomSubmit: { action: 'onJoinRoomSubmit executed!' },
-  },
+  title: 'components/Join Room',
 };
 export default Story;
 
