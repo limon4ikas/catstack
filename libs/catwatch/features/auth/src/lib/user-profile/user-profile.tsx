@@ -1,5 +1,4 @@
 import { forwardRef } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { BellIcon } from '@heroicons/react/24/outline';
 
@@ -12,6 +11,7 @@ import {
 import { useSocketIsOnline } from '@catstack/catwatch/data-access';
 
 import { useAuth, useAuthUser } from '../auth-slice';
+import { UserMenu } from './user-menu';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type NotificationBellProps = {};
@@ -58,8 +58,8 @@ export const UserProfile = forwardRef<HTMLDivElement, UserProfileProps>(
 
 export const UserProfileContainer = () => {
   const router = useRouter();
-  const { username } = useAuthUser();
   const { logout } = useAuth();
+  const { username } = useAuthUser();
   const isSocketConnected = useSocketIsOnline();
 
   const handleLogoutClick = async () => {
@@ -78,26 +78,7 @@ export const UserProfileContainer = () => {
           />
         </PopoverTrigger>
         <PopoverContent align="end" sideOffset={4}>
-          <div className="flex flex-col w-48 py-1 bg-white border border-gray-200 rounded-md shadow-lg dark:bg-gray-800 dark:border-gray-700">
-            <Link
-              href="/user/profile"
-              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
-            >
-              Profile
-            </Link>
-            <Link
-              href="/user/settings"
-              className="block px-4 py-2 text-sm jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
-            >
-              Settings
-            </Link>
-            <button
-              onClick={handleLogoutClick}
-              className="block px-4 py-2 text-sm text-left jtext-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
-            >
-              Logout
-            </button>
-          </div>
+          <UserMenu onLogoutClick={handleLogoutClick} />
         </PopoverContent>
       </Popover>
     </div>

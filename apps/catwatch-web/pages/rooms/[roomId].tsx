@@ -8,9 +8,7 @@ import { MainLayout } from '../../components/layout';
 
 export const RoomPage: NextPage = () => {
   const router = useRouter();
-  const roomId = router.query?.roomId as string | undefined;
-
-  if (!roomId) return null;
+  const roomId = router.query?.roomId as string;
 
   return (
     <MainLayout>

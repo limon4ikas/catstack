@@ -9,7 +9,10 @@ export type AvatarProps = AvatarPrimitive.AvatarProps & {
 };
 
 export const Avatar = ({ username, isOnline, src, ...props }: AvatarProps) => (
-  <AvatarPrimitive.Root className="relative inline-flex w-10 h-10" {...props}>
+  <AvatarPrimitive.Root
+    className="relative inline-flex w-10 h-10 select-none"
+    {...props}
+  >
     <AvatarPrimitive.Image
       src={src}
       alt="Avatar"

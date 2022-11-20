@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
@@ -7,16 +7,6 @@ import { useUserInfoQuery } from '@catstack/catwatch/data-access';
 
 import { selectUser } from './auth-slice.selectors';
 
-const ProtectedRoute = ({ children }: PropsWithChildren) => {
-  const router = useRouter();
-  const user = useSelector(selectUser);
-
-  if (typeof window !== 'undefined' && !user) router.push('/auth/login');
-
-  // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <>{children}</>;
-};
-
 export interface WithAuthConfig {
   redirectTo?: string;
   loadingComponent?: ReactNode;
@@ -24,16 +14,18 @@ export interface WithAuthConfig {
 
 export const withAuth = (Component: NextPage) => (config?: WithAuthConfig) => {
   const AuthenticatedComponent = () => {
-    const { isError, isFetching } = useUserInfoQuery();
+    const router = useRouter();
     const user = useSelector(selectUser);
+    const { isError, isFetching } = useUserInfoQuery();
 
     if (isFetching) return config?.loadingComponent || null;
 
-    if (isError || !user) return <ProtectedRoute />;
+    if (isError || !user) {
+      if (typeof window !== 'undefined') router.push('/auth/login');
+      return null;
+    }
 
-    if (user) return <Component />;
-
-    return null;
+    return <Component />;
   };
 
   return AuthenticatedComponent;

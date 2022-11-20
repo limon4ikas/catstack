@@ -1,6 +1,8 @@
 import { PropsWithChildren, ReactNode } from 'react';
 import Link from 'next/link';
 
+import { cva } from '@catstack/shared/utils';
+
 const Logo = () => {
   return (
     <Link href="/" className="flex">
@@ -12,19 +14,29 @@ const Logo = () => {
   );
 };
 
+const navLinkStyles = cva([
+  'inline-flex',
+  'items-center',
+  'px-3',
+  'py-2',
+  'text-sm',
+  'font-medium',
+  'text-gray-900',
+  'rounded-md',
+  'hover:bg-gray-50',
+  'hover:text-gray-900',
+  'dark:text-white',
+  'dark:hover:bg-gray-700',
+  'dark:hover:text-white',
+]);
+
 const Navigation = () => {
   return (
     <div className="flex items-center gap-4">
-      <Link
-        href="/"
-        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white"
-      >
+      <Link href="/" className={navLinkStyles()}>
         Join
       </Link>
-      <Link
-        href="/convert"
-        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md hover:bg-gray-50 hover:text-gray-900 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white"
-      >
+      <Link href="/convert" className={navLinkStyles()}>
         Convert
       </Link>
     </div>

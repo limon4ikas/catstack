@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
@@ -12,7 +12,7 @@ import { useAuthUser } from '@catstack/catwatch/features/auth';
 import { useRoomContext } from '../context';
 import { getAllRoomMessages } from '../room-slice.selectors';
 
-const stringToColour = (string: string) => {
+const stringToColor = (string: string) => {
   let hash = 0;
   for (let i = 0; i < string.length; i++) {
     hash = string.charCodeAt(i) + ((hash << 5) - hash);
@@ -61,7 +61,7 @@ export const ChatMessage = ({ username, text }: ChatMessageProps) => {
   return (
     <div className="px-4 py-1 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
       <span
-        style={{ color: stringToColour(username) }}
+        style={{ color: stringToColor(username) }}
         className="text-sm font-semibold leading-5"
       >
         {username}:{' '}
@@ -101,7 +101,7 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
 
   return (
     <ul
-      className="flex flex-col flex-grow min-h-0 overflow-x-hidden overflow-y-auto"
+      className="flex flex-col flex-grow min-h-0 py-3 overflow-x-hidden overflow-y-auto"
       ref={parent}
     >
       {messages.map((message, idx) => {
