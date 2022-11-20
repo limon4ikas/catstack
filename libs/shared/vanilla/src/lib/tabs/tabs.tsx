@@ -26,6 +26,7 @@ const tabsTriggerStyles = cva([
   'dark:hover:rdx-state-active:text-white',
   'dark:hover:rdx-state-inactive:text-white',
   'dark:rdx-state-active:bg-gray-700',
+  'dark:rdx-state-active:hover:bg-gray-700',
   'dark:rdx-state-inactive:bg-transparent',
   'dark:hover:rdx-state-inactive:bg-gray-700',
 ]);
